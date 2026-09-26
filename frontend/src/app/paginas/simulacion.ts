@@ -188,7 +188,7 @@ function describir(p: Record<string, unknown> | undefined): string {
             <div class="grid gap-3 md:grid-cols-2">
               <div class="rounded-lg bg-acento-suave p-3 text-xs leading-relaxed">
                 <p class="mb-1 font-mono text-[10px] uppercase tracking-wider text-moss">Prompt enviado</p>
-                <p>…Customer query: "<span class="text-forest">{{ c.texto }}</span>"<br />Predicted intent: <span class="text-mal">{{ leg(c.pred) }}</span><br />Correct intent: <span class="text-bien">{{ leg(c.real) }}</span><br /><br />Explanation:</p>
+                <p>…Customer query: "<span class="text-forest">{{ c.texto }}</span>"<br />Predicted intent: <span class="text-mal">{{ leg(c.pred) }}</span><br />{{ salidaCal()?.prompt === 'P1' ? 'Correct intent' : 'Dataset label' }}: <span class="text-bien">{{ leg(c.real) }}</span><br /><br />Explanation:</p>
               </div>
               @if (salidaCal(); as s) {
                 <div class="rounded-lg border border-fog p-3">
