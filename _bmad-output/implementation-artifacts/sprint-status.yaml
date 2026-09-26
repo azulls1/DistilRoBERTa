@@ -1,0 +1,31 @@
+# generated: 09-26-2026 00:10
+# project: DistilRoBERTa · Banking77
+# Planificación: espesificaciones/ (Spec Kit) · Épicas: _bmad-output/planning-artifacts/epics.md
+generated: 09-26-2026 00:10
+last_updated: 09-26-2026 00:10
+project: DistilRoBERTa · Banking77
+project_key: NOKEY
+tracking_system: file-system
+story_location: "_bmad-output/implementation-artifacts"
+
+development_status:
+  epic-1: done
+  1-1-notebook-ejecutado: done
+  1-2-revision-manual-e-interpretacion: done
+  1-3-pdf: done
+  epic-1-retrospective: optional
+
+  epic-2: done
+  2-1-esquema-y-seguridad: done
+  2-2-cargador-y-api-lectura: done
+  epic-2-retrospective: optional
+
+  epic-3: done
+  3-1-paginas-de-resultados: done
+  epic-3-retrospective: optional
+
+  epic-4: in-progress
+  4-1-worker-celery-y-clasificar: done
+  4-2-despliegue: done
+  4-3-push-github-azulls1: backlog   # bloqueado: falta permiso de escritura para la cuenta adonaihernadez
+  epic-4-retrospective: optional
