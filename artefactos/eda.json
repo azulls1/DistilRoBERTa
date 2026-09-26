@@ -1,0 +1,807 @@
+{
+ "estadisticas": [
+  {
+   "metrica": "n_caracteres",
+   "particion": "train",
+   "count": 10003,
+   "mean": 59.47375787263821,
+   "std": 40.86790120711292,
+   "min": 13.0,
+   "q1": 36.0,
+   "mediana": 47.0,
+   "q3": 64.0,
+   "max": 433.0
+  },
+  {
+   "metrica": "n_palabras",
+   "particion": "train",
+   "count": 10003,
+   "mean": 11.949415175447365,
+   "std": 7.8915768393189625,
+   "min": 2.0,
+   "q1": 7.0,
+   "mediana": 10.0,
+   "q3": 13.0,
+   "max": 79.0
+  },
+  {
+   "metrica": "n_tokens",
+   "particion": "train",
+   "count": 10003,
+   "mean": 15.80035989203239,
+   "std": 9.027775568992288,
+   "min": 4.0,
+   "q1": 11.0,
+   "mediana": 13.0,
+   "q3": 17.0,
+   "max": 96.0
+  },
+  {
+   "metrica": "n_caracteres",
+   "particion": "test",
+   "count": 3080,
+   "mean": 54.23246753246753,
+   "std": 34.658007876765716,
+   "min": 13.0,
+   "q1": 35.0,
+   "mediana": 45.0,
+   "q3": 60.0,
+   "max": 368.0
+  },
+  {
+   "metrica": "n_palabras",
+   "particion": "test",
+   "count": 3080,
+   "mean": 10.952597402597403,
+   "std": 6.688180381157935,
+   "min": 2.0,
+   "q1": 7.0,
+   "mediana": 9.0,
+   "q3": 12.0,
+   "max": 69.0
+  },
+  {
+   "metrica": "n_tokens",
+   "particion": "test",
+   "count": 3080,
+   "mean": 14.672727272727272,
+   "std": 7.695911719279372,
+   "min": 4.0,
+   "q1": 10.0,
+   "mediana": 13.0,
+   "q3": 16.0,
+   "max": 81.0
+  }
+ ],
+ "ngramas": [
+  {
+   "tipo": "palabra",
+   "rango": 1,
+   "ngrama": "card",
+   "frecuencia": 3591
+  },
+  {
+   "tipo": "palabra",
+   "rango": 2,
+   "ngrama": "account",
+   "frecuencia": 1716
+  },
+  {
+   "tipo": "palabra",
+   "rango": 3,
+   "ngrama": "money",
+   "frecuencia": 1407
+  },
+  {
+   "tipo": "palabra",
+   "rango": 4,
+   "ngrama": "transfer",
+   "frecuencia": 1392
+  },
+  {
+   "tipo": "palabra",
+   "rango": 5,
+   "ngrama": "top",
+   "frecuencia": 1381
+  },
+  {
+   "tipo": "palabra",
+   "rango": 6,
+   "ngrama": "get",
+   "frecuencia": 1045
+  },
+  {
+   "tipo": "palabra",
+   "rango": 7,
+   "ngrama": "need",
+   "frecuencia": 927
+  },
+  {
+   "tipo": "palabra",
+   "rango": 8,
+   "ngrama": "payment",
+   "frecuencia": 921
+  },
+  {
+   "tipo": "palabra",
+   "rango": 9,
+   "ngrama": "cash",
+   "frecuencia": 884
+  },
+  {
+   "tipo": "palabra",
+   "rango": 10,
+   "ngrama": "exchange",
+   "frecuencia": 708
+  },
+  {
+   "tipo": "palabra",
+   "rango": 11,
+   "ngrama": "charged",
+   "frecuencia": 660
+  },
+  {
+   "tipo": "palabra",
+   "rango": 12,
+   "ngrama": "please",
+   "frecuencia": 643
+  },
+  {
+   "tipo": "palabra",
+   "rango": 13,
+   "ngrama": "atm",
+   "frecuencia": 624
+  },
+  {
+   "tipo": "palabra",
+   "rango": 14,
+   "ngrama": "app",
+   "frecuencia": 611
+  },
+  {
+   "tipo": "palabra",
+   "rango": 15,
+   "ngrama": "use",
+   "frecuencia": 579
+  },
+  {
+   "tipo": "palabra",
+   "rango": 16,
+   "ngrama": "fee",
+   "frecuencia": 574
+  },
+  {
+   "tipo": "palabra",
+   "rango": 17,
+   "ngrama": "pending",
+   "frecuencia": 543
+  },
+  {
+   "tipo": "palabra",
+   "rango": 18,
+   "ngrama": "help",
+   "frecuencia": 476
+  },
+  {
+   "tipo": "palabra",
+   "rango": 19,
+   "ngrama": "pin",
+   "frecuencia": 459
+  },
+  {
+   "tipo": "palabra",
+   "rango": 20,
+   "ngrama": "would",
+   "frecuencia": 458
+  },
+  {
+   "tipo": "palabra",
+   "rango": 21,
+   "ngrama": "transaction",
+   "frecuencia": 456
+  },
+  {
+   "tipo": "palabra",
+   "rango": 22,
+   "ngrama": "long",
+   "frecuencia": 451
+  },
+  {
+   "tipo": "palabra",
+   "rango": 23,
+   "ngrama": "still",
+   "frecuencia": 448
+  },
+  {
+   "tipo": "palabra",
+   "rango": 24,
+   "ngrama": "made",
+   "frecuencia": 434
+  },
+  {
+   "tipo": "palabra",
+   "rango": 25,
+   "ngrama": "new",
+   "frecuencia": 432
+  },
+  {
+   "tipo": "palabra",
+   "rango": 26,
+   "ngrama": "make",
+   "frecuencia": 427
+  },
+  {
+   "tipo": "palabra",
+   "rango": 27,
+   "ngrama": "rate",
+   "frecuencia": 418
+  },
+  {
+   "tipo": "palabra",
+   "rango": 28,
+   "ngrama": "take",
+   "frecuencia": 411
+  },
+  {
+   "tipo": "palabra",
+   "rango": 29,
+   "ngrama": "wrong",
+   "frecuencia": 390
+  },
+  {
+   "tipo": "palabra",
+   "rango": 30,
+   "ngrama": "know",
+   "frecuencia": 385
+  },
+  {
+   "tipo": "palabra",
+   "rango": 31,
+   "ngrama": "declined",
+   "frecuencia": 380
+  },
+  {
+   "tipo": "palabra",
+   "rango": 32,
+   "ngrama": "charge",
+   "frecuencia": 379
+  },
+  {
+   "tipo": "palabra",
+   "rango": 33,
+   "ngrama": "cards",
+   "frecuencia": 376
+  },
+  {
+   "tipo": "palabra",
+   "rango": 34,
+   "ngrama": "want",
+   "frecuencia": 366
+  },
+  {
+   "tipo": "palabra",
+   "rango": 35,
+   "ngrama": "withdrawal",
+   "frecuencia": 359
+  },
+  {
+   "tipo": "palabra",
+   "rango": 36,
+   "ngrama": "refund",
+   "frecuencia": 355
+  },
+  {
+   "tipo": "palabra",
+   "rango": 37,
+   "ngrama": "like",
+   "frecuencia": 348
+  },
+  {
+   "tipo": "palabra",
+   "rango": 38,
+   "ngrama": "virtual",
+   "frecuencia": 344
+  },
+  {
+   "tipo": "palabra",
+   "rango": 39,
+   "ngrama": "one",
+   "frecuencia": 336
+  },
+  {
+   "tipo": "palabra",
+   "rango": 40,
+   "ngrama": "tried",
+   "frecuencia": 334
+  },
+  {
+   "tipo": "palabra",
+   "rango": 41,
+   "ngrama": "got",
+   "frecuencia": 327
+  },
+  {
+   "tipo": "palabra",
+   "rango": 42,
+   "ngrama": "tell",
+   "frecuencia": 324
+  },
+  {
+   "tipo": "palabra",
+   "rango": 43,
+   "ngrama": "extra",
+   "frecuencia": 322
+  },
+  {
+   "tipo": "palabra",
+   "rango": 44,
+   "ngrama": "go",
+   "frecuencia": 316
+  },
+  {
+   "tipo": "palabra",
+   "rango": 45,
+   "ngrama": "using",
+   "frecuencia": 315
+  },
+  {
+   "tipo": "palabra",
+   "rango": 46,
+   "ngrama": "see",
+   "frecuencia": 313
+  },
+  {
+   "tipo": "palabra",
+   "rango": 47,
+   "ngrama": "identity",
+   "frecuencia": 307
+  },
+  {
+   "tipo": "palabra",
+   "rango": 48,
+   "ngrama": "work",
+   "frecuencia": 306
+  },
+  {
+   "tipo": "palabra",
+   "rango": 49,
+   "ngrama": "yet",
+   "frecuencia": 303
+  },
+  {
+   "tipo": "palabra",
+   "rango": 50,
+   "ngrama": "disposable",
+   "frecuencia": 302
+  },
+  {
+   "tipo": "palabra",
+   "rango": 51,
+   "ngrama": "change",
+   "frecuencia": 283
+  },
+  {
+   "tipo": "palabra",
+   "rango": 52,
+   "ngrama": "something",
+   "frecuencia": 277
+  },
+  {
+   "tipo": "palabra",
+   "rango": 53,
+   "ngrama": "currencies",
+   "frecuencia": 274
+  },
+  {
+   "tipo": "palabra",
+   "rango": 54,
+   "ngrama": "showing",
+   "frecuencia": 266
+  },
+  {
+   "tipo": "palabra",
+   "rango": 55,
+   "ngrama": "statement",
+   "frecuencia": 262
+  },
+  {
+   "tipo": "palabra",
+   "rango": 56,
+   "ngrama": "currency",
+   "frecuencia": 262
+  },
+  {
+   "tipo": "palabra",
+   "rango": 57,
+   "ngrama": "received",
+   "frecuencia": 260
+  },
+  {
+   "tipo": "palabra",
+   "rango": 58,
+   "ngrama": "check",
+   "frecuencia": 260
+  },
+  {
+   "tipo": "palabra",
+   "rango": 59,
+   "ngrama": "funds",
+   "frecuencia": 253
+  },
+  {
+   "tipo": "palabra",
+   "rango": 60,
+   "ngrama": "working",
+   "frecuencia": 250
+  },
+  {
+   "tipo": "palabra",
+   "rango": 61,
+   "ngrama": "amount",
+   "frecuencia": 250
+  },
+  {
+   "tipo": "palabra",
+   "rango": 62,
+   "ngrama": "pay",
+   "frecuencia": 243
+  },
+  {
+   "tipo": "palabra",
+   "rango": 63,
+   "ngrama": "someone",
+   "frecuencia": 240
+  },
+  {
+   "tipo": "palabra",
+   "rango": 64,
+   "ngrama": "going",
+   "frecuencia": 238
+  },
+  {
+   "tipo": "palabra",
+   "rango": 65,
+   "ngrama": "bank",
+   "frecuencia": 235
+  },
+  {
+   "tipo": "palabra",
+   "rango": 66,
+   "ngrama": "verify",
+   "frecuencia": 229
+  },
+  {
+   "tipo": "palabra",
+   "rango": 67,
+   "ngrama": "think",
+   "frecuencia": 225
+  },
+  {
+   "tipo": "palabra",
+   "rango": 68,
+   "ngrama": "back",
+   "frecuencia": 215
+  },
+  {
+   "tipo": "palabra",
+   "rango": 69,
+   "ngrama": "ago",
+   "frecuencia": 210
+  },
+  {
+   "tipo": "palabra",
+   "rango": 70,
+   "ngrama": "find",
+   "frecuencia": 206
+  },
+  {
+   "tipo": "palabra",
+   "rango": 71,
+   "ngrama": "possible",
+   "frecuencia": 205
+  },
+  {
+   "tipo": "palabra",
+   "rango": 72,
+   "ngrama": "getting",
+   "frecuencia": 192
+  },
+  {
+   "tipo": "palabra",
+   "rango": 73,
+   "ngrama": "cancel",
+   "frecuencia": 190
+  },
+  {
+   "tipo": "palabra",
+   "rango": 74,
+   "ngrama": "much",
+   "frecuencia": 187
+  },
+  {
+   "tipo": "palabra",
+   "rango": 75,
+   "ngrama": "time",
+   "frecuencia": 186
+  },
+  {
+   "tipo": "palabra",
+   "rango": 76,
+   "ngrama": "transfers",
+   "frecuencia": 177
+  },
+  {
+   "tipo": "palabra",
+   "rango": 77,
+   "ngrama": "receive",
+   "frecuencia": 175
+  },
+  {
+   "tipo": "palabra",
+   "rango": 78,
+   "ngrama": "used",
+   "frecuencia": 174
+  },
+  {
+   "tipo": "palabra",
+   "rango": 79,
+   "ngrama": "purchase",
+   "frecuencia": 173
+  },
+  {
+   "tipo": "palabra",
+   "rango": 80,
+   "ngrama": "fees",
+   "frecuencia": 172
+  },
+  {
+   "tipo": "palabra",
+   "rango": 81,
+   "ngrama": "debit",
+   "frecuencia": 171
+  },
+  {
+   "tipo": "palabra",
+   "rango": 82,
+   "ngrama": "able",
+   "frecuencia": 163
+  },
+  {
+   "tipo": "palabra",
+   "rango": 83,
+   "ngrama": "order",
+   "frecuencia": 160
+  },
+  {
+   "tipo": "palabra",
+   "rango": 84,
+   "ngrama": "times",
+   "frecuencia": 159
+  },
+  {
+   "tipo": "palabra",
+   "rango": 85,
+   "ngrama": "sent",
+   "frecuencia": 158
+  },
+  {
+   "tipo": "palabra",
+   "rango": 86,
+   "ngrama": "withdraw",
+   "frecuencia": 154
+  },
+  {
+   "tipo": "palabra",
+   "rango": 87,
+   "ngrama": "balance",
+   "frecuencia": 152
+  },
+  {
+   "tipo": "palabra",
+   "rango": 88,
+   "ngrama": "could",
+   "frecuencia": 148
+  },
+  {
+   "tipo": "palabra",
+   "rango": 89,
+   "ngrama": "verification",
+   "frecuencia": 147
+  },
+  {
+   "tipo": "palabra",
+   "rango": 90,
+   "ngrama": "add",
+   "frecuencia": 145
+  },
+  {
+   "tipo": "palabra",
+   "rango": 91,
+   "ngrama": "show",
+   "frecuencia": 144
+  },
+  {
+   "tipo": "palabra",
+   "rango": 92,
+   "ngrama": "lost",
+   "frecuencia": 143
+  },
+  {
+   "tipo": "palabra",
+   "rango": 93,
+   "ngrama": "days",
+   "frecuencia": 142
+  },
+  {
+   "tipo": "palabra",
+   "rango": 94,
+   "ngrama": "today",
+   "frecuencia": 140
+  },
+  {
+   "tipo": "palabra",
+   "rango": 95,
+   "ngrama": "mastercard",
+   "frecuencia": 139
+  },
+  {
+   "tipo": "palabra",
+   "rango": 96,
+   "ngrama": "phone",
+   "frecuencia": 138
+  },
+  {
+   "tipo": "palabra",
+   "rango": 97,
+   "ngrama": "right",
+   "frecuencia": 135
+  },
+  {
+   "tipo": "palabra",
+   "rango": 98,
+   "ngrama": "bought",
+   "frecuencia": 135
+  },
+  {
+   "tipo": "palabra",
+   "rango": 99,
+   "ngrama": "visa",
+   "frecuencia": 132
+  },
+  {
+   "tipo": "palabra",
+   "rango": 100,
+   "ngrama": "another",
+   "frecuencia": 131
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 1,
+   "ngrama": "exchange rate",
+   "frecuencia": 361
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 2,
+   "ngrama": "new card",
+   "frecuencia": 286
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 3,
+   "ngrama": "virtual card",
+   "frecuencia": 282
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 4,
+   "ngrama": "card payment",
+   "frecuencia": 266
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 5,
+   "ngrama": "would like",
+   "frecuencia": 227
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 6,
+   "ngrama": "cash withdrawal",
+   "frecuencia": 207
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 7,
+   "ngrama": "money account",
+   "frecuencia": 159
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 8,
+   "ngrama": "transfer money",
+   "frecuencia": 151
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 9,
+   "ngrama": "long take",
+   "frecuencia": 151
+  },
+  {
+   "tipo": "bigrama",
+   "rango": 10,
+   "ngrama": "still pending",
+   "frecuencia": 150
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 1,
+   "ngrama": "disposable virtual card",
+   "frecuencia": 107
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 2,
+   "ngrama": "exchange rate wrong",
+   "frecuencia": 50
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 3,
+   "ngrama": "get money back",
+   "frecuencia": 40
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 4,
+   "ngrama": "transfer money account",
+   "frecuencia": 40
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 5,
+   "ngrama": "get virtual card",
+   "frecuencia": 39
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 6,
+   "ngrama": "direct debit payment",
+   "frecuencia": 39
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 7,
+   "ngrama": "charged extra fee",
+   "frecuencia": 39
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 8,
+   "ngrama": "get new card",
+   "frecuencia": 36
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 9,
+   "ngrama": "would like know",
+   "frecuencia": 33
+  },
+  {
+   "tipo": "trigrama",
+   "rango": 10,
+   "ngrama": "virtual card work",
+   "frecuencia": 32
+  }
+ ],
+ "balance": {
+  "mínimo (train)": 35,
+  "clase mínima": "contactless_not_working",
+  "máximo (train)": 187,
+  "clase máxima": "card_payment_fee_charged",
+  "razón máx/mín": 5.34,
+  "coeficiente de variación": 0.254,
+  "entropía normalizada": 0.992
+ }
+}

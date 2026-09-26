@@ -1,0 +1,541 @@
+[
+ {
+  "id": 0,
+  "nombre": "activate_my_card",
+  "nombre_legible": "activate my card",
+  "n_train": 159,
+  "n_test": 40
+ },
+ {
+  "id": 1,
+  "nombre": "age_limit",
+  "nombre_legible": "age limit",
+  "n_train": 110,
+  "n_test": 40
+ },
+ {
+  "id": 2,
+  "nombre": "apple_pay_or_google_pay",
+  "nombre_legible": "apple pay or google pay",
+  "n_train": 126,
+  "n_test": 40
+ },
+ {
+  "id": 3,
+  "nombre": "atm_support",
+  "nombre_legible": "atm support",
+  "n_train": 87,
+  "n_test": 40
+ },
+ {
+  "id": 4,
+  "nombre": "automatic_top_up",
+  "nombre_legible": "automatic top up",
+  "n_train": 127,
+  "n_test": 40
+ },
+ {
+  "id": 5,
+  "nombre": "balance_not_updated_after_bank_transfer",
+  "nombre_legible": "balance not updated after bank transfer",
+  "n_train": 171,
+  "n_test": 40
+ },
+ {
+  "id": 6,
+  "nombre": "balance_not_updated_after_cheque_or_cash_deposit",
+  "nombre_legible": "balance not updated after cheque or cash deposit",
+  "n_train": 181,
+  "n_test": 40
+ },
+ {
+  "id": 7,
+  "nombre": "beneficiary_not_allowed",
+  "nombre_legible": "beneficiary not allowed",
+  "n_train": 156,
+  "n_test": 40
+ },
+ {
+  "id": 8,
+  "nombre": "cancel_transfer",
+  "nombre_legible": "cancel transfer",
+  "n_train": 157,
+  "n_test": 40
+ },
+ {
+  "id": 9,
+  "nombre": "card_about_to_expire",
+  "nombre_legible": "card about to expire",
+  "n_train": 129,
+  "n_test": 40
+ },
+ {
+  "id": 10,
+  "nombre": "card_acceptance",
+  "nombre_legible": "card acceptance",
+  "n_train": 59,
+  "n_test": 40
+ },
+ {
+  "id": 11,
+  "nombre": "card_arrival",
+  "nombre_legible": "card arrival",
+  "n_train": 153,
+  "n_test": 40
+ },
+ {
+  "id": 12,
+  "nombre": "card_delivery_estimate",
+  "nombre_legible": "card delivery estimate",
+  "n_train": 112,
+  "n_test": 40
+ },
+ {
+  "id": 13,
+  "nombre": "card_linking",
+  "nombre_legible": "card linking",
+  "n_train": 139,
+  "n_test": 40
+ },
+ {
+  "id": 14,
+  "nombre": "card_not_working",
+  "nombre_legible": "card not working",
+  "n_train": 112,
+  "n_test": 40
+ },
+ {
+  "id": 15,
+  "nombre": "card_payment_fee_charged",
+  "nombre_legible": "card payment fee charged",
+  "n_train": 187,
+  "n_test": 40
+ },
+ {
+  "id": 16,
+  "nombre": "card_payment_not_recognised",
+  "nombre_legible": "card payment not recognised",
+  "n_train": 168,
+  "n_test": 40
+ },
+ {
+  "id": 17,
+  "nombre": "card_payment_wrong_exchange_rate",
+  "nombre_legible": "card payment wrong exchange rate",
+  "n_train": 167,
+  "n_test": 40
+ },
+ {
+  "id": 18,
+  "nombre": "card_swallowed",
+  "nombre_legible": "card swallowed",
+  "n_train": 61,
+  "n_test": 40
+ },
+ {
+  "id": 19,
+  "nombre": "cash_withdrawal_charge",
+  "nombre_legible": "cash withdrawal charge",
+  "n_train": 177,
+  "n_test": 40
+ },
+ {
+  "id": 20,
+  "nombre": "cash_withdrawal_not_recognised",
+  "nombre_legible": "cash withdrawal not recognised",
+  "n_train": 160,
+  "n_test": 40
+ },
+ {
+  "id": 21,
+  "nombre": "change_pin",
+  "nombre_legible": "change pin",
+  "n_train": 122,
+  "n_test": 40
+ },
+ {
+  "id": 22,
+  "nombre": "compromised_card",
+  "nombre_legible": "compromised card",
+  "n_train": 86,
+  "n_test": 40
+ },
+ {
+  "id": 23,
+  "nombre": "contactless_not_working",
+  "nombre_legible": "contactless not working",
+  "n_train": 35,
+  "n_test": 40
+ },
+ {
+  "id": 24,
+  "nombre": "country_support",
+  "nombre_legible": "country support",
+  "n_train": 129,
+  "n_test": 40
+ },
+ {
+  "id": 25,
+  "nombre": "declined_card_payment",
+  "nombre_legible": "declined card payment",
+  "n_train": 153,
+  "n_test": 40
+ },
+ {
+  "id": 26,
+  "nombre": "declined_cash_withdrawal",
+  "nombre_legible": "declined cash withdrawal",
+  "n_train": 173,
+  "n_test": 40
+ },
+ {
+  "id": 27,
+  "nombre": "declined_transfer",
+  "nombre_legible": "declined transfer",
+  "n_train": 133,
+  "n_test": 40
+ },
+ {
+  "id": 28,
+  "nombre": "direct_debit_payment_not_recognised",
+  "nombre_legible": "direct debit payment not recognised",
+  "n_train": 182,
+  "n_test": 40
+ },
+ {
+  "id": 29,
+  "nombre": "disposable_card_limits",
+  "nombre_legible": "disposable card limits",
+  "n_train": 121,
+  "n_test": 40
+ },
+ {
+  "id": 30,
+  "nombre": "edit_personal_details",
+  "nombre_legible": "edit personal details",
+  "n_train": 121,
+  "n_test": 40
+ },
+ {
+  "id": 31,
+  "nombre": "exchange_charge",
+  "nombre_legible": "exchange charge",
+  "n_train": 121,
+  "n_test": 40
+ },
+ {
+  "id": 32,
+  "nombre": "exchange_rate",
+  "nombre_legible": "exchange rate",
+  "n_train": 112,
+  "n_test": 40
+ },
+ {
+  "id": 33,
+  "nombre": "exchange_via_app",
+  "nombre_legible": "exchange via app",
+  "n_train": 118,
+  "n_test": 40
+ },
+ {
+  "id": 34,
+  "nombre": "extra_charge_on_statement",
+  "nombre_legible": "extra charge on statement",
+  "n_train": 166,
+  "n_test": 40
+ },
+ {
+  "id": 35,
+  "nombre": "failed_transfer",
+  "nombre_legible": "failed transfer",
+  "n_train": 137,
+  "n_test": 40
+ },
+ {
+  "id": 36,
+  "nombre": "fiat_currency_support",
+  "nombre_legible": "fiat currency support",
+  "n_train": 126,
+  "n_test": 40
+ },
+ {
+  "id": 37,
+  "nombre": "get_disposable_virtual_card",
+  "nombre_legible": "get disposable virtual card",
+  "n_train": 97,
+  "n_test": 40
+ },
+ {
+  "id": 38,
+  "nombre": "get_physical_card",
+  "nombre_legible": "get physical card",
+  "n_train": 106,
+  "n_test": 40
+ },
+ {
+  "id": 39,
+  "nombre": "getting_spare_card",
+  "nombre_legible": "getting spare card",
+  "n_train": 129,
+  "n_test": 40
+ },
+ {
+  "id": 40,
+  "nombre": "getting_virtual_card",
+  "nombre_legible": "getting virtual card",
+  "n_train": 98,
+  "n_test": 40
+ },
+ {
+  "id": 41,
+  "nombre": "lost_or_stolen_card",
+  "nombre_legible": "lost or stolen card",
+  "n_train": 82,
+  "n_test": 40
+ },
+ {
+  "id": 42,
+  "nombre": "lost_or_stolen_phone",
+  "nombre_legible": "lost or stolen phone",
+  "n_train": 121,
+  "n_test": 40
+ },
+ {
+  "id": 43,
+  "nombre": "order_physical_card",
+  "nombre_legible": "order physical card",
+  "n_train": 120,
+  "n_test": 40
+ },
+ {
+  "id": 44,
+  "nombre": "passcode_forgotten",
+  "nombre_legible": "passcode forgotten",
+  "n_train": 105,
+  "n_test": 40
+ },
+ {
+  "id": 45,
+  "nombre": "pending_card_payment",
+  "nombre_legible": "pending card payment",
+  "n_train": 159,
+  "n_test": 40
+ },
+ {
+  "id": 46,
+  "nombre": "pending_cash_withdrawal",
+  "nombre_legible": "pending cash withdrawal",
+  "n_train": 143,
+  "n_test": 40
+ },
+ {
+  "id": 47,
+  "nombre": "pending_top_up",
+  "nombre_legible": "pending top up",
+  "n_train": 149,
+  "n_test": 40
+ },
+ {
+  "id": 48,
+  "nombre": "pending_transfer",
+  "nombre_legible": "pending transfer",
+  "n_train": 148,
+  "n_test": 40
+ },
+ {
+  "id": 49,
+  "nombre": "pin_blocked",
+  "nombre_legible": "pin blocked",
+  "n_train": 115,
+  "n_test": 40
+ },
+ {
+  "id": 50,
+  "nombre": "receiving_money",
+  "nombre_legible": "receiving money",
+  "n_train": 95,
+  "n_test": 40
+ },
+ {
+  "id": 51,
+  "nombre": "Refund_not_showing_up",
+  "nombre_legible": "refund not showing up",
+  "n_train": 162,
+  "n_test": 40
+ },
+ {
+  "id": 52,
+  "nombre": "request_refund",
+  "nombre_legible": "request refund",
+  "n_train": 169,
+  "n_test": 40
+ },
+ {
+  "id": 53,
+  "nombre": "reverted_card_payment?",
+  "nombre_legible": "reverted card payment",
+  "n_train": 161,
+  "n_test": 40
+ },
+ {
+  "id": 54,
+  "nombre": "supported_cards_and_currencies",
+  "nombre_legible": "supported cards and currencies",
+  "n_train": 129,
+  "n_test": 40
+ },
+ {
+  "id": 55,
+  "nombre": "terminate_account",
+  "nombre_legible": "terminate account",
+  "n_train": 108,
+  "n_test": 40
+ },
+ {
+  "id": 56,
+  "nombre": "top_up_by_bank_transfer_charge",
+  "nombre_legible": "top up by bank transfer charge",
+  "n_train": 111,
+  "n_test": 40
+ },
+ {
+  "id": 57,
+  "nombre": "top_up_by_card_charge",
+  "nombre_legible": "top up by card charge",
+  "n_train": 114,
+  "n_test": 40
+ },
+ {
+  "id": 58,
+  "nombre": "top_up_by_cash_or_cheque",
+  "nombre_legible": "top up by cash or cheque",
+  "n_train": 114,
+  "n_test": 40
+ },
+ {
+  "id": 59,
+  "nombre": "top_up_failed",
+  "nombre_legible": "top up failed",
+  "n_train": 145,
+  "n_test": 40
+ },
+ {
+  "id": 60,
+  "nombre": "top_up_limits",
+  "nombre_legible": "top up limits",
+  "n_train": 97,
+  "n_test": 40
+ },
+ {
+  "id": 61,
+  "nombre": "top_up_reverted",
+  "nombre_legible": "top up reverted",
+  "n_train": 146,
+  "n_test": 40
+ },
+ {
+  "id": 62,
+  "nombre": "topping_up_by_card",
+  "nombre_legible": "topping up by card",
+  "n_train": 103,
+  "n_test": 40
+ },
+ {
+  "id": 63,
+  "nombre": "transaction_charged_twice",
+  "nombre_legible": "transaction charged twice",
+  "n_train": 175,
+  "n_test": 40
+ },
+ {
+  "id": 64,
+  "nombre": "transfer_fee_charged",
+  "nombre_legible": "transfer fee charged",
+  "n_train": 172,
+  "n_test": 40
+ },
+ {
+  "id": 65,
+  "nombre": "transfer_into_account",
+  "nombre_legible": "transfer into account",
+  "n_train": 113,
+  "n_test": 40
+ },
+ {
+  "id": 66,
+  "nombre": "transfer_not_received_by_recipient",
+  "nombre_legible": "transfer not received by recipient",
+  "n_train": 171,
+  "n_test": 40
+ },
+ {
+  "id": 67,
+  "nombre": "transfer_timing",
+  "nombre_legible": "transfer timing",
+  "n_train": 128,
+  "n_test": 40
+ },
+ {
+  "id": 68,
+  "nombre": "unable_to_verify_identity",
+  "nombre_legible": "unable to verify identity",
+  "n_train": 102,
+  "n_test": 40
+ },
+ {
+  "id": 69,
+  "nombre": "verify_my_identity",
+  "nombre_legible": "verify my identity",
+  "n_train": 104,
+  "n_test": 40
+ },
+ {
+  "id": 70,
+  "nombre": "verify_source_of_funds",
+  "nombre_legible": "verify source of funds",
+  "n_train": 113,
+  "n_test": 40
+ },
+ {
+  "id": 71,
+  "nombre": "verify_top_up",
+  "nombre_legible": "verify top up",
+  "n_train": 126,
+  "n_test": 40
+ },
+ {
+  "id": 72,
+  "nombre": "virtual_card_not_working",
+  "nombre_legible": "virtual card not working",
+  "n_train": 41,
+  "n_test": 40
+ },
+ {
+  "id": 73,
+  "nombre": "visa_or_mastercard",
+  "nombre_legible": "visa or mastercard",
+  "n_train": 135,
+  "n_test": 40
+ },
+ {
+  "id": 74,
+  "nombre": "why_verify_identity",
+  "nombre_legible": "why verify identity",
+  "n_train": 121,
+  "n_test": 40
+ },
+ {
+  "id": 75,
+  "nombre": "wrong_amount_of_cash_received",
+  "nombre_legible": "wrong amount of cash received",
+  "n_train": 180,
+  "n_test": 40
+ },
+ {
+  "id": 76,
+  "nombre": "wrong_exchange_rate_for_cash_withdrawal",
+  "nombre_legible": "wrong exchange rate for cash withdrawal",
+  "n_train": 163,
+  "n_test": 40
+ }
+]

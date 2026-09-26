@@ -41,9 +41,9 @@ md("""
 # Transformers y Modelos de Lenguaje Grande (LLM)
 ## Clasificación de intenciones bancarias con DistilRoBERTa y explicación de errores con Falcon-7b-instruct
 
-**Asignatura:** Sistemas Cognitivos Artificiales · Maestría en Inteligencia Artificial · UNIR México
-**Actividad:** 2 (individual)
-**Autor:** Adonai Hernández
+**Asignatura:** Sistemas Cognitivos Artificiales · Maestría en Inteligencia Artificial · UNIR México  
+**Actividad:** 2 (individual)  
+**Autor:** Adonai Hernández  
 **Fecha:** septiembre de 2026
 
 ---
@@ -385,7 +385,7 @@ md("""
 | Hiperparámetro | Valor | Motivo |
 |---|---|---|
 | Tasa de aprendizaje | 5e-5 con *warmup* del 10 % y decaimiento lineal | valor estándar para afinar modelos BERT |
-| Tamaño de lote | 32 | cabe holgado en memoria con `max_length` 64 |
+| Tamaño de lote | 32 | cabe holgado en memoria: las consultas son cortas (mediana de 13 tokens) |
 | Épocas | hasta 8, *early stopping* con paciencia 2 | evita sobreajuste: se queda la mejor época en validación |
 | Métrica de selección | F1 macro en validación | trata igual a las 77 clases |
 | *Weight decay* | 0.01 | regularización |
@@ -767,7 +767,8 @@ Cada explicación se leyó a mano contra la consulta y las dos intenciones, y se
 - **Razón que da el LLM**, en categorías: `solapamiento_lexico` (una palabra de la consulta
   pertenece al vocabulario de la clase predicha), `ambiguedad_real` (la consulta encaja en las
   dos intenciones), `etiqueta_dudosa` (la etiqueta del dataset es discutible), `generica`
-  (no da una razón concreta) y `otra`.
+  (no da una razón concreta), `frecuencia_supuesta` (atribuye el error a que una clase es «más
+  común», dato que el LLM no tiene) y `otra`.
 
 La revisión se guarda en `artefactos/revision_manual.json` para que sea auditable.
 """)

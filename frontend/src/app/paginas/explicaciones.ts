@@ -16,6 +16,7 @@ const RAZON: Record<string, string> = {
   ambiguedad_real: 'Ambigüedad real',
   etiqueta_dudosa: 'Etiqueta dudosa',
   generica: 'Genérica',
+  frecuencia_supuesta: 'Frecuencia supuesta',
   otra: 'Otra',
 };
 

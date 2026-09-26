@@ -1,0 +1,122 @@
+[
+ {
+  "orden": 1,
+  "veredicto": "alucinada",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Afirma que la palabra 'card' aparece en la consulta; no aparece. La pista real es 'payment ... pending', que encaja con pending_card_payment."
+ },
+ {
+  "orden": 2,
+  "veredicto": "alucinada",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Dice que aparece 'transaction'; no aparece. La pista real es 'double charged', casi literal de transaction_charged_twice. Además la salida quedó cortada a media oración (60 tokens)."
+ },
+ {
+  "orden": 3,
+  "veredicto": "alucinada",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Se contradice: dice que 'exchange rate' no está en la consulta y sí está. La etiqueta del dataset (exchange_charge) es dudosa: la consulta pregunta literalmente por el tipo de cambio. Salida cortada."
+ },
+ {
+  "orden": 4,
+  "veredicto": "parcial",
+  "razon_categoria": "generica",
+  "nota_revision": "'Más específica' sin citar palabras. La pregunta 'how many transactions' sí habla de límites: la predicción es defendible y la etiqueta, dudosa."
+ },
+ {
+  "orden": 5,
+  "veredicto": "parcial",
+  "razon_categoria": "ambiguedad_real",
+  "nota_revision": "Razonamiento plausible (fiat_currency_support es más general que exchange_via_app) pero no cita el verbo 'exchange', que es la pista real."
+ },
+ {
+  "orden": 6,
+  "veredicto": "alucinada",
+  "razon_categoria": "ambiguedad_real",
+  "nota_revision": "Intercambia las etiquetas: dice que el clasificador eligió 'exchange via app', que es la correcta, e inventa una intención 'currency conversion' que no existe."
+ },
+ {
+  "orden": 7,
+  "veredicto": "parcial",
+  "razon_categoria": "generica",
+  "nota_revision": "No señala que la consulta nunca dice 'virtual': 'my card is just not working' es literalmente card_not_working. Etiqueta dudosa."
+ },
+ {
+  "orden": 8,
+  "veredicto": "pertinente",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Correcto: la consulta menciona 'transfer' y pregunta 'when', lo que empuja a transfer_timing. Lo de 'más común' es relleno, pero la razón central es fiel."
+ },
+ {
+  "orden": 9,
+  "veredicto": "alucinada",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Salida idéntica a la #3 y con la misma contradicción ('exchange rate' sí está en la consulta). Etiqueta dudosa. Salida cortada."
+ },
+ {
+  "orden": 10,
+  "veredicto": "parcial",
+  "razon_categoria": "generica",
+  "nota_revision": "Explicación genérica; la consulta no menciona ni tarjeta ni transferencia, así que ambas clases de comisión de recarga son posibles."
+ },
+ {
+  "orden": 11,
+  "veredicto": "pertinente",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Correcto: 'top up my card' es casi literal de topping_up_by_card. La etiqueta del dataset (transfer_into_account) es dudosa."
+ },
+ {
+  "orden": 12,
+  "veredicto": "parcial",
+  "razon_categoria": "generica",
+  "nota_revision": "Habla de 'cash withdrawal' y 'direct debit' como términos, pero no explica por qué eligió retiro en efectivo; la consulta ('someone has taken my money') es realmente ambigua."
+ },
+ {
+  "orden": 13,
+  "veredicto": "parcial",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Cita 'top up' (sí aparece) pero el razonamiento es circular. La pista real es 'wouldn't accept', sinónimo de fallo (top_up_failed)."
+ },
+ {
+  "orden": 14,
+  "veredicto": "alucinada",
+  "razon_categoria": "frecuencia_supuesta",
+  "nota_revision": "Inventa que pin_blocked es 'más común y buscado'; no se le dio ningún dato de frecuencia. Ignora la pista real: 'unblock'."
+ },
+ {
+  "orden": 15,
+  "veredicto": "pertinente",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Correcto: la palabra 'declined' empuja a declined_cash_withdrawal. La etiqueta real (wrong_amount_of_cash_received) es discutible para esta consulta."
+ },
+ {
+  "orden": 16,
+  "veredicto": "parcial",
+  "razon_categoria": "generica",
+  "nota_revision": "'Más específica' sin citar palabras; 'what can I use a virtual disposable card for' encaja razonablemente con las dos clases."
+ },
+ {
+  "orden": 17,
+  "veredicto": "alucinada",
+  "razon_categoria": "generica",
+  "nota_revision": "Inventa una intención 'view PIN' que no existe y no explica la relación PIN ↔ tarjeta física (el PIN llega con la tarjeta física, esa es la pista)."
+ },
+ {
+  "orden": 18,
+  "veredicto": "parcial",
+  "razon_categoria": "frecuencia_supuesta",
+  "nota_revision": "Afirma sin datos que 'declined' es más común, aunque sí usa un hecho de la consulta (compras anteriores). La consulta dice literalmente 'being declined': la predicción es correcta y la etiqueta, dudosa."
+ },
+ {
+  "orden": 19,
+  "veredicto": "parcial",
+  "razon_categoria": "generica",
+  "nota_revision": "Genérica. 'How long can an EU transfer take?' es exactamente transfer_timing: la etiqueta pending_transfer es dudosa y el LLM no lo detecta."
+ },
+ {
+  "orden": 20,
+  "veredicto": "alucinada",
+  "razon_categoria": "frecuencia_supuesta",
+  "nota_revision": "Confunde las clases: dice que la correcta 'involves topping up by card', que es justamente la predicha. Además inventa una frecuencia."
+ }
+]

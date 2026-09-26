@@ -1,0 +1,257 @@
+[
+ {
+  "config": "A",
+  "orden": 1,
+  "idx_test": 1866,
+  "salida": "The classifier likely chose the predicted intent because the word 'payment' appears in the customer's query, whereas the correct intent ('pending transfer') does not contain this word.",
+  "n_oraciones": 1,
+  "n_tokens": 38,
+  "segundos": 6.5,
+  "palabras_ajenas": 0.5,
+  "elegida": false,
+  "consulta_id": 101866,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": null,
+   "top_p": null
+  }
+ },
+ {
+  "config": "B",
+  "orden": 1,
+  "idx_test": 1866,
+  "salida": "The classifier likely chose the 'pending card payment' intent because the word 'card' appears in the customer's query, whereas the correct intent ('pending transfer') does not contain this word.",
+  "n_oraciones": 1,
+  "n_tokens": 43,
+  "segundos": 4.0,
+  "palabras_ajenas": 0.333,
+  "elegida": true,
+  "consulta_id": 101866,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": 0.3,
+   "top_p": 0.9
+  }
+ },
+ {
+  "config": "C",
+  "orden": 1,
+  "idx_test": 1866,
+  "salida": "The classifier probably chose the 'pending card payment' intent because of the word 'card' that appears in the customer's query, even though a more accurate response could be 'pending transfer'.",
+  "n_oraciones": 1,
+  "n_tokens": 43,
+  "segundos": 4.0,
+  "palabras_ajenas": 0.5,
+  "elegida": false,
+  "consulta_id": 101866,
+  "parametros": {
+   "max_new_tokens": 150,
+   "temperature": 1.0,
+   "top_p": 0.95
+  }
+ },
+ {
+  "config": "A",
+  "orden": 2,
+  "idx_test": 1626,
+  "salida": "The classifier likely chose the predicted intent because the word 'double' appears in the customer's query, which could indicate that the issue is related to a duplicate transaction. However, in this case, the customer is referring to a refund for a pending card payment, which is not related to the",
+  "n_oraciones": 2,
+  "n_tokens": 60,
+  "segundos": 5.6,
+  "palabras_ajenas": 0.643,
+  "elegida": false,
+  "consulta_id": 101626,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": null,
+   "top_p": null
+  }
+ },
+ {
+  "config": "B",
+  "orden": 2,
+  "idx_test": 1626,
+  "salida": "The classifier likely chose the predicted intent because the word 'transaction' appears in the customer's query, which could indicate that they are referring to a specific transaction. In this case, the customer is asking about the status of a pending card payment, so the classifier may have misclassified the query",
+  "n_oraciones": 2,
+  "n_tokens": 60,
+  "segundos": 5.2,
+  "palabras_ajenas": 0.667,
+  "elegida": true,
+  "consulta_id": 101626,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": 0.3,
+   "top_p": 0.9
+  }
+ },
+ {
+  "config": "C",
+  "orden": 2,
+  "idx_test": 1626,
+  "salida": "The customer probably mistyped the word 'transacted' which led the classifier to predict the wrong intent. In the actual context, the customer should have used the correct term 'double-charged'. Once the error is corrected, the classifier will likely update its understanding and recognize the true intent.",
+  "n_oraciones": 3,
+  "n_tokens": 62,
+  "segundos": 5.4,
+  "palabras_ajenas": 0.882,
+  "elegida": false,
+  "consulta_id": 101626,
+  "parametros": {
+   "max_new_tokens": 150,
+   "temperature": 1.0,
+   "top_p": 0.95
+  }
+ },
+ {
+  "config": "A",
+  "orden": 3,
+  "idx_test": 2763,
+  "salida": "The classifier likely chose the predicted intent because the word 'exchange' appears in the customer query, whereas the word 'exchange rate' does not. However, it is important to note that the classifier may have been trained on a dataset where 'exchange rate' is a more common term than",
+  "n_oraciones": 2,
+  "n_tokens": 60,
+  "segundos": 5.1,
+  "palabras_ajenas": 0.667,
+  "elegida": false,
+  "consulta_id": 102763,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": null,
+   "top_p": null
+  }
+ },
+ {
+  "config": "B",
+  "orden": 3,
+  "idx_test": 2763,
+  "salida": "The classifier probably chose the predicted intent instead of the correct one because the word 'exchange' appears in the customer query, while 'exchange rate' does not. However, it is important to note that the classifier may have been trained on a dataset where 'exchange rate' is a more",
+  "n_oraciones": 2,
+  "n_tokens": 60,
+  "segundos": 5.1,
+  "palabras_ajenas": 0.615,
+  "elegida": true,
+  "consulta_id": 102763,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": 0.3,
+   "top_p": 0.9
+  }
+ },
+ {
+  "config": "C",
+  "orden": 3,
+  "idx_test": 2763,
+  "salida": "The customer probably mistyped 'exchange rate' as 'exchange charge'. This is due to similarity in terms such as 'rate' and 'charge'; the classifier might have associated 'exchange rate' with financial transactions. However, the context of the customer's query indicates they were looking for the exchange rate, not a specific transaction charge, so this prediction might be wrong.",
+  "n_oraciones": 3,
+  "n_tokens": 82,
+  "segundos": 6.9,
+  "palabras_ajenas": 0.593,
+  "elegida": false,
+  "consulta_id": 102763,
+  "parametros": {
+   "max_new_tokens": 150,
+   "temperature": 1.0,
+   "top_p": 0.95
+  }
+ },
+ {
+  "config": "A",
+  "orden": 4,
+  "idx_test": 2637,
+  "salida": "The classifier likely chose the predicted intent because it is more specific and directly addresses the customer's question about transaction limits. The correct intent, 'get disposable virtual card,' is more general and may not have been considered by the classifier.",
+  "n_oraciones": 2,
+  "n_tokens": 49,
+  "segundos": 4.3,
+  "palabras_ajenas": 0.615,
+  "elegida": false,
+  "consulta_id": 102637,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": null,
+   "top_p": null
+  }
+ },
+ {
+  "config": "B",
+  "orden": 4,
+  "idx_test": 2637,
+  "salida": "The classifier likely chose the predicted intent because it is more specific and directly addresses the customer's query, whereas the correct intent is more general and may not be understood as well.",
+  "n_oraciones": 1,
+  "n_tokens": 37,
+  "segundos": 3.4,
+  "palabras_ajenas": 1.0,
+  "elegida": true,
+  "consulta_id": 102637,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": 0.3,
+   "top_p": 0.9
+  }
+ },
+ {
+  "config": "C",
+  "orden": 4,
+  "idx_test": 2637,
+  "salida": "The classifier probably chose the predicted intent instead of the correct one because of the similarity in words between 'disposable card' and 'get disposable virtual card.' Both contain the word 'disposable,' which may have influenced the classifier's decision.",
+  "n_oraciones": 1,
+  "n_tokens": 55,
+  "segundos": 4.8,
+  "palabras_ajenas": 0.462,
+  "elegida": false,
+  "consulta_id": 102637,
+  "parametros": {
+   "max_new_tokens": 150,
+   "temperature": 1.0,
+   "top_p": 0.95
+  }
+ },
+ {
+  "config": "A",
+  "orden": 5,
+  "idx_test": 264,
+  "salida": "The classifier likely chose the predicted intent because it is more specific and directly related to the customer's query, whereas the correct intent is more general and may not be applicable to all situations.",
+  "n_oraciones": 1,
+  "n_tokens": 39,
+  "segundos": 3.8,
+  "palabras_ajenas": 1.0,
+  "elegida": false,
+  "consulta_id": 100264,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": null,
+   "top_p": null
+  }
+ },
+ {
+  "config": "B",
+  "orden": 5,
+  "idx_test": 264,
+  "salida": "The classifier likely chose the 'exchange via app' intent because it is more specific and relevant to banking services, whereas 'fiat currency support' could be interpreted as referring to general currency exchange or a broader range of financial services.",
+  "n_oraciones": 1,
+  "n_tokens": 49,
+  "segundos": 4.3,
+  "palabras_ajenas": 0.619,
+  "elegida": true,
+  "consulta_id": 100264,
+  "parametros": {
+   "max_new_tokens": 60,
+   "temperature": 0.3,
+   "top_p": 0.9
+  }
+ },
+ {
+  "config": "C",
+  "orden": 5,
+  "idx_test": 264,
+  "salida": "The classifier probably chose the 'exchange via app' intent because of the word 'app' that appears in the customer query. In this context, 'exchange via app' could be interpreted as a request to perform an exchange through an app rather than in-person or over the phone. Therefore, the classifier might have deemed it the more likely intent based on the provided information.",
+  "n_oraciones": 3,
+  "n_tokens": 79,
+  "segundos": 6.7,
+  "palabras_ajenas": 0.625,
+  "elegida": false,
+  "consulta_id": 100264,
+  "parametros": {
+   "max_new_tokens": 150,
+   "temperature": 1.0,
+   "top_p": 0.95
+  }
+ }
+]
