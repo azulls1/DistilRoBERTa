@@ -115,13 +115,6 @@ def inferencia_por_tarea(task_id: str) -> dict | None:
             where i.task_id = %s""", (task_id,))
 
 
-def inferencias_recientes(limite: int) -> list[dict]:
-    return db.todos(
-        f"""select i.id::text, i.texto, c.nombre as clase, i.confianza::float, i.estado, i.creado_en
-            from {T['inferencias']} i left join {T['clases']} c on c.id = i.clase_pred_id
-            order by i.creado_en desc limit %s""", (limite,))
-
-
 def completar_inferencia(inferencia_id: str, r: dict) -> None:
     from psycopg.types.json import Jsonb
     db.uno(f"""update {T['inferencias']} set estado = 'completada', clase_pred_id = %s, confianza = %s,
@@ -213,6 +206,23 @@ def paquete(pid: str) -> dict | None:
 def ultimo_paquete() -> dict | None:
     return db.uno(f"select id::text, estado, archivo, bytes, sha256, n_archivos, creado_en, completado_en "
                   f"from {T['entregables_generados']} where estado = 'completada' order by completado_en desc limit 1")
+
+
+def paquete_en_curso(max_minutos: int = 5) -> dict | None:
+    """Un paquete que se está generando ahora mismo (para no encolar otro igual)."""
+    return db.uno(f"select id::text, estado from {T['entregables_generados']} where estado = 'pendiente' "
+                  f"and creado_en > now() - make_interval(mins => %s) order by creado_en desc limit 1", (max_minutos,))
+
+
+def purgar_paquetes(conservar: int) -> list[str]:
+    """Borra los registros de paquetes salvo los `conservar` completados más recientes; devuelve sus archivos."""
+    filas = db.todos(
+        f"""delete from {T['entregables_generados']} where id not in (
+                select id from {T['entregables_generados']} where estado = 'completada'
+                order by completado_en desc limit %s)
+            and (estado <> 'pendiente' or creado_en < now() - interval '1 hour')
+            returning archivo""", (conservar,))
+    return [f["archivo"] for f in filas if f.get("archivo")]
 
 
 def paquetes_recientes(limite: int = 5) -> list[dict]:

@@ -3,7 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 import redis
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field, field_validator
@@ -20,10 +20,20 @@ async def ciclo_vida(_: FastAPI):
     db.cerrar()
 
 
+# Sin documentación interactiva en producción: no se publica el mapa de la API
 app = FastAPI(title="DistilRoBERTa · Banking77", version="1.0.0", lifespan=ciclo_vida,
-              docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url=None)
+              docs_url=None, openapi_url=None, redoc_url=None)
 app.add_middleware(CORSMiddleware, allow_origins=config().cors, allow_methods=["GET", "POST"],
-                   allow_headers=["content-type"])
+                   allow_headers=["content-type", "x-requested-with"])
+
+CABECERA_PORTAL = "portal-distilroberta"
+
+
+def desde_el_portal(request: Request) -> None:
+    """Las acciones que escriben exigen una cabecera propia: obliga a un preflight CORS, así que otra web no
+    puede dispararlas desde el navegador de un visitante (solo se permite el origen del portal)."""
+    if request.headers.get("x-requested-with") != CABECERA_PORTAL:
+        raise HTTPException(403, "Petición no permitida")
 
 
 def _corrida(corrida: str | None) -> str:
@@ -115,7 +125,7 @@ class PeticionClasificar(BaseModel):
         return v
 
 
-@app.post("/api/clasificar", status_code=202)
+@app.post("/api/clasificar", status_code=202, dependencies=[Depends(desde_el_portal)])
 def clasificar(peticion: PeticionClasificar):
     from .tareas import clasificar as tarea
 
@@ -123,7 +133,8 @@ def clasificar(peticion: PeticionClasificar):
     try:
         r = tarea.apply_async(args=[inferencia["id"], peticion.texto], task_id=inferencia["id"])
     except Exception as e:
-        consultas.fallar_inferencia(inferencia["id"], f"No se pudo encolar: {e}")
+        log.exception("No se pudo encolar la inferencia")
+        consultas.fallar_inferencia(inferencia["id"], "La cola de clasificación no está disponible.")
         raise HTTPException(503, "La cola de clasificación no está disponible") from e
     consultas.asignar_tarea(inferencia["id"], r.id)
     return {"task_id": r.id, "inferencia_id": inferencia["id"]}
@@ -144,9 +155,6 @@ def tarea(task_id: str):
     return respuesta
 
 
-@app.get("/api/inferencias")
-def inferencias(limit: int = Query(20, ge=1, le=100)):
-    return consultas.inferencias_recientes(limit)
 
 
 # ── Simulación ──────────────────────────────────────────────────────────────
@@ -208,18 +216,35 @@ def entregable_archivo(ruta: str):
     return FileResponse(destino, filename=destino.name)
 
 
-@app.post("/api/entregables/generar", status_code=202)
+@app.post("/api/entregables/generar", status_code=202, dependencies=[Depends(desde_el_portal)])
 def entregables_generar():
     from .tareas import generar_entregable
+
+    # Si ya se está generando uno, o el último sigue vigente (posterior a los archivos del catálogo
+    # desplegado y su ZIP existe), se devuelve ese en vez de construir otro igual.
+    en_curso = consultas.paquete_en_curso()
+    if en_curso:
+        return {"paquete_id": en_curso["id"], "task_id": en_curso["id"], "reutilizado": True}
+    ultimo = consultas.ultimo_paquete()
+    if ultimo and (config().dir_paquetes / ultimo["archivo"]).is_file() and \
+            ultimo["completado_en"].timestamp() > _version_catalogo():
+        return {"paquete_id": ultimo["id"], "task_id": ultimo["id"], "reutilizado": True}
 
     p = consultas.crear_paquete()
     try:
         r = generar_entregable.apply_async(args=[p["id"]], task_id=p["id"])
     except Exception as e:
-        consultas.fallar_paquete(p["id"], f"No se pudo encolar: {e}")
+        log.exception("No se pudo encolar el paquete")
+        consultas.fallar_paquete(p["id"], "La cola de trabajos no está disponible.")
         raise HTTPException(503, "La cola de trabajos no está disponible") from e
     consultas.asignar_tarea_paquete(p["id"], r.id)
     return {"paquete_id": p["id"], "task_id": r.id}
+
+
+def _version_catalogo() -> float:
+    """Momento del despliegue del catálogo: la fecha más reciente de sus archivos."""
+    base = config().dir_entregables
+    return max((f.stat().st_mtime for f in base.rglob("*") if f.is_file()), default=0.0)
 
 
 @app.get("/api/entregables/paquete/{pid}")

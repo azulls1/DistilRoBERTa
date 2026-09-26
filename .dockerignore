@@ -1,0 +1,12 @@
+# Contexto de construcción del backend: solo lo que copia el Dockerfile
+.git
+.venv*
+**/node_modules
+**/__pycache__
+data
+notebooks
+docs
+artefactos/*.csv
+frontend
+*.env
+.env*

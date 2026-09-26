@@ -13,7 +13,7 @@ def cliente(monkeypatch):
     monkeypatch.setattr(consultas, "corrida_activa", lambda corrida=None: dict(CORRIDA) if corrida in (None, CORRIDA["id"]) else None)
     monkeypatch.setattr(consultas, "resumen", lambda cid: {"n_clases": 77, "n_errores": 210})
     monkeypatch.setattr(consultas, "clases", lambda cid: [{"id": 0, "nombre": "activate_my_card", "f1": 0.97}])
-    return TestClient(main.app)
+    return TestClient(main.app, headers={"X-Requested-With": main.CABECERA_PORTAL})
 
 
 def test_resumen(cliente):
@@ -88,3 +88,22 @@ def test_archivo_registrado_se_descarga(cliente, monkeypatch, tmp_path):
     monkeypatch.setattr(cfg.config(), "dir_entregables", tmp_path)
     r = cliente.get("/api/entregables/archivo", params={"ruta": "figuras/a.png"})
     assert r.status_code == 200 and r.content == b"png"
+
+
+@pytest.mark.parametrize("ruta", ["/api/clasificar", "/api/entregables/generar"])
+def test_escrituras_exigen_cabecera_del_portal(cliente, ruta):
+    """Sin la cabecera propia (lo que enviaría otra web desde el navegador de un visitante) → 403."""
+    r = cliente.post(ruta, json={"texto": "hola"}, headers={"X-Requested-With": ""})
+    assert r.status_code == 403
+
+
+@pytest.mark.parametrize("ruta", ["/api/docs", "/api/openapi.json", "/api/redoc", "/api/inferencias"])
+def test_sin_documentacion_ni_historial_publico(cliente, ruta):
+    assert cliente.get(ruta).status_code == 404
+
+
+def test_generar_reutiliza_el_paquete_en_curso(cliente, monkeypatch):
+    monkeypatch.setattr(consultas, "paquete_en_curso", lambda: {"id": "p-1", "estado": "pendiente"})
+    monkeypatch.setattr(consultas, "crear_paquete", lambda: pytest.fail("no debe crear otro paquete"))
+    r = cliente.post("/api/entregables/generar")
+    assert r.status_code == 202 and r.json() == {"paquete_id": "p-1", "task_id": "p-1", "reutilizado": True}

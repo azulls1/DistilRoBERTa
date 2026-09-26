@@ -15,7 +15,7 @@ services:
       - DATABASE_URL_FILE=/run/secrets/distilroberta_db_dsn
       - REDIS_URL=redis://redis:6379/0
       - REDIS_RESULT_URL=redis://redis:6379/1
-      - CORS_ORIGINS=https://distilroberta.iagentek.com.mx,http://localhost:4200
+      - CORS_ORIGINS=https://distilroberta.iagentek.com.mx
     secrets: [distilroberta_db_dsn]
     volumes: [paquetes:/data/paquetes]
     networks: [interna, iagenteknet, supabase_maestria]
@@ -33,7 +33,28 @@ services:
         # Prioridad explícita ALTA: debe ganarle al router del frontend (Host a secas)
         - traefik.http.routers.distilroberta-api.priority=100
         - traefik.http.routers.distilroberta-api.service=distilroberta-api
+        - traefik.http.routers.distilroberta-api.middlewares=distilroberta-hsts,distilroberta-cabeceras-api,distilroberta-limite,distilroberta-cuerpo
+        # Escrituras (clasificar, generar ZIP): límite más estricto por IP
+        - traefik.http.routers.distilroberta-api-escritura.rule=Host(`distilroberta.iagentek.com.mx`) && PathPrefix(`/api`) && Method(`POST`)
+        - traefik.http.routers.distilroberta-api-escritura.entrypoints=websecure
+        - traefik.http.routers.distilroberta-api-escritura.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.distilroberta-api-escritura.priority=110
+        - traefik.http.routers.distilroberta-api-escritura.service=distilroberta-api
+        - traefik.http.routers.distilroberta-api-escritura.middlewares=distilroberta-hsts,distilroberta-cabeceras-api,distilroberta-limite-escritura,distilroberta-cuerpo
         - traefik.http.services.distilroberta-api.loadbalancer.server.port=8000
+        # Middlewares propios del stack (no se toca la configuración global de Traefik)
+        - traefik.http.middlewares.distilroberta-hsts.headers.stsSeconds=31536000
+        - traefik.http.middlewares.distilroberta-hsts.headers.stsIncludeSubdomains=false
+        - traefik.http.middlewares.distilroberta-cabeceras-api.headers.contentTypeNosniff=true
+        - traefik.http.middlewares.distilroberta-cabeceras-api.headers.frameDeny=true
+        - traefik.http.middlewares.distilroberta-cabeceras-api.headers.referrerPolicy=no-referrer
+        - traefik.http.middlewares.distilroberta-limite.ratelimit.average=20
+        - traefik.http.middlewares.distilroberta-limite.ratelimit.period=1s
+        - traefik.http.middlewares.distilroberta-limite.ratelimit.burst=60
+        - traefik.http.middlewares.distilroberta-limite-escritura.ratelimit.average=20
+        - traefik.http.middlewares.distilroberta-limite-escritura.ratelimit.period=1m
+        - traefik.http.middlewares.distilroberta-limite-escritura.ratelimit.burst=10
+        - traefik.http.middlewares.distilroberta-cuerpo.buffering.maxRequestBodyBytes=8192
 
   worker:
     image: distilroberta-backend:${TAG}
@@ -86,7 +107,8 @@ services:
         - traefik.http.routers.distilroberta-web.tls.certresolver=letsencryptresolver
         - traefik.http.routers.distilroberta-web.priority=10
         - traefik.http.routers.distilroberta-web.service=distilroberta-web
-        - traefik.http.services.distilroberta-web.loadbalancer.server.port=80
+        - traefik.http.routers.distilroberta-web.middlewares=distilroberta-hsts,distilroberta-limite
+        - traefik.http.services.distilroberta-web.loadbalancer.server.port=8080
 
 volumes:
   paquetes:   # ZIP de entregables generados desde la web (compartido por api y worker)

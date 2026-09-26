@@ -1,10 +1,9 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
-import { HttpClient, httpResource } from '@angular/common/http';
-import { Estado } from '../componentes/estado';
+import { HttpClient } from '@angular/common/http';
 import { Encabezado } from '../componentes/encabezado';
 
 import { Barras } from '../componentes/barras';
-import { EstadoTarea, Inferencia } from '../core/modelos';
+import { EstadoTarea } from '../core/modelos';
 import { legible, pct } from '../core/formato';
 
 const MAX = 512;
@@ -20,7 +19,7 @@ const ESPANOL = /\b(el|la|los|las|mi|tarjeta|cuenta|dinero|por qué|cómo|transf
 
 @Component({
   selector: 'app-clasificar',
-  imports: [Encabezado, Estado, Barras],
+  imports: [Encabezado, Barras],
   template: `
     <app-encabezado titulo="Clasificar una consulta" icono="rayo" etiqueta="En vivo · Celery + Redis">
       <span entrada>Escribe una consulta bancaria en inglés. La petición se encola (Celery + Redis) y un worker la clasifica con el
@@ -74,27 +73,29 @@ const ESPANOL = /\b(el|la|los|las|mi|tarjeta|cuenta|dinero|por qué|cómo|transf
     </section>
 
     <section class="panel mt-6">
-      <div class="mb-3 flex items-center justify-between">
-        <h2 class="font-semibold">Historial reciente</h2>
-        <button type="button" class="text-sm text-acento hover:underline" (click)="h.reload()">Actualizar</button>
+      <div class="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h2 class="font-semibold">Tus consultas de esta sesión</h2>
+        <p class="text-xs text-tenue">Solo las ves tú: no se muestran las consultas de otros visitantes.</p>
       </div>
-      <app-estado [cargando]="h.isLoading()" [error]="h.error()" [vacio]="!h.value()?.length" textoVacio="Aún no se ha clasificado ninguna consulta." (reintentar)="h.reload()">
+      @if (historial().length) {
         <div class="overflow-x-auto">
           <table class="tabla min-w-[36rem]">
             <thead><tr><th>Consulta</th><th>Intención</th><th class="text-right">Confianza</th><th class="text-right">Cuándo</th></tr></thead>
             <tbody>
-              @for (i of h.value() ?? []; track i.id) {
-                <tr>
+              @for (i of historial(); track i.cuando) {
+                <tr class="animate-fadeIn">
                   <td>{{ i.texto }}</td>
-                  <td class="mono">{{ i.clase ?? i.estado }}</td>
-                  <td class="text-right tabular-nums">{{ i.confianza == null ? '—' : pct(i.confianza, 1) }}</td>
-                  <td class="text-right text-xs text-tenue">{{ hora(i.creado_en) }}</td>
+                  <td class="mono">{{ i.clase }}</td>
+                  <td class="text-right tabular-nums">{{ pct(i.confianza, 1) }}</td>
+                  <td class="text-right text-xs text-tenue">{{ hora(i.cuando) }}</td>
                 </tr>
               }
             </tbody>
           </table>
         </div>
-      </app-estado>
+      } @else {
+        <p class="text-sm text-tenue">Aún no has clasificado ninguna consulta en esta sesión.</p>
+      }
     </section>
   `,
 })
@@ -109,7 +110,9 @@ export class ClasificarPagina {
   protected readonly procesando = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly resultado = signal<EstadoTarea['resultado'] | null>(null);
-  protected readonly h = httpResource<Inferencia[]>(() => '/api/inferencias?limit=15');
+  /** Historial local de la sesión (máx. 15); no se consulta ni se expone el de otros visitantes. */
+  protected readonly historial = signal<{ texto: string; clase: string; confianza: number; cuando: string }[]>([]);
+  private enviado = '';
 
   protected readonly invalido = computed(() => !this.texto().trim() || this.texto().length > MAX);
   protected readonly enEspanol = computed(() => ESPANOL.test(this.texto()) || /[ñáéíóú¿¡]/i.test(this.texto()));
@@ -130,7 +133,8 @@ export class ClasificarPagina {
     this.procesando.set(true);
     this.error.set(null);
     this.resultado.set(null);
-    this.http.post<{ task_id: string }>('/api/clasificar', { texto: this.texto().trim() }).subscribe({
+    this.enviado = this.texto().trim();
+    this.http.post<{ task_id: string }>('/api/clasificar', { texto: this.enviado }).subscribe({
       next: ({ task_id }) => this.sondear(task_id, Date.now()),
       error: (e) => this.fallar(e?.error?.detail ?? 'No se pudo enviar la consulta.'),
     });
@@ -142,7 +146,10 @@ export class ClasificarPagina {
         if (t.estado === 'completada') {
           this.resultado.set(t.resultado ?? null);
           this.procesando.set(false);
-          this.h.reload();
+          if (t.resultado) {
+            const r = t.resultado;
+            this.historial.update((h) => [{ texto: this.enviado, clase: r.clase, confianza: r.confianza, cuando: new Date().toISOString() }, ...h].slice(0, 15));
+          }
         } else if (t.estado === 'error') {
           this.fallar(t.error ?? 'El worker no pudo clasificar la consulta.');
         } else if (Date.now() - inicio > 20000) {
