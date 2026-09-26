@@ -7,8 +7,8 @@
    "nombre": "Entregable para el profesor (.zip)",
    "detalle": "Notebook, PDF, figuras y resultados, con LEEME que mapea cada criterio de la rúbrica a su evidencia.",
    "ruta": "entregable-actividad-2-adonai-hernandez.zip",
-   "bytes": 4522004,
-   "sha256": "651fb9511cccc52426f95049090d5b17cc75865bbae8ad6919253640b2ba45e2"
+   "bytes": 4522118,
+   "sha256": "7ea752d8b67d43003fcbc242e7979480601b111a8b86123ca4dd3e9411d837d0"
   },
   {
    "criterio": "Entrega",
@@ -16,8 +16,8 @@
    "nombre": "Notebook completo (.ipynb)",
    "detalle": "Código comentado, análisis, visualizaciones y conclusiones; ejecutado de punta a punta.",
    "ruta": "SCA_Actividad2_DistilRoBERTa_Banking77.ipynb",
-   "bytes": 1940180,
-   "sha256": "be3f405a2d1daf064b50f0a62091bd0cf477e2fcf702b06f3f45c578394f3e64"
+   "bytes": 1940268,
+   "sha256": "838b5a8541c32fad0d6751785c91df245a37c7da569be67835566f76b90e7753"
   },
   {
    "criterio": "Entrega",
@@ -25,8 +25,8 @@
    "nombre": "Notebook exportado a PDF",
    "detalle": "Versión PDF exigida por el enunciado.",
    "ruta": "SCA_Actividad2_DistilRoBERTa_Banking77.pdf",
-   "bytes": 3671421,
-   "sha256": "eea0c44c89660a21c48928c02c26c2204f2fa5bc3aefc3e8dbd6e1f6c5fa378e"
+   "bytes": 3671549,
+   "sha256": "5caf755be1943e8b443ff345668c01219f9f7ac1c24d1a612e2c2f2cbed80982"
   },
   {
    "criterio": "C1",
@@ -196,8 +196,8 @@
    "nombre": "cumplimiento.json",
    "detalle": "Matriz de cumplimiento del enunciado (33 requisitos)",
    "ruta": "datos/cumplimiento.json",
-   "bytes": 11965,
-   "sha256": "eab038a9ebb2ef8256ed15aa3f377c6ed2f8d03fc9f3bcf546e89080b885b21c"
+   "bytes": 11989,
+   "sha256": "43029db9525ba9fd6ae4b396513d2252000b4e04a7f483ecb72c686c05de9de9"
   },
   {
    "criterio": "C5",

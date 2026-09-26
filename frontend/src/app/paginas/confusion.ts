@@ -74,7 +74,7 @@ const suave = (x: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
                       <span class="mono w-5 shrink-0 text-right text-mal">{{ x.conteo }}</span>
                       <span class="min-w-0">{{ x.real }} <span class="text-tenue">→</span> {{ x.pred }}</span>
                     </span>
-                    <span class="ml-7 mt-1 block h-1 overflow-hidden rounded-full bg-mal-suave">
+                    <span class="ml-7 mt-1 block h-1 w-[calc(100%-1.75rem)] overflow-hidden rounded-full bg-mal-suave">
                       <span class="block h-full rounded-full bg-mal transition-[width] duration-700 ease-out" [style.transition-delay.ms]="k * 40"
                             [style.width.%]="listo() ? (x.conteo / maxPar()) * 100 : 0"></span>
                     </span>
