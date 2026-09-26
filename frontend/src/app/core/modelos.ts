@@ -98,19 +98,22 @@ export interface Explicacion {
   razon_categoria: string;
   veredicto: 'pertinente' | 'parcial' | 'alucinada';
   nota_revision: string | null;
-  parametros: Record<string, number | null>;
+  parametros: Record<string, number | string | null>;
   prompt: string;
 }
 
 export interface Calibracion {
   config: string;
-  parametros: Record<string, number | null>;
+  prompt: string;
+  parametros: Record<string, number | string | null>;
+  formato_ok: boolean | null;
+  cita_falsa: boolean | null;
+  cita_verificable: boolean | null;
   consulta: string;
   salida: string;
   n_oraciones: number;
   n_tokens: number;
   segundos: number;
-  palabras_ajenas: number | null;
   elegida: boolean;
 }
 
@@ -149,7 +152,8 @@ export interface Muestra {
 }
 
 export interface SalidaLlm {
-  config: 'A' | 'B' | 'C';
+  config: string;
+  prompt: string;
   salida_cruda: string;
   explicacion: string;
   n_oraciones: number;
@@ -164,7 +168,7 @@ export interface CalibracionCompleta {
   real: string;
   pred: string;
   veredicto: 'pertinente' | 'parcial' | 'alucinada';
-  configs: { config: 'A' | 'B' | 'C'; explicacion: string; salida_cruda: string; n_oraciones: number; segundos: number }[];
+  configs: { config: string; prompt: string; explicacion: string; salida_cruda: string; n_oraciones: number; segundos: number }[];
 }
 
 export interface Requisito {

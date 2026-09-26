@@ -29,8 +29,20 @@ FIGURAS = {  # título legible por sección del notebook
     "3.3": "Curvas de entrenamiento y validación",
     "3.4": "Matriz de confusión (conteos y solo errores)",
     "3.5": "F1 por clase con las 7 mejores y 7 peores",
-    "4.6": "Veredicto manual y razones del LLM",
+    "4.7": "Veredicto manual y razones del LLM",
 }
+ART = RAIZ / "artefactos"
+_cal = json.load(open(ART / "calibracion.json"))
+_cp = lambda campo: sorted({f[campo] for f in _cal})
+DESC_CAL = (f"Calibración del prompt: {len(_cp('config'))} configuraciones de decodificación ({', '.join(_cp('config'))}) y "
+            f"{len(_cp('prompt'))} estructuras ({', '.join(_cp('prompt'))}) sobre {len({f['consulta_id'] for f in _cal})} consultas")
+_sim = json.load(open(ART / "simulacion_llm.json")) if (ART / "simulacion_llm.json").exists() else []
+_hp = json.load(open(ART / "corrida.json"))["hiperparametros"]
+DESC_SIM = (f"Salidas reales de Falcon ({_hp['config_llm']}/{_hp['prompt_llm']}) para "
+            f"{len({s['consulta_id'] for s in _sim if s['config'] == _hp['config_llm']})} errores y las configuraciones "
+            f"{', '.join(sorted({s['config'] for s in _sim if s['revisada']}))} sobre las revisadas")
+_cump = json.load(open(ART / "cumplimiento.json"))
+DESC_CUMP = f"Matriz de cumplimiento: enunciado, rúbrica nivel 4 y solicitud ({len(_cump)} requisitos)"
 DATOS = [
     ("corrida.json", "C2", "Hiperparámetros, accuracy, F1 macro y duración de la corrida"),
     ("eda.json", "C1", "Estadísticas descriptivas, n-gramas y balance"),
@@ -38,11 +50,11 @@ DATOS = [
     ("metricas_clase.json", "C2", "Precision, recall, F1 y errores de las 77 clases"),
     ("confusion.json", "C2", "Matriz de confusión dispersa"),
     ("predicciones.csv", "C2", "Predicción, confianza y top-5 de las 3 080 consultas de prueba"),
-    ("calibracion.json", "C3", "Calibración del prompt: 3 configuraciones × 5 consultas"),
+    ("calibracion.json", "C3", DESC_CAL),
     ("explicaciones.json", "C3", "Las 20 explicaciones de Falcon-7b-instruct con su prompt"),
     ("revision_manual.json", "C3", "Veredicto manual y razón de cada explicación"),
-    ("simulacion_llm.json", "C3", "Salidas reales de Falcon para los 208 errores y A/B/C sobre las 20"),
-    ("cumplimiento.json", "C5", "Matriz de cumplimiento del enunciado (33 requisitos)"),
+    ("simulacion_llm.json", "C3", DESC_SIM),
+    ("cumplimiento.json", "C5", DESC_CUMP),
 ]
 CODIGO = [
     ("ml/construir_notebook.py", "Genera el notebook celda a celda"),

@@ -1,5 +1,5 @@
 {
- "id": "2026-09-25T23-53",
+ "id": "2026-09-26T03-06",
  "modelo_base": "distilbert/distilroberta-base",
  "llm": "tiiuae/falcon-7b-instruct",
  "dispositivo": "mps",
@@ -12,8 +12,9 @@
   "weight_decay": 0.01,
   "seed": 42,
   "mejor_epoca": 6,
-  "config_llm": "B",
-  "llm_max_new_tokens": 60,
+  "config_llm": "E",
+  "prompt_llm": "P3",
+  "llm_max_new_tokens": 150,
   "llm_temperature": 0.3,
   "llm_top_p": 0.9
  },
@@ -22,5 +23,5 @@
  "n_train": 9002,
  "n_val": 1001,
  "n_test": 3080,
- "duracion_entrenamiento_s": 502.62440180778503
+ "duracion_entrenamiento_s": 479.3881096839905
 }

@@ -91,10 +91,10 @@ def explicaciones(cid: str) -> list[dict]:
 
 def calibracion(cid: str) -> list[dict]:
     return db.todos(
-        f"""select k.config, k.parametros, q.texto as consulta, k.salida, k.n_oraciones, k.n_tokens,
-                   k.segundos::float, k.palabras_ajenas::float, k.elegida
+        f"""select k.config, k.prompt, k.parametros, q.texto as consulta, k.salida, k.n_oraciones, k.n_tokens,
+                   k.segundos::float, k.formato_ok, k.cita_falsa, k.cita_verificable, k.elegida
             from {T['calibracion_llm']} k join {T['consultas']} q on q.id = k.consulta_id
-            where k.corrida_id = %s order by k.consulta_id, k.config""", (cid,))
+            where k.corrida_id = %s order by k.prompt, k.config, k.consulta_id""", (cid,))
 
 
 # ── Inferencias en vivo ─────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ def muestra(cid: str, tipo: str) -> dict | None:
 
 def simulacion_llm(cid: str, consulta_id: int) -> list[dict]:
     return db.todos(
-        f"""select config, salida_cruda, explicacion, n_oraciones, segundos::float, revisada
+        f"""select config, prompt, salida_cruda, explicacion, n_oraciones, segundos::float, revisada
             from {T['simulacion_llm']} where corrida_id = %s and consulta_id = %s order by config""",
         (cid, consulta_id))
 
@@ -161,7 +161,7 @@ def calibracion_completa(cid: str) -> list[dict]:
     """Las 20 consultas revisadas con sus tres configuraciones (A, B, C) y el veredicto de la B."""
     return db.todos(
         f"""select e.orden, s.consulta_id, q.texto, r.nombre as real, p.nombre as pred, e.veredicto,
-                   json_agg(json_build_object('config', s.config, 'explicacion', s.explicacion,
+                   json_agg(json_build_object('config', s.config, 'prompt', s.prompt, 'explicacion', s.explicacion,
                             'salida_cruda', s.salida_cruda, 'n_oraciones', s.n_oraciones, 'segundos', s.segundos)
                             order by s.config) as configs
             from {T['explicaciones_llm']} e

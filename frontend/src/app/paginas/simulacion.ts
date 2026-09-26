@@ -18,11 +18,12 @@ const PASOS: { titulo: string; icono: NombreIcono; detalle: string }[] = [
   { titulo: 'Veredicto frente a la etiqueta real', icono: 'diana', detalle: 'Solo en consultas del conjunto de prueba, que traen su etiqueta.' },
   { titulo: 'Explicación de Falcon-7b-instruct', icono: 'mensaje', detalle: 'Salida real generada offline con el prompt calibrado.' },
 ];
-const CONFIG = {
-  A: { nombre: 'A · codiciosa', params: 'do_sample=False (T→0) · max_new_tokens=60' },
-  B: { nombre: 'B · T = 0.3 (elegida)', params: 'temperature=0.3 · top_p=0.9 · max_new_tokens=60' },
-  C: { nombre: 'C · T = 1.0', params: 'temperature=1.0 · top_p=0.95 · max_new_tokens=150' },
-} as const;
+/** Descripción legible de una configuración a partir de sus parámetros reales (leídos de la base). */
+function describir(p: Record<string, unknown> | undefined): string {
+  if (!p) return '';
+  const t = p['temperature'] == null ? 'codiciosa (T→0)' : `temperature=${p['temperature']} · top_p=${p['top_p']}`;
+  return `${t} · max_new_tokens=${p['max_new_tokens']}`;
+}
 
 @Component({
   selector: 'app-simulacion',
@@ -139,7 +140,7 @@ const CONFIG = {
                         <app-estado [cargando]="llm.isLoading()" [error]="llm.error()" [vacio]="!llm.value()?.length" (reintentar)="llm.reload()"
                                     textoVacio="No hay salida de Falcon para esta consulta.">
                           @if (salidaB(); as s) {
-                            <p class="mb-2 text-xs text-tenue">Falcon explicó por qué el modelo eligió <span class="mono text-mal">{{ m.pred_guardada }}</span> en vez de <span class="mono text-bien">{{ m.real }}</span> (configuración B, {{ s.segundos }} s en MPS):</p>
+                            <p class="mb-2 text-xs text-tenue">Falcon explicó por qué el modelo eligió <span class="mono text-mal">{{ m.pred_guardada }}</span> en vez de <span class="mono text-bien">{{ m.real }}</span> (configuración {{ s.config }}, estructura {{ s.prompt }}, {{ s.segundos }} s en MPS):</p>
                             <blockquote class="border-l-2 border-forest pl-3 text-sm leading-relaxed text-forest">{{ s.explicacion }}</blockquote>
                             <p class="mt-2 text-xs" [class]="s.revisada ? 'text-pine' : 'text-aviso'">
                               {{ s.revisada ? 'Es una de las ' + nRevisadas() + ' explicaciones revisadas a mano: consulta su veredicto en «Explicaciones del LLM».' : 'Sin revisión manual: en la revisión de ' + nRevisadas() + ' casos, el ' + pctAlucinadas() + ' de las explicaciones de Falcon afirmaba algo falso. Léela con ese filtro.' }}
@@ -166,7 +167,7 @@ const CONFIG = {
       <h2 class="seccion flex items-center gap-2"><app-icono nombre="termometro" clase="h-4 w-4" /> Simulador de calibración del prompt</h2>
       <app-estado [cargando]="cal.isLoading()" [error]="cal.error()" [vacio]="!cal.value()?.length" (reintentar)="cal.reload()">
         <div class="panel grid gap-4">
-          <p class="text-sm text-tenue">Elige uno de los {{ cal.value()?.length }} errores revisados y cambia la configuración: las tres salidas son reales, generadas con el mismo prompt y la misma semilla.</p>
+          <p class="text-sm text-tenue">Elige uno de los {{ cal.value()?.length }} errores revisados y cambia la configuración de decodificación: todas las salidas son reales, generadas con la misma estructura de prompt y la misma semilla.</p>
           <div class="grid gap-3 md:grid-cols-[1fr_auto]">
             <label class="grid gap-1 text-sm"><span class="text-tenue">Error</span>
               <select class="campo" [value]="ordenCal()" (change)="ordenCal.set(+$any($event.target).value)">
@@ -175,15 +176,15 @@ const CONFIG = {
             </label>
             <div class="grid gap-1 text-sm"><span class="text-tenue">Configuración</span>
               <div class="flex rounded-lg border border-fog p-0.5" role="radiogroup" aria-label="Configuración">
-                @for (k of claves; track k) {
-                  <button type="button" role="radio" [attr.aria-checked]="config() === k" (click)="config.set(k)"
-                          class="rounded-md px-3 py-1.5 font-mono text-xs transition" [class]="config() === k ? 'bg-forest text-white' : 'text-pine hover:bg-acento-suave'">{{ k }}</button>
+                @for (k of claves(); track k) {
+                  <button type="button" role="radio" [attr.aria-checked]="configActiva() === k" (click)="config.set(k)"
+                          class="rounded-md px-3 py-1.5 font-mono text-xs transition" [class]="configActiva() === k ? 'bg-forest text-white' : 'text-pine hover:bg-acento-suave'">{{ k }}@if (k === elegida()) {✓}</button>
                 }
               </div>
             </div>
           </div>
           @if (calActual(); as c) {
-            <p class="font-mono text-[11px] text-moss">{{ nombreConfig(config()) }} · {{ paramsConfig(config()) }}</p>
+            <p class="font-mono text-[11px] text-moss">Config. {{ configActiva() }}{{ configActiva() === elegida() ? ' (elegida por la calibración)' : '' }} · {{ paramsConfig(configActiva()) }} · estructura {{ salidaCal()?.prompt }}</p>
             <div class="grid gap-3 md:grid-cols-2">
               <div class="rounded-lg bg-acento-suave p-3 text-xs leading-relaxed">
                 <p class="mb-1 font-mono text-[10px] uppercase tracking-wider text-moss">Prompt enviado</p>
@@ -194,7 +195,7 @@ const CONFIG = {
                   <p class="mb-1 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-moss">Respuesta de Falcon
                     <span [class]="s.n_oraciones > 2 ? 'text-mal' : 'text-bien'">{{ s.n_oraciones }} oraciones · {{ s.segundos }} s</span></p>
                   <p class="animate-fadeIn text-sm leading-relaxed text-forest">{{ s.salida_cruda }}</p>
-                  @if (config() === 'B') { <p class="mt-2 text-xs text-tenue">Veredicto manual: <strong>{{ c.veredicto }}</strong></p> }
+                  @if (configActiva() === elegida()) { <p class="mt-2 text-xs text-tenue">Veredicto manual: <strong>{{ c.veredicto }}</strong></p> }
                 </div>
               }
             </div>
@@ -227,7 +228,7 @@ export class SimulacionPagina {
   private readonly temporizadores: ReturnType<typeof setTimeout>[] = [];
   protected readonly pasos = PASOS;
   protected readonly capas = ['capa 1', 'capa 2', 'capa 3', 'capa 4', 'capa 5', 'capa 6', 'softmax'];
-  protected readonly claves = ['A', 'B', 'C'] as const;
+  protected readonly claves = computed(() => [...new Set((this.cal.value() ?? []).flatMap((c) => c.configs.map((k) => k.config)))].sort());
   protected readonly pct = pct;
   protected readonly num = num;
   protected readonly leg = legible;
@@ -253,13 +254,16 @@ export class SimulacionPagina {
     const m = this.muestra();
     return m && !m.correcta && this.visibles() >= 6 ? `/api/simulacion/llm/${m.consulta_id}` : undefined;
   });
-  protected readonly salidaB = computed(() => this.llm.value()?.find((s) => s.config === 'B') ?? null);
+  protected readonly salidaB = computed(() => this.llm.value()?.find((s) => s.config === this.elegida()) ?? this.llm.value()?.[0] ?? null);
 
   protected readonly cal = httpResource<CalibracionCompleta[]>(() => '/api/simulacion/calibracion');
   protected readonly ordenCal = signal(1);
-  protected readonly config = signal<'A' | 'B' | 'C'>('B');
+  protected readonly config = signal<string>('');
+  /** Configuración que eligió la calibración del notebook (se muestra por defecto). */
+  protected readonly elegida = computed(() => String(this.resumen.value()?.corrida?.hiperparametros['config_llm'] ?? ''));
+  protected readonly configActiva = computed(() => this.config() || this.elegida());
   protected readonly calActual = computed(() => this.cal.value()?.find((c) => c.orden === this.ordenCal()) ?? null);
-  protected readonly salidaCal = computed(() => this.calActual()?.configs.find((c) => c.config === this.config()) ?? null);
+  protected readonly salidaCal = computed(() => this.calActual()?.configs.find((c) => c.config === this.configActiva()) ?? null);
 
   protected readonly h = httpResource<Epoca[]>(() => '/api/entrenamiento');
   protected readonly nEpocas = signal(8);
@@ -362,10 +366,13 @@ export class SimulacionPagina {
   protected top5(r: Resultado) {
     return r.top5.map((t, i) => ({ etiqueta: legible(t.clase), valor: t.prob, texto: pct(t.prob, 1), tono: i === 0 ? ('acento' as const) : ('tenue' as const) }));
   }
-  protected nombreConfig(k: 'A' | 'B' | 'C') {
-    return CONFIG[k].nombre;
+  protected paramsConfig(k: string) {
+    return describir(this.cal.value()?.[0] ? this.parametrosDe(k) : undefined);
   }
-  protected paramsConfig(k: 'A' | 'B' | 'C') {
-    return CONFIG[k].params;
+  /** Parámetros de una configuración, tomados de la tabla de calibración de la base. */
+  private readonly calTabla = httpResource<{ config: string; parametros: Record<string, unknown> }[]>(() => '/api/calibracion');
+  private parametrosDe(k: string) {
+    return this.calTabla.value()?.find((c) => c.config === k)?.parametros;
   }
+
 }

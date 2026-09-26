@@ -60,7 +60,7 @@
   "requisito": "Identificar las 15 palabras más frecuentes",
   "seccion_notebook": "2.3",
   "ruta_web": "/eda",
-  "evidencia": "Top-15 con gráfica (se guardan 100 para la nube).",
+  "evidencia": "Top-15 con gráfica (se guardan 150 para la nube).",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -151,7 +151,7 @@
   "requisito": "Realizar el fine-tuning del modelo preentrenado",
   "seccion_notebook": "3.3",
   "ruta_web": "/resumen",
-  "evidencia": "9,002 ej. de entrenamiento + 1,001 de validación; mejor época 6; 8.4 min en mps.",
+  "evidencia": "9,002 ej. de entrenamiento + 1,001 de validación; mejor época 6; 8.0 min en mps.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -229,7 +229,7 @@
   "requisito": "Discusión de causas con base en el EDA",
   "seccion_notebook": "3.6",
   "ruta_web": "/confusion",
-  "evidencia": "H1 (desbalance) rechazada: ρ = -0.14, p = 0.21. H2 (n-gramas compartidos) confirmada: 9× más bigramas comunes en los pares que se confunden.",
+  "evidencia": "H1 (desbalance) sin evidencia a favor: ρ = -0.14, p = 0.21. H2 (n-gramas compartidos) confirmada: 9× más bigramas comunes en los pares que se confunden.",
   "fuente": "Rúbrica detallada",
   "cumplido": true
  },
@@ -242,7 +242,7 @@
   "requisito": "Diseñar un prompt para tiiuae/falcon-7b-instruct con explicación breve (máximo dos oraciones)",
   "seccion_notebook": "4.2",
   "ruta_web": "/explicaciones",
-  "evidencia": "Prompt de cinco piezas (rol, tarea, restricciones, datos, ancla de salida) documentado pieza por pieza.",
+  "evidencia": "Tres estructuras (P1, P2, P3) con rol, tarea, restricciones, datos y ancla «Explanation:»; P3 añade dos ejemplos tomados de train. Cada pieza, documentada.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -255,7 +255,7 @@
   "requisito": "Calibrar la temperatura",
   "seccion_notebook": "4.4",
   "ruta_web": "/simulacion",
-  "evidencia": "Tres configuraciones: codiciosa (T→0), T = 0.3 y T = 1.0 sobre las mismas consultas.",
+  "evidencia": "5 configuraciones (A, B, C, D, E): codiciosa, T = 0.3 y T = 1.0, cada una medida sobre las mismas 8 consultas; elegida E por regla fijada de antemano (8/8 en formato correcto).",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -268,7 +268,7 @@
   "requisito": "Calibrar la longitud de respuesta",
   "seccion_notebook": "4.4",
   "ruta_web": "/simulacion",
-  "evidencia": "max_new_tokens 60 vs 150 (+ explicación de por qué max_new_tokens y no max_length) y recorte a 2 oraciones.",
+  "evidencia": "max_new_tokens 60 vs 150 con la temperatura fija (B vs E, C vs D), de modo que longitud y temperatura se miden por separado; se explica por qué max_new_tokens y no max_length.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -279,9 +279,9 @@
   "puntos": 3.0,
   "peso": 30,
   "requisito": "Calibrar la claridad y estructura del prompt",
-  "seccion_notebook": "4.2 · 4.4",
+  "seccion_notebook": "4.2 · 4.5",
   "ruta_web": "/explicaciones",
-  "evidencia": "Formato fijo con ancla «Explanation:», parada en línea en blanco y repetition_penalty.",
+  "evidencia": "3 estructuras (P1, P2, P3) con la configuración E: citas verificables P1 1/8 · P2 6/8 · P3 8/8; elegida P3.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -305,9 +305,9 @@
   "puntos": 3.0,
   "peso": 30,
   "requisito": "Solicitar al LLM una justificación de cada clasificación incorrecta",
-  "seccion_notebook": "4.5",
+  "seccion_notebook": "4.6",
   "ruta_web": "/explicaciones",
-  "evidencia": "20 explicaciones generadas con la configuración B.",
+  "evidencia": "20 explicaciones generadas con la configuración E y la estructura P3.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -318,9 +318,9 @@
   "puntos": 3.0,
   "peso": 30,
   "requisito": "Validar manualmente la veracidad y pertinencia de las respuestas",
-  "seccion_notebook": "4.6",
+  "seccion_notebook": "4.7",
   "ruta_web": "/explicaciones",
-  "evidencia": "Veredicto por explicación: 3 pertinentes, 9 parciales, 8 alucinadas.",
+  "evidencia": "Veredicto por explicación: 7 pertinentes, 10 parciales, 3 alucinadas.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -331,9 +331,9 @@
   "puntos": 3.0,
   "peso": 30,
   "requisito": "Analizar y listar las razones proporcionadas por el LLM",
-  "seccion_notebook": "4.6 · 4.7",
+  "seccion_notebook": "4.8",
   "ruta_web": "/explicaciones",
-  "evidencia": "Cinco categorías de razón con conteo, tabla y los tres patrones de alucinación.",
+  "evidencia": "3 categorías de razón con conteo (solapamiento_lexico 16, ambiguedad_real 2, etiqueta_dudosa 2) y los patrones de fallo.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -344,7 +344,7 @@
   "puntos": 3.0,
   "peso": 30,
   "requisito": "Validación de la coherencia de las respuestas y discusión de las implicancias del uso del LLM",
-  "seccion_notebook": "4.6 · 4.8",
+  "seccion_notebook": "4.7 · 4.9",
   "ruta_web": "/explicaciones",
   "evidencia": "Veredicto manual de las 20 respuestas y cuatro conclusiones sobre fidelidad, calibración, encuadre del prompt y uso recomendado.",
   "fuente": "Rúbrica detallada",
@@ -370,9 +370,9 @@
   "puntos": 2.0,
   "peso": 20,
   "requisito": "Redactar conclusiones sobre el uso del LLM para interpretar el clasificador",
-  "seccion_notebook": "4.8",
+  "seccion_notebook": "4.9",
   "ruta_web": "/explicaciones",
-  "evidencia": "Cuatro conclusiones, prompt mejorado propuesto y uso recomendado.",
+  "evidencia": "Cuatro conclusiones: qué controla cada eje de la calibración, límites de fidelidad, encuadre del prompt y uso recomendado.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -411,7 +411,7 @@
   "requisito": "Todo el código debe estar debidamente comentado y estructurado en un notebook",
   "seccion_notebook": "Todo",
   "ruta_web": "/entregables",
-  "evidencia": "Comentarios en cada celda; secciones numeradas 0–7.",
+  "evidencia": "Comentarios en cada celda de código (27); secciones numeradas 0–7.",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -437,7 +437,7 @@
   "requisito": "Referencias",
   "seccion_notebook": "6",
   "ruta_web": "/entregables",
-  "evidencia": "15 referencias (APA).",
+  "evidencia": "20 referencias (APA).",
   "fuente": "Enunciado",
   "cumplido": true
  },
@@ -528,7 +528,7 @@
   "requisito": "Versión exportada en PDF",
   "seccion_notebook": "—",
   "ruta_web": "/entregables",
-  "evidencia": "PDF de 46 páginas generado desde el notebook ejecutado.",
+  "evidencia": "PDF de 54 páginas generado desde el notebook ejecutado.",
   "fuente": "Enunciado",
   "cumplido": true
  }

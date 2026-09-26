@@ -28,6 +28,7 @@ CSS_IMPRESION = """
   .jp-RenderedHTMLCommon td, .jp-RenderedHTMLCommon th { text-align: left !important; white-space: normal !important;
       padding: 2px 5px !important; vertical-align: top; overflow-wrap: anywhere; max-width: none !important; }
   .jp-RenderedHTMLCommon td { min-width: 5.5em; } .jp-RenderedHTMLCommon td:first-child { min-width: 1.5em; }
+  .jp-RenderedHTMLCommon tbody th { min-width: 2.2em; white-space: nowrap !important; overflow-wrap: normal; }
   .jp-OutputArea-output pre, .jp-CodeCell pre { font-size: 7.6pt; white-space: pre-wrap; word-break: break-word; }
   .jp-RenderedHTMLCommon h1 { font-size: 20pt; } .jp-RenderedHTMLCommon h2 { font-size: 15pt; break-before: page; }
   .jp-RenderedHTMLCommon h2:first-of-type { break-before: auto; }

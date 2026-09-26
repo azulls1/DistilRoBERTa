@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="t d">
+  <title id="t">DistilRoBERTa · Banking77</title>
+  <desc id="d">Una consulta bancaria se tokeniza, atraviesa 6 capas de DistilRoBERTa y se clasifica entre 77 intenciones; Falcon-7b explica los errores.</desc>
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#04202C"/><stop offset="0.45" stop-color="#304040"/><stop offset="1" stop-color="#021519"/>
+    </linearGradient>
+    <radialGradient id="orbe" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#5B7065" stop-opacity="0.55"/><stop offset="1" stop-color="#5B7065" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="puntos" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.1" fill="#ffffff" opacity="0.06"/>
+    </pattern>
+    <style>
+      text { font-family: 'Sora', 'DM Sans', -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif; }
+      .mono { font-family: 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace; }
+      .aparece { opacity: 0; animation: aparece 0.9s ease-out forwards; }
+      @keyframes aparece { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+      .orbe1 { animation: flota 9s ease-in-out infinite; }
+      .orbe2 { animation: flota 13s ease-in-out infinite reverse; }
+      @keyframes flota { 0%,100% { transform: translate(0,0); } 50% { transform: translate(40px,-25px); } }
+      .token { opacity: 0; animation: token 6s ease-out infinite; }
+      @keyframes token { 0% { opacity: 0; transform: translateY(10px); } 8%, 70% { opacity: 1; transform: none; } 85%, 100% { opacity: 0; } }
+      .capa { animation: capa 6s ease-in-out infinite; }
+      @keyframes capa { 0%, 30% { fill: #1A3036; } 38% { fill: #9EADA3; } 46%, 100% { fill: #1A3036; } }
+      .pred { opacity: 0; animation: pred 6s ease-out infinite; }
+      @keyframes pred { 0%, 55% { opacity: 0; } 62%, 85% { opacity: 1; } 95%, 100% { opacity: 0; } }
+      .barra { transform-origin: left; animation: barra 6s ease-out infinite; }
+      @keyframes barra { 0%, 56% { transform: scaleX(0); } 66%, 85% { transform: scaleX(1); } 95%, 100% { transform: scaleX(0); } }
+      .pulso { animation: pulso 1.6s ease-in-out infinite; }
+      @keyframes pulso { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
+      @media (prefers-reduced-motion: reduce) { * { animation: none !important; opacity: 1 !important; transform: none !important; } }
+    </style>
+  </defs>
+
+  <rect width="1200" height="360" rx="24" fill="url(#fondo)"/>
+  <rect width="1200" height="360" rx="24" fill="url(#puntos)"/>
+  <circle class="orbe1" cx="1040" cy="60" r="190" fill="url(#orbe)"/>
+  <circle class="orbe2" cx="120" cy="330" r="160" fill="url(#orbe)"/>
+
+  <!-- Título -->
+  <g class="aparece" style="animation-delay:.1s">
+    <rect x="60" y="44" width="236" height="28" rx="14" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.12"/>
+    <circle class="pulso" cx="80" cy="58" r="4" fill="#34d399"/>
+    <text x="94" y="63" font-size="13" fill="#ffffff" fill-opacity="0.85">UNIR · SCA · Actividad 2</text>
+  </g>
+  <text class="aparece" style="animation-delay:.25s" x="60" y="122" font-size="46" font-weight="700" fill="#ffffff">DistilRoBERTa · Banking77</text>
+  <text class="aparece" style="animation-delay:.4s" x="60" y="158" font-size="20" fill="#ffffff" fill-opacity="0.7">Transformers y LLM: 77 intenciones bancarias + explicación de errores con Falcon-7b-instruct</text>
+
+  <!-- Consulta → tokens -->
+  <text class="aparece mono" style="animation-delay:.55s" x="60" y="210" font-size="13" fill="#9EADA3">CONSULTA</text>
+  <g class="mono" font-size="15">
+    <g class="token" style="animation-delay:0.0s"><rect x="60"  y="222" width="44" height="30" rx="7" fill="#ffffff"/><text x="70"  y="242" fill="#04202C">&lt;s&gt;</text></g>
+    <g class="token" style="animation-delay:0.15s"><rect x="110" y="222" width="30" height="30" rx="7" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.25"/><text x="120" y="242" fill="#ffffff">I</text></g>
+    <g class="token" style="animation-delay:0.3s"><rect x="146" y="222" width="70" height="30" rx="7" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.25"/><text x="156" y="242" fill="#ffffff">▁still</text></g>
+    <g class="token" style="animation-delay:0.45s"><rect x="222" y="222" width="62" height="30" rx="7" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.25"/><text x="232" y="242" fill="#ffffff">▁have</text></g>
+    <g class="token" style="animation-delay:0.6s"><rect x="290" y="222" width="52" height="30" rx="7" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.25"/><text x="300" y="242" fill="#ffffff">▁not</text></g>
+    <g class="token" style="animation-delay:0.75s"><rect x="348" y="222" width="100" height="30" rx="7" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.25"/><text x="358" y="242" fill="#ffffff">▁received</text></g>
+    <g class="token" style="animation-delay:0.9s"><rect x="454" y="222" width="46" height="30" rx="7" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.25"/><text x="464" y="242" fill="#ffffff">▁my</text></g>
+    <g class="token" style="animation-delay:1.05s"><rect x="506" y="222" width="64" height="30" rx="7" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-opacity="0.25"/><text x="516" y="242" fill="#ffffff">▁card</text></g>
+    <g class="token" style="animation-delay:1.2s"><rect x="576" y="222" width="48" height="30" rx="7" fill="#ffffff"/><text x="584" y="242" fill="#04202C">&lt;/s&gt;</text></g>
+  </g>
+
+  <!-- 6 capas + softmax -->
+  <text class="aparece mono" style="animation-delay:.6s" x="60" y="290" font-size="13" fill="#9EADA3">6 CAPAS DE AUTOATENCIÓN</text>
+  <g class="mono" font-size="12" fill="#ffffff" fill-opacity="0.85">
+    <rect class="capa" style="animation-delay:0.0s"  x="60"  y="302" width="70" height="30" rx="7"/><text x="74"  y="322">capa 1</text>
+    <rect class="capa" style="animation-delay:0.12s" x="138" y="302" width="70" height="30" rx="7"/><text x="152" y="322">capa 2</text>
+    <rect class="capa" style="animation-delay:0.24s" x="216" y="302" width="70" height="30" rx="7"/><text x="230" y="322">capa 3</text>
+    <rect class="capa" style="animation-delay:0.36s" x="294" y="302" width="70" height="30" rx="7"/><text x="308" y="322">capa 4</text>
+    <rect class="capa" style="animation-delay:0.48s" x="372" y="302" width="70" height="30" rx="7"/><text x="386" y="322">capa 5</text>
+    <rect class="capa" style="animation-delay:0.60s" x="450" y="302" width="70" height="30" rx="7"/><text x="464" y="322">capa 6</text>
+    <rect class="capa" style="animation-delay:0.72s" x="528" y="302" width="96" height="30" rx="7"/><text x="546" y="322">softmax·77</text>
+  </g>
+
+  <!-- Predicción (la escribe ml/generar_readme.py con la inferencia REAL del modelo sobre esta consulta) -->
+  <g class="pred">
+    <rect x="690" y="206" width="450" height="126" rx="16" fill="#ffffff" fill-opacity="0.07" stroke="#ffffff" stroke-opacity="0.15"/>
+    <text x="714" y="236" class="mono" font-size="12" fill="#9EADA3">PREDICCIÓN REAL · TOP-3</text>
+{{BARRAS}}
+  </g>
+</svg>

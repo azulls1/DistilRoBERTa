@@ -74,22 +74,23 @@ const RAZON: Record<string, string> = {
       <section class="panel mt-8">
         <h2 class="mb-1 font-semibold">Calibración del prompt</h2>
         <p class="subtitulo mb-4">
-          {{ nConfigs() }} configuraciones sobre las mismas {{ nConsultasCal() }} consultas; los parámetros de cada una
-          salen de la base. La elegida por la regla del notebook se marca.
+          {{ nConfigs() }} combinaciones de decodificación (A–E) y estructura de prompt (P1–P3) sobre las mismas
+          {{ nConsultasCal() }} consultas; los parámetros salen de la base. Se marca la combinación que eligió la regla del notebook.
         </p>
         <app-estado [cargando]="c.isLoading()" [error]="c.error()" (reintentar)="c.reload()">
           <div class="overflow-x-auto">
             <table class="tabla min-w-[48rem]">
               <thead><tr><th>Consulta</th><th>Config.</th><th class="text-right">Oraciones</th><th class="text-right">Tokens</th>
-                <th class="text-right">Palabras ajenas</th><th>Salida</th></tr></thead>
+                <th>Formato</th><th>Citas</th><th>Salida</th></tr></thead>
               <tbody>
                 @for (k of c.value() ?? []; track $index) {
                   <tr [class.bg-acento-suave]="k.elegida">
                     <td class="max-w-[14rem]">{{ k.consulta }}</td>
-                    <td class="mono" [title]="parametros(k)">{{ k.config }}@if (k.elegida) { ✓ }<span class="block text-[10px] text-moss">{{ parametros(k) }}</span></td>
+                    <td class="mono" [title]="parametros(k)">{{ k.config }}·{{ k.prompt }}@if (k.elegida) { ✓ }<span class="block text-[10px] text-moss">{{ parametros(k) }}</span></td>
                     <td class="text-right tabular-nums" [class.text-mal]="k.n_oraciones > 2">{{ k.n_oraciones }}</td>
                     <td class="text-right tabular-nums">{{ k.n_tokens }}</td>
-                    <td class="text-right tabular-nums">{{ pct(k.palabras_ajenas, 0) }}</td>
+                    <td [class]="k.formato_ok ? 'text-bien' : 'text-mal'">{{ k.formato_ok ? 'correcto' : 'no' }}</td>
+                    <td [class]="k.cita_falsa ? 'text-mal' : k.cita_verificable ? 'text-bien' : 'text-tenue'">{{ k.cita_falsa ? 'falsa' : k.cita_verificable ? 'verificable' : '—' }}</td>
                     <td class="text-xs leading-relaxed">{{ k.salida }}</td>
                   </tr>
                 }
@@ -149,11 +150,11 @@ export class ExplicacionesPagina {
       'Explicación:',
     ].join('\n');
   }
-  protected readonly nConfigs = computed(() => new Set((this.c.value() ?? []).map((k) => k.config)).size);
+  protected readonly nConfigs = computed(() => new Set((this.c.value() ?? []).map((k) => k.config + k.prompt)).size);
   protected readonly nConsultasCal = computed(() => new Set((this.c.value() ?? []).map((k) => k.consulta)).size);
   protected parametros(k: Calibracion) {
     const p = k.parametros;
-    return (p['temperature'] == null ? 'T→0' : 'T=' + p['temperature']) + ' · ' + p['max_new_tokens'] + ' tok';
+    return (p['temperature'] == null ? 'T→0' : 'T=' + p['temperature']) + ' · ' + p['max_new_tokens'] + ' tok · ' + k.prompt;
   }
   protected readonly filtro = signal<'todas' | Explicacion['veredicto']>('todas');
   protected readonly filtros = [

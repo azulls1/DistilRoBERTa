@@ -43,7 +43,7 @@ md("""
 
 **Asignatura:** Sistemas Cognitivos Artificiales · Maestría en Inteligencia Artificial · UNIR México  
 **Actividad:** 2 (individual)  
-**Autor:** Adonai Hernández  
+**Autor:** Adonai Samael Hernández Mata  
 **Fecha:** septiembre de 2026
 
 ---
@@ -63,8 +63,8 @@ md("""
 0. Entorno de ejecución
 1. Carga del dataset
 2. Análisis exploratorio de datos
-3. Clasificación con DistilRoBERTa
-4. Explicación de errores con Falcon-7b-instruct
+3. Clasificación con DistilRoBERTa (3.6 causas con base en el EDA · 3.8 mejoras técnicas propuestas)
+4. Explicación de errores con Falcon-7b-instruct (4.4 calibración de decodificación · 4.5 calibración de la estructura del prompt)
 5. Conclusiones generales
 6. Referencias
 7. Anexo: exportación de resultados
@@ -86,10 +86,21 @@ El notebook detecta el acelerador disponible y se adapta:
 
 Para Colab basta con descomentar la celda de instalación. Se fija la semilla `42` en todas las
 librerías para que los resultados sean reproducibles.
+
+**Requisitos de hardware del enunciado y cómo se atienden:**
+
+- *Colab (GPU T4, ≥ 15 GB libres para Falcon-7b)*: la VRAM se verifica con `!nvidia-smi`; además, la
+  celda 4.1 imprime la memoria que ocupa Falcon tras cargarlo, en cualquier acelerador. Con la
+  cuantización a 4 bits NF4 (Dettmers et al., 2023) Falcon ocupa bastante menos que en `float16`.
+- *Esta ejecución (Apple Silicon, memoria unificada)*: Falcon-7b se carga en `float16`; la celda 4.1
+  deja constancia de la memoria medida.
+- *Aviso de NumPy del enunciado* (`ValueError: Unable to avoid copy…` → reinstalar `NumPy<=1.24.3`):
+  **no se presentó** con las versiones de esta ejecución (las imprime la celda siguiente); si aparece en
+  Colab con versiones antiguas de `datasets`, la solución es la del enunciado.
 """)
 code("""
 # En Google Colab, descomentar para instalar las dependencias y verificar la GPU:
-# !pip install -q "transformers>=4.46" accelerate datasets scikit-learn nltk wordcloud seaborn bitsandbytes
+# !pip install -q "transformers>=4.56" accelerate datasets scikit-learn nltk wordcloud seaborn bitsandbytes
 # !nvidia-smi          # comprobar GPU T4 y ≥ 15 GB de VRAM libres antes de cargar Falcon-7b
 # Solo si aparece "ValueError: Unable to avoid copy while creating an array":
 # !pip install -q "numpy<=1.24.3"
@@ -107,11 +118,18 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
 import transformers
+import datasets
 from IPython.display import display, Markdown
 
-# Salida limpia: sin avisos de versiones, columnas de texto anchas y figuras sin bordes superiores
+# Salida limpia: sin avisos ni barras de progreso de Hugging Face (ensucian el PDF), tablas completas
 warnings.filterwarnings("ignore")
+os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+transformers.logging.set_verbosity_error()
+transformers.utils.logging.disable_progress_bar()
+datasets.disable_progress_bars()
 pd.set_option("display.max_colwidth", 120)
+pd.set_option("display.max_rows", 120)
 plt.rcParams.update({"figure.dpi": 110, "axes.spines.top": False, "axes.spines.right": False})
 
 # ── Reproducibilidad ────────────────────────────────────────────────────────
@@ -136,7 +154,7 @@ for p in (DATA, ART, MODELO):
 
 # Dejar constancia del entorno en el que se ejecutó
 print(f"Dispositivo: {DEVICE}")
-print(f"torch {torch.__version__} · transformers {transformers.__version__} · numpy {np.__version__}")
+print(f"torch {torch.__version__} · transformers {transformers.__version__} · datasets {datasets.__version__} · numpy {np.__version__}")
 if DEVICE == "cuda":
     print(torch.cuda.get_device_name(0))
 """)
@@ -232,6 +250,7 @@ display(largo_clase.head(5).round(1).to_frame())
 print("Clases con consultas más largas:")
 display(largo_clase.tail(5).round(1).to_frame())
 """)
+interpretacion("fig_longitud")
 md("### 2.2 Limpieza básica del texto")
 md("""
 Se aplica: (1) conversión a minúsculas, (2) eliminación de caracteres especiales (todo lo que
@@ -240,11 +259,13 @@ no sea letra, dígito o espacio) y (3) eliminación de *stopwords* del inglés (
 > **Importante:** esta limpieza se usa **solo para el análisis exploratorio** (frecuencias,
 > n-gramas y nube de palabras). El Transformer recibe el **texto original**, porque su
 > tokenizador y su preentrenamiento aprovechan la puntuación y, sobre todo, palabras que NLTK
-> considera *stopwords* pero que cambian la intención — por ejemplo *not*, *why*, *my*,
-> *can't*: "*my card is **not** working*" frente a "*my card is working*".
+> considera *stopwords* pero que cambian la intención — por ejemplo *not*, *no*, *why*, *how* o
+> *up*: «*My card is **not** working*» queda como «card working», y «*How do I top **up** my
+> card?*» como «top card». (*can't* también desaparece, pero no por ser stopword: la regla de
+> caracteres especiales lo parte en «can» y «t», y esas dos sí lo son.)
 """)
 code("""
-# Lista de stopwords del inglés de NLTK (198 palabras); si no hay red, la equivalente de scikit-learn
+# Lista de stopwords del inglés de NLTK; si no hay red, la equivalente de scikit-learn
 import nltk
 from nltk.corpus import stopwords
 try:
@@ -269,6 +290,10 @@ for df in (train_df, test_df):
 # Corpus completo (train + test) para las frecuencias del análisis exploratorio
 todas = pd.concat([train_df, test_df], ignore_index=True)
 print(f"Stopwords usadas: {len(STOPWORDS)}")
+# Palabras con intención que la lista trata como stopwords (y por eso el Transformer recibe el texto original)
+print("Palabras con intención incluidas en la lista:", [w for w in ["not", "no", "why", "how", "up", "don't", "didn't"] if w in STOPWORDS])
+for ejemplo in ["My card is not working", "How do I top up my card?", "I can't transfer money"]:
+    print(f"   {ejemplo!r:32} → {limpiar(ejemplo)!r}")
 display(todas[["text", "texto_limpio"]].sample(6, random_state=1))
 """)
 md("### 2.3 Palabras, bigramas y trigramas más frecuentes")
@@ -284,9 +309,9 @@ def top_ngramas(textos, n, k):
     orden = frec.argsort()[::-1][:k]
     return pd.DataFrame({"ngrama": vec.get_feature_names_out()[orden], "frecuencia": frec[orden]})
 
-# Frecuencias sobre el texto limpio: 100 palabras (15 para la tabla, 100 para la nube), 10 bigramas y 10 trigramas
+# Frecuencias sobre el texto limpio: 150 palabras (15 para la tabla, 150 para la nube), 10 bigramas y 10 trigramas
 corpus_limpio = todas["texto_limpio"]
-top_palabras = top_ngramas(corpus_limpio, 1, 100)   # 100 para la nube; se muestran 15
+top_palabras = top_ngramas(corpus_limpio, 1, 150)   # la nube de 2.4 usa exactamente estas frecuencias
 top_bigramas = top_ngramas(corpus_limpio, 2, 10)
 top_trigramas = top_ngramas(corpus_limpio, 3, 10)
 
@@ -305,18 +330,20 @@ display(pd.concat([top_palabras.head(15).reset_index(drop=True),
                    top_bigramas, top_trigramas], axis=1,
                   keys=["Palabras", "Bigramas", "Trigramas"]).fillna(""))
 """)
+interpretacion("fig_ngramas")
 md("### 2.4 Nube de palabras")
 code("""
 # Nube de palabras: el tamaño de cada palabra es proporcional a su frecuencia en el texto limpio
 from wordcloud import WordCloud
 
-# 150 palabras como máximo; semilla fija para que la disposición sea reproducible
-nube = WordCloud(width=1400, height=600, background_color="white", colormap="viridis",
-                 max_words=150, random_state=SEED).generate(" ".join(corpus_limpio))
+# Mismas frecuencias que la tabla de 2.3 (150 palabras), sin fusionar bigramas; semilla fija para la disposición
+nube = WordCloud(width=1400, height=600, background_color="white", colormap="viridis", max_words=150,
+                 random_state=SEED).generate_from_frequencies(dict(zip(top_palabras.ngrama, top_palabras.frecuencia)))
 # Dibujar la nube sin ejes
 plt.figure(figsize=(14, 6)); plt.imshow(nube, interpolation="bilinear"); plt.axis("off")
 plt.title("Nube de palabras (train + test, texto limpio)"); plt.show()
 """)
+interpretacion("fig_nube")
 md("### 2.5 ¿Está balanceado el conjunto de datos?")
 code("""
 # Número de consultas por clase en cada partición, en el orden oficial de las etiquetas
@@ -349,6 +376,7 @@ eje.set_xticks(range(N_CLASES)); eje.set_xticklabels(orden.index, rotation=90, f
 eje.set_title("Consultas por clase en train (ordenadas)"); eje.legend()
 plt.tight_layout(); plt.show()
 """)
+interpretacion("fig_balance")
 md("### 2.6 Conclusiones del análisis exploratorio")
 interpretacion("eda")
 
@@ -358,11 +386,17 @@ interpretacion("eda")
 md("""
 ## 3. Clasificación con DistilRoBERTa
 
-**DistilRoBERTa** (`distilroberta-base`) es una versión destilada de RoBERTa: 6 capas de
-Transformer en lugar de 12, 82 M de parámetros, y aproximadamente el doble de rápida que
-RoBERTa-base conservando la mayor parte de su desempeño. Se usa *transfer learning*: se parte
-de los pesos preentrenados en inglés y se añade una cabeza de clasificación de 77 salidas sobre
-el token `<s>`; después se afina **todo** el modelo con las consultas etiquetadas.
+Un Transformer procesa la frase completa con **autoatención**: cada token se representa en función de
+todos los demás (Vaswani et al., 2017). Los codificadores preentrenados como BERT (Devlin et al., 2019) y
+RoBERTa (Liu et al., 2019) aprenden esas representaciones sobre grandes corpus sin etiquetar y luego se
+**afinan** para una tarea concreta.
+
+**DistilRoBERTa** (`distilroberta-base`) es la versión **destilada** de RoBERTa, con la técnica de
+DistilBERT (Sanh et al., 2019): 6 capas de Transformer en lugar de 12 y 82 M de parámetros frente a
+125 M; según la ficha oficial del modelo en Hugging Face es, en promedio, el doble de rápida que
+RoBERTa-base. Se usa *transfer learning*: se parte de los pesos preentrenados en inglés y se añade una
+cabeza de clasificación de 77 salidas sobre el token `<s>`; después se afina **todo** el modelo con las
+consultas etiquetadas, con la librería `transformers` (Wolf et al., 2020).
 
 ### 3.1 Tokenización
 """)
@@ -449,7 +483,7 @@ def metricas(pred):
 PASOS_WARMUP = int(0.10 * 8 * np.ceil(len(ds_tr) / 32))
 # Hiperparámetros del fine-tuning (ver la tabla anterior); se guarda y restaura la mejor época por F1 macro
 args = TrainingArguments(
-    output_dir=str(RAIZ / "salidas_entrenamiento"),
+    output_dir=str(RAIZ / "salidas_entrenamiento"), disable_tqdm=True,
     num_train_epochs=8, learning_rate=5e-5, warmup_steps=PASOS_WARMUP, weight_decay=0.01,
     per_device_train_batch_size=32, per_device_eval_batch_size=64,
     eval_strategy="epoch", save_strategy="epoch", logging_strategy="epoch",
@@ -485,8 +519,9 @@ ejes[1].plot(curva.epoch, curva.eval_accuracy, "o-", label="accuracy"); ejes[1].
 ejes[1].set_title("Validación"); ejes[1].set_xlabel("época"); ejes[1].legend()
 plt.tight_layout(); plt.show()
 # La época que se conserva (y que se evalúa en prueba) es la de mayor F1 macro en validación
-print(f"Mejor checkpoint: {trainer.state.best_model_checkpoint} (F1 macro val = {trainer.state.best_metric:.4f})")
+print(f"Mejor checkpoint: {Path(trainer.state.best_model_checkpoint).name} (F1 macro val = {trainer.state.best_metric:.4f})")
 """)
+interpretacion("fig_curvas")
 md("### 3.4 Evaluación en el conjunto de prueba")
 code("""
 # Evaluación final sobre las consultas de prueba, que el modelo no vio en el entrenamiento
@@ -506,10 +541,18 @@ F1_MACRO = f1_score(y_true, y_pred, average="macro")
 print(f"Accuracy (test): {ACCURACY:.4f}   ·   F1 macro (test): {F1_MACRO:.4f}")
 print(f"Errores: {(y_true != y_pred).sum()} de {len(y_true)}")
 
-# Reporte por clase: precision, recall, F1 y soporte de las 77 intenciones
+# ¿La confianza del modelo distingue aciertos de errores?
+acierto = y_true == y_pred
+print(f"Confianza media: aciertos {confianza[acierto].mean():.3f} · errores {confianza[~acierto].mean():.3f}")
+print(f"Errores cometidos con confianza > 0.90: {(confianza[~acierto] > 0.90).mean():.1%} "
+      f"({(confianza[~acierto] > 0.90).sum()} de {(~acierto).sum()})")
+
+# Reporte por clase COMPLETO: precision, recall, F1 y soporte de las 77 intenciones
+print()
+print(classification_report(y_true, y_pred, target_names=ETIQUETAS, digits=3, zero_division=0))
+# La misma información como tabla, para usarla en las secciones siguientes
 reporte = pd.DataFrame(classification_report(y_true, y_pred, target_names=ETIQUETAS,
                                              output_dict=True, zero_division=0)).T
-display(reporte.round(3))
 """)
 code("""
 # Matriz de confusión 77 × 77 (filas: clase real; columnas: clase predicha)
@@ -532,10 +575,12 @@ plt.tight_layout(); plt.show()
 # Pares de clases más confundidos (real → predicha)
 pares = (pd.DataFrame([(ETIQUETAS[i], ETIQUETAS[j], fuera[i, j]) for i in range(N_CLASES)
                        for j in range(N_CLASES) if fuera[i, j] > 0], columns=["real", "predicha", "errores"])
-         .sort_values("errores", ascending=False).reset_index(drop=True))
-print("15 pares más confundidos:")
+         .sort_values(["errores", "real", "predicha"], ascending=[False, True, True], kind="stable")
+         .reset_index(drop=True))
+print(f"15 pares más confundidos (de {len(pares)} pares con al menos un error; empates en orden alfabético):")
 display(pares.head(15))
 """)
+interpretacion("fig_confusion")
 md("### 3.5 Las siete clases mejor clasificadas y las siete con más errores")
 code("""
 # Tabla por clase con el número de errores (consultas de la clase que no se predijeron bien)
@@ -559,16 +604,22 @@ eje.bar(range(N_CLASES), orden.values, color=colores)
 eje.set_xticks(range(N_CLASES)); eje.set_xticklabels(orden.index, rotation=90, fontsize=7)
 eje.set_ylim(orden.min() - .05, 1.01); eje.set_title("F1 por clase (rojo: 7 con más errores · verde: 7 mejores)")
 plt.tight_layout(); plt.show()
+
+# Empates que el orden resuelve (para declararlos en el texto)
+print(f"Clases con F1 = 1.000: {int((por_clase['f1-score'] >= 0.9999).sum())} (se muestran las 7 primeras en el orden oficial)")
+corte = int(peores["errores"].min())
+print(f"Clases con {corte} errores (el corte de las 7 peores): {sorted(por_clase.index[por_clase['errores'] == corte])}")
 """)
+interpretacion("fig_f1")
 md("""
 ### 3.6 Análisis de causas en las clases problemáticas
 
-Para no quedarnos en la intuición se miden tres cosas en cada clase problemática:
-(1) **a qué clases se va** cuando falla, (2) **ejemplos reales** de sus errores y (3) la
-**similitud léxica** entre la clase real y la predicha, calculada como el coseno entre los
-vectores TF-IDF de todas las consultas de entrenamiento de cada clase. Si los errores se
-concentran en pares con vocabulario muy parecido, la causa es de solapamiento semántico y no un
-defecto del entrenamiento.
+Para no quedarse en la intuición se miden cuatro cosas: (1) **a qué clases se va** cada clase
+problemática cuando falla, (2) **ejemplos reales** de sus errores, (3) la **similitud léxica** entre la
+clase real y la predicha —el coseno entre los vectores TF-IDF de todas las consultas de entrenamiento
+de cada clase— y (4) qué parte de los errores ocurre **dentro de la misma familia** de intenciones. Si
+los errores se concentran en pares con vocabulario muy parecido, la causa es de solapamiento léxico y no
+un defecto del entrenamiento. Después, la celda siguiente contrasta las dos hipótesis que dejó el EDA.
 """)
 code("""
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -605,6 +656,19 @@ conf_sim = fuera + fuera.T
 rho, pval = spearmanr(sim_pares, conf_sim[triu])
 print(f"Spearman(similitud léxica, errores entre el par) = {rho:.3f} (p = {pval:.1e}) sobre {len(sim_pares)} pares")
 
+# Familias de intenciones: regla por palabra clave del nombre de la clase (la primera que coincide gana)
+REGLAS_FAMILIA = [("identidad", ("identity", "verify")), ("recargas", ("top_up", "topping_up")),
+                  ("transferencias", ("transfer", "beneficiary")), ("divisas", ("exchange", "currenc", "fiat")),
+                  ("efectivo y cajero", ("cash", "atm")),
+                  ("tarjetas", ("card", "pin", "passcode", "contactless", "apple_pay", "visa")),
+                  ("cargos y pagos", ("payment", "debit", "charge", "fee", "refund", "statement", "transaction"))]
+def familia(clase):
+    return next((f for f, claves in REGLAS_FAMILIA if any(k in clase for k in claves)), "cuenta y otros")
+FAMILIA = {c: familia(c) for c in ETIQUETAS}
+misma = errores_df["category"].map(FAMILIA) == errores_df["predicha"].map(FAMILIA)
+print(f"Errores dentro de la misma familia: {misma.mean():.1%} ({misma.sum()} de {len(errores_df)})")
+display(pd.Series(FAMILIA).value_counts().rename("clases por familia").to_frame().T)
+
 # Tres errores reales por clase problemática, de mayor a menor confianza
 print("\\nEjemplos de errores en las clases problemáticas:")
 display(errores_df[errores_df["category"].isin(peores.index)]
@@ -613,58 +677,42 @@ display(errores_df[errores_df["category"].isin(peores.index)]
 """)
 code(r'''
 # ── ¿Explica el EDA los errores? Dos hipótesis que salen del análisis exploratorio ──────────
-# Celda autocontenida: lee los artefactos que guardó esta misma corrida (artefactos/), así se puede
-# volver a ejecutar sin reentrenar. H1: el desbalance de clases (razón máx/mín 5.3×) causa errores.
-# H2: las clases que comparten n-gramas (bigramas del EDA) se confunden entre sí.
-import json
-from pathlib import Path
-import numpy as np
-import pandas as pd
-from scipy.stats import spearmanr
-from sklearn.feature_extraction.text import CountVectorizer
-from IPython.display import display
-
-ART = (Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()) / "artefactos"
-clases = pd.DataFrame(json.load(open(ART / "clases.json"))).set_index("id")
-metr = pd.DataFrame(json.load(open(ART / "metricas_clase.json"))).set_index("clase_id")
-tabla = clases.join(metr)
+# H1: el desbalance de clases que midió el EDA (sección 2.5) causa los errores.
+# H2: las clases que comparten n-gramas frecuentes (sección 2.3) se confunden entre sí.
+# Usa los objetos de esta misma ejecución: conteo (2.5), por_clase y peores (3.5), fuera (3.4) y train_df.
+tabla = por_clase.assign(n_train=conteo["train"])
 
 # H1 · Tamaño de la clase en train frente a su F1 en prueba
-rho1, p1 = spearmanr(tabla["n_train"], tabla["f1"])
-peores_t = tabla[tabla["categoria"] == "peor"]
-pequenas = tabla.nsmallest(7, "n_train")
+rho1, p1 = spearmanr(tabla["n_train"], tabla["f1-score"])
 print(f"H1 · Spearman(ejemplos de entrenamiento, F1) = {rho1:.3f} (p = {p1:.2f}) sobre {len(tabla)} clases")
-print(f"     Las 7 clases con más errores tienen {peores_t['n_train'].mean():.0f} ejemplos de media; "
+print(f"     Las 7 clases con más errores tienen {tabla.loc[peores.index, 'n_train'].mean():.0f} ejemplos de media; "
       f"el promedio general es {tabla['n_train'].mean():.0f}")
 print("     Las 7 clases más pequeñas y su F1:")
-display(pequenas[["nombre", "n_train", "f1", "errores"]].round(3).reset_index(drop=True))
+display(tabla.nsmallest(7, "n_train")[["n_train", "f1-score", "errores"]].round(3))
 
-# H2 · Bigramas frecuentes compartidos entre cada par de clases (los 15 más frecuentes de cada clase)
-consultas = pd.read_csv(ART / "consultas.csv")
-train_q = consultas[consultas["particion"] == "train"]
-docs = train_q.groupby("label")["texto_limpio"].apply(lambda s: "\n".join(s.fillna(""))).reindex(range(len(tabla)))
-vec = CountVectorizer(ngram_range=(2, 2), token_pattern=r"(?u)\b\w+\b")
-X = vec.fit_transform(docs.fillna(""))
-vocab = np.array(vec.get_feature_names_out())
-top_bi = {i: set(vocab[np.asarray(X[i].todense()).ravel().argsort()[::-1][:15]]) for i in range(len(tabla))}
+# H2 · Los 15 bigramas más frecuentes de cada clase (texto limpio de train) y cuántos comparte cada par
+docs_bi = train_df.groupby("label")["texto_limpio"].apply(lambda t: "\n".join(t)).reindex(range(N_CLASES)).fillna("")
+vec_bi = CountVectorizer(ngram_range=(2, 2), token_pattern=r"(?u)\b\w+\b")
+X_bi = vec_bi.fit_transform(docs_bi)
+vocab_bi = np.array(vec_bi.get_feature_names_out())
+top_bi = {i: set(vocab_bi[np.asarray(X_bi[i].todense()).ravel().argsort()[::-1][:15]]) for i in range(N_CLASES)}
 
-conf = np.zeros((len(tabla), len(tabla)), int)
-for i, j, c in json.load(open(ART / "confusion.json")):
-    conf[i, j] = c
-np.fill_diagonal(conf, 0)
-errores_par = conf + conf.T
-pares = [(i, j) for i in range(len(tabla)) for j in range(i + 1, len(tabla))]
-jaccard = np.array([len(top_bi[i] & top_bi[j]) / len(top_bi[i] | top_bi[j]) for i, j in pares])
-err = np.array([errores_par[i, j] for i, j in pares])
-rho2, p2 = spearmanr(jaccard, err)
-print(f"\nH2 · Bigramas compartidos (Jaccard): pares que se confunden {jaccard[err > 0].mean():.3f} · "
-      f"pares que nunca se confunden {jaccard[err == 0].mean():.3f} "
-      f"({jaccard[err > 0].mean() / jaccard[err == 0].mean():.0f}× más)")
+# Jaccard de bigramas frecuentes frente a errores entre cada par (en ambos sentidos)
+errores_par = fuera + fuera.T
+pares_idx = list(zip(*triu))
+jaccard = np.array([len(top_bi[i] & top_bi[j]) / len(top_bi[i] | top_bi[j]) for i, j in pares_idx])
+err_par = errores_par[triu]
+rho2, p2 = spearmanr(jaccard, err_par)
+print(f"\nH2 · Bigramas compartidos (Jaccard): pares que se confunden {jaccard[err_par > 0].mean():.3f} · "
+      f"pares que nunca se confunden {jaccard[err_par == 0].mean():.3f} "
+      f"({jaccard[err_par > 0].mean() / jaccard[err_par == 0].mean():.0f}× más)")
 print(f"     Spearman(bigramas compartidos, errores entre el par) = {rho2:.3f} (p = {p2:.1e})")
-filas = [{"par": f"{clases.nombre[i]} ↔ {clases.nombre[j]}", "errores": int(errores_par[i, j]),
-          "bigramas compartidos": ", ".join(sorted(top_bi[i] & top_bi[j])) or "—"}
-         for i, j in sorted(pares, key=lambda x: -errores_par[x])[:8]]
-display(pd.DataFrame(filas))
+# Los pares con más errores y los bigramas frecuentes que comparten (orden estable por nombre en empates)
+mas_errores = sorted(pares_idx, key=lambda x: (-errores_par[x], ETIQUETAS[x[0]], ETIQUETAS[x[1]]))[:8]
+display(pd.DataFrame([{"par": f"{ETIQUETAS[i]} ↔ {ETIQUETAS[j]}", "errores": int(errores_par[i, j]),
+                       "similitud TF-IDF (percentil)": f"{sim[i, j]:.3f} ({(sim_pares < sim[i, j]).mean() * 100:.1f})",
+                       "bigramas compartidos": ", ".join(sorted(top_bi[i] & top_bi[j])) or "—"}
+                      for i, j in mas_errores]))
 ''')
 interpretacion("causas")
 md("### 3.7 Conclusiones del uso del Transformer")
@@ -672,8 +720,10 @@ interpretacion("transformer")
 code("""
 # Guardar el modelo afinado (lo usa la aplicación web para clasificar en vivo)
 trainer.save_model(str(MODELO)); tokenizer.save_pretrained(str(MODELO))
-print("Modelo guardado en", MODELO, "·", sorted(p.name for p in MODELO.iterdir()))
+print("Modelo guardado en", MODELO.relative_to(RAIZ), "·", sorted(p.name for p in MODELO.iterdir()))
 """)
+md("### 3.8 Mejoras técnicas propuestas: del diagnóstico al ajuste")
+interpretacion("mejoras")
 
 # ════════════════════════════════════════════════════════════════════════════
 # 4. Falcon
@@ -683,9 +733,10 @@ md("""
 
 ### 4.1 Carga del modelo
 
-`tiiuae/falcon-7b-instruct` tiene 7 mil millones de parámetros: ≈ 14 GB en `float16`. Antes de
-cargarlo se libera el clasificador. En Colab se cuantiza a 4 bits (NF4) para que entre en la
-T4; en Apple Silicon cabe en `float16` en la memoria unificada.
+`tiiuae/falcon-7b-instruct` es la versión ajustada con instrucciones de Falcon-7B (Almazrouei et al.,
+2023): 7 mil millones de parámetros, ≈ 14 GB en `float16`. Antes de cargarlo se libera el clasificador.
+En Colab se cuantiza a 4 bits NF4 (Dettmers et al., 2023) para que entre en la T4; en Apple Silicon cabe
+en `float16` en la memoria unificada. La celda imprime la memoria que ocupa realmente.
 """)
 code("""
 from transformers import AutoModelForCausalLM
@@ -700,7 +751,7 @@ if DEVICE == "mps": torch.mps.empty_cache()
 LLM_ID = "tiiuae/falcon-7b-instruct"
 t0 = time.time()
 tok_llm = AutoTokenizer.from_pretrained(LLM_ID)
-# Colab (GPU T4): cuantización NF4 de 4 bits con bitsandbytes (≈ 4 GB de VRAM)
+# Colab (GPU T4): cuantización NF4 de 4 bits con bitsandbytes
 if DEVICE == "cuda":
     from transformers import BitsAndBytesConfig
     llm = AutoModelForCausalLM.from_pretrained(LLM_ID, device_map="auto", quantization_config=BitsAndBytesConfig(
@@ -713,65 +764,106 @@ else:
 # Modo inferencia: sin dropout
 llm.eval()
 print(f"{LLM_ID} cargado en {time.time()-t0:.0f} s · {llm.num_parameters()/1e9:.2f} B parámetros · {llm.dtype}")
+
+# Memoria ocupada por el modelo (verificación que pide el enunciado, en cualquier acelerador)
+if DEVICE == "cuda":
+    print(f"VRAM ocupada: {torch.cuda.memory_allocated() / 1e9:.2f} GB de {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB")
+    import subprocess; print(subprocess.run(["nvidia-smi"], capture_output=True, text=True).stdout)
+elif DEVICE == "mps":
+    print(f"Memoria MPS ocupada: {torch.mps.current_allocated_memory() / 1e9:.2f} GB")
 """)
 md("""
-### 4.2 Diseño del prompt
+### 4.2 Diseño del prompt y sus tres variantes de estructura
 
-El prompt se construye con cinco piezas, cada una pensada contra un tipo de alucinación:
+La base del diseño son cinco piezas, cada una pensada contra un tipo de alucinación:
 
 | Pieza | Para qué |
 |---|---|
 | **Rol** («analista de soporte bancario que audita un clasificador») | fija el dominio y el tono |
-| **Tarea explícita**: explicar por qué el clasificador eligió la intención *predicha* | evita que el modelo «corrija» o responda al cliente |
-| **Restricciones**: máximo dos oraciones, citar palabras de la consulta, no inventar | ataca directamente la alucinación y la longitud |
-| **Datos**: consulta, intención predicha e intención correcta, con nombres legibles | da al modelo todo lo que necesita y nada más |
+| **Tarea explícita**: explicar por qué el clasificador eligió la intención *predicha* | evita que el modelo responda al cliente |
+| **Restricciones**: máximo dos oraciones, referirse solo a palabras de la consulta, no inventar | ataca la alucinación y la longitud |
+| **Datos**: consulta, intención predicha y etiqueta del dataset, con nombres legibles | da al modelo todo lo que necesita y nada más |
 | **Ancla de salida** `Explanation:` | el modelo empieza a escribir la explicación directamente |
 
-Se pasan las dos intenciones porque se explican **errores**: la explicación útil es la que dice
-qué palabras de la consulta empujaron hacia la clase equivocada en lugar de la correcta.
+Para **calibrar la claridad y la estructura** (el tercer eje que pide el enunciado) se comparan tres variantes
+que solo difieren en la estructura; todas se envían en inglés, el idioma de las consultas y de las
+instrucciones con que se ajustó Falcon (en español se incluye la traducción):
+
+| Variante | Qué cambia | Hipótesis |
+|---|---|---|
+| **P1 · premisa de error** | afirma que la predicción es INCORRECTA y pide explicar por qué se eligió | el encuadre puede empujar al modelo a racionalizar |
+| **P2 · neutral con citas** | no afirma quién tiene razón y obliga a citar entre comillas simples las palabras de la consulta | citas exactas → explicaciones verificables |
+| **P3 · P2 + dos ejemplos** (*few-shot*, Brown et al., 2020) | añade dos ejemplos resueltos con consultas del conjunto de **entrenamiento** | los ejemplos fijan el formato y el tipo de razonamiento |
+
+**P1 en inglés (tal como se envía) y en español:**
+
+| Inglés | Español |
+|---|---|
+| You are a banking customer-support analyst who audits an automatic intent classifier. | Eres un analista de atención a clientes bancarios que audita un clasificador automático de intenciones. |
+| The classifier read the customer query below and predicted an intent that is WRONG. | El clasificador leyó la consulta del cliente de abajo y predijo una intención que es INCORRECTA. |
+| In at most two short sentences, explain why the classifier probably chose the predicted intent instead of the correct one. | En máximo dos oraciones cortas, explica por qué el clasificador probablemente eligió la intención predicha en lugar de la correcta. |
+| Refer only to words that appear in the query. Do not invent facts, do not give advice to the customer. | Refiérete solo a palabras que aparecen en la consulta. No inventes hechos y no des consejos al cliente. |
+| Customer query: "{texto}" · Predicted intent: {pred} · Correct intent: {real} · Explanation: | Consulta del cliente: «{texto}» · Intención predicha: {pred} · Intención correcta: {real} · Explicación: |
+
+**P2 en inglés y en español** (lo que cambia respecto de P1):
+
+| Inglés | Español |
+|---|---|
+| The classifier read the customer query below and predicted an intent that differs from the label in the dataset. | El clasificador leyó la consulta del cliente de abajo y predijo una intención distinta de la etiqueta del dataset. |
+| In at most two short sentences, explain which words of the query led the classifier to the predicted intent, quoting those words between single quotes exactly as they appear in the query. | En máximo dos oraciones cortas, explica qué palabras de la consulta llevaron al clasificador a la intención predicha, citándolas entre comillas simples tal como aparecen en la consulta. |
+| Dataset label: {real} | Etiqueta del dataset: {real} |
+
+**P3** es P2 precedido de dos ejemplos resueltos (en la celda siguiente, con su traducción en los comentarios).
 """)
-code("""
+code('''
 # Nombre de intención legible para el LLM: card_arrival → «card arrival»
 def legible(etiqueta: str) -> str:
     return etiqueta.replace("_", " ").replace("?", "").lower()
 
-# Plantilla del prompt (en inglés, el idioma del dataset y del entrenamiento de Falcon). Traducción al español:
-# «Eres un analista de atención a clientes bancarios que audita un clasificador automático de intenciones.
-#  El clasificador leyó la consulta del cliente de abajo y predijo una intención que es INCORRECTA.
-#  En máximo dos oraciones cortas, explica por qué el clasificador probablemente eligió la intención
-#  predicha en lugar de la correcta. Refiérete solo a palabras que aparecen en la consulta.
-#  No inventes hechos y no des consejos al cliente.
-#  Consulta del cliente: «{texto}» · Intención predicha: {pred} · Intención correcta: {real}
-#  Explicación:»
-PLANTILLA = (
-    "You are a banking customer-support analyst who audits an automatic intent classifier.\\n"
-    "The classifier read the customer query below and predicted an intent that is WRONG.\\n"
-    "In at most two short sentences, explain why the classifier probably chose the predicted "
-    "intent instead of the correct one. Refer only to words that appear in the query. "
-    "Do not invent facts, do not give advice to the customer.\\n\\n"
-    'Customer query: "{texto}"\\n'
-    "Predicted intent: {pred}\\n"
-    "Correct intent: {real}\\n\\n"
-    "Explanation:"
-)
+CABECERA = "You are a banking customer-support analyst who audits an automatic intent classifier.\\n"
+# P1 · premisa de error. Español: «El clasificador leyó la consulta… y predijo una intención que es INCORRECTA.
+#   En máximo dos oraciones cortas, explica por qué… Refiérete solo a palabras de la consulta. No inventes hechos…»
+P1 = (CABECERA +
+      "The classifier read the customer query below and predicted an intent that is WRONG.\\n"
+      "In at most two short sentences, explain why the classifier probably chose the predicted "
+      "intent instead of the correct one. Refer only to words that appear in the query. "
+      "Do not invent facts, do not give advice to the customer.\\n\\n"
+      'Customer query: "{texto}"\\nPredicted intent: {pred}\\nCorrect intent: {real}\\n\\nExplanation:')
+# P2 · neutral con citas. Español: «…predijo una intención distinta de la etiqueta del dataset. En máximo dos
+#   oraciones cortas, explica qué palabras de la consulta llevaron a la intención predicha, citándolas entre
+#   comillas simples tal como aparecen. No inventes hechos…» · «Etiqueta del dataset: {real}»
+INSTRUCCION_P2 = (
+    "The classifier read the customer query below and predicted an intent that differs from the label in the dataset.\\n"
+    "In at most two short sentences, explain which words of the query led the classifier to the predicted intent, "
+    "quoting those words between single quotes exactly as they appear in the query. "
+    "Do not invent facts, do not give advice to the customer.\\n\\n")
+BLOQUE = 'Customer query: "{texto}"\\nPredicted intent: {pred}\\nDataset label: {real}\\n\\nExplanation:'
+P2 = CABECERA + INSTRUCCION_P2 + BLOQUE
+# P3 · P2 + dos ejemplos resueltos con consultas reales del conjunto de ENTRENAMIENTO (no de prueba).
+# Traducción de los ejemplos: 1) «Creo que mi recarga fue revertida» → la consulta dice 'top up' y 'reverted';
+#   una recarga revertida se parece a una fallida… 2) «¿Cuánto hay que esperar mi tarjeta?» → 'wait' y 'my card'
+#   aparecen en mensajes de tarjetas que no han llegado…
+EJEMPLOS = (
+    'Customer query: "I think my top up has been reverted"\\nPredicted intent: top up failed\\n'
+    "Dataset label: top up reverted\\n\\nExplanation: The query mentions 'top up' and a reverted top-up looks "
+    "like a failed one, which pushes toward top up failed. The word 'reverted' is what points to the label.\\n\\n"
+    'Customer query: "How long is the wait for my card?"\\nPredicted intent: card arrival\\n'
+    "Dataset label: card delivery estimate\\n\\nExplanation: The words 'wait' and 'my card' are typical of "
+    "messages about cards that have not arrived. 'How long' asks for a delivery time, which fits the label better.\\n\\n")
+P3 = CABECERA + INSTRUCCION_P2 + EJEMPLOS + BLOQUE
+PROMPTS = {"P1": P1, "P2": P2, "P3": P3}
 
-# Rellenar la plantilla con una consulta y sus dos intenciones
-def construir_prompt(texto, pred, real):
-    return PLANTILLA.format(texto=texto.strip(), pred=legible(pred), real=legible(real))
+# Rellenar una plantilla con una consulta y sus dos intenciones
+def construir_prompt(texto, pred, real, variante="P1"):
+    return PROMPTS[variante].format(texto=texto.strip(), pred=legible(pred), real=legible(real))
 
 # Contar oraciones: se corta después de «.», «!» o «?» seguidos de espacio
 def contar_oraciones(texto):
     return len([s for s in re.split(r"(?<=[.!?])\\s+", texto.strip()) if s])
 
-def recortar(texto, max_oraciones=2):
-    \"\"\"Postproceso: primera línea no vacía y como máximo dos oraciones.\"\"\"
-    texto = texto.strip().split("\\n\\n")[0].strip()
-    partes = [s for s in re.split(r"(?<=[.!?])\\s+", texto) if s]
-    return " ".join(partes[:max_oraciones])
-
 @torch.no_grad()
 def generar(prompt, max_new_tokens=60, temperature=None, top_p=None):
-    \"\"\"Genera con Falcon. temperature=None → decodificación codiciosa (determinista).\"\"\"
+    """Genera con Falcon. temperature=None → decodificación codiciosa (determinista)."""
     torch.manual_seed(SEED)
     entrada = tok_llm(prompt, return_tensors="pt").to(llm.device)
     muestreo = temperature is not None
@@ -784,141 +876,204 @@ def generar(prompt, max_new_tokens=60, temperature=None, top_p=None):
     nuevos = out[0, entrada["input_ids"].shape[1]:]
     return tok_llm.decode(nuevos, skip_special_tokens=True).strip(), len(nuevos), time.time() - t0
 
-print(construir_prompt("I still haven't received my new card", "card_delivery_estimate", "card_arrival"))
-""")
+# Métricas automáticas de cada respuesta (se definen ANTES de ver resultados)
+CITA = re.compile(r"(?:(?<=\\s)|^)['\\"‘“]([^'\\"‘’“”]{2,60}?)['\\"’”](?=[\\s.,;:!?)]|$)")
+def medir(salida, n_tok, max_new, texto, pred, real):
+    """formato_ok: 1-2 oraciones completas y sin tocar el tope · citas verificables/falsas frente a la consulta."""
+    completa = salida.rstrip().endswith((".", "!", "?")) and n_tok < max_new
+    citas = [c.strip().lower() for c in CITA.findall(salida)]
+    etiquetas = {legible(pred), legible(real)}
+    citas = [c for c in citas if c not in etiquetas]          # citar el nombre de la intención no es evidencia
+    falsas = [c for c in citas if c not in texto.lower()]
+    return {"n_oraciones": contar_oraciones(salida), "completa": completa,
+            "formato_ok": completa and 1 <= contar_oraciones(salida) <= 2,
+            "citas": len(citas), "cita_falsa": bool(falsas),
+            "cita_verificable": bool(citas) and not falsas, "citas_falsas": ", ".join(falsas)}
+
+print(construir_prompt("How do I top up my card?", "topping_up_by_card", "transfer_into_account", "P2"))
+''')
 md("""
 ### 4.3 Selección de las 20 consultas mal clasificadas
 
-Criterio reproducible: de todos los errores en prueba se toman los **20 con mayor confianza en
-la clase equivocada**, con un máximo de **2 por clase real** para que haya variedad. Son los
-errores más interesantes: el modelo se equivoca *con seguridad*.
+Criterio reproducible: de todos los errores en prueba se toman los **20 con mayor confianza en la clase
+equivocada**, con un máximo de **2 por clase real** para que haya variedad. No es una muestra aleatoria:
+son los errores que el modelo comete *con seguridad*, justo los que más conviene entender. Las primeras 8
+se usan para calibrar.
 """)
 code("""
 # Los 20 errores de mayor confianza, con máximo 2 por clase real para tener variedad
 seleccion = (errores_df.sort_values("confianza", ascending=False)
              .groupby("category").head(2).head(20).reset_index().rename(columns={"index": "idx_test"}))
-# Numeración 1…20 que se usa en el resto de la sección
+# Numeración 1…20 e identificador estable de la consulta (el mismo que usan la base de datos y la web)
 seleccion["orden"] = range(1, len(seleccion) + 1)
-display(seleccion[["orden", "text", "category", "predicha", "confianza"]].round(3))
+seleccion["consulta_id"] = 100000 + seleccion["idx_test"]
+# ¿Cuántas de las 20 pertenecen a las 7 clases con más errores?
+print(f"De las 20, {seleccion['category'].isin(peores.index).sum()} tienen su clase real entre las 7 con más errores")
+display(seleccion[["orden", "consulta_id", "text", "category", "predicha", "confianza"]].round(3))
 """)
 md("""
-### 4.4 Calibración: temperatura, longitud y estructura
+### 4.4 Calibración de la decodificación: temperatura y longitud
 
-Se comparan tres configuraciones sobre las mismas **5 consultas** (las 5 primeras de la
-selección):
+Se comparan cinco configuraciones con la estructura base (P1) sobre las mismas **8 consultas**. El diseño
+**separa los dos factores**: A, B y C cambian solo la temperatura con la misma longitud; B frente a E y C
+frente a D cambian solo la longitud con la misma temperatura.
 
-| Config. | Decodificación | `max_new_tokens` | Hipótesis |
-|---|---|---|---|
-| **A** | codiciosa (`do_sample=False`, equivale a temperatura → 0) | 60 | la más estable y fiel |
-| **B** | muestreo, `temperature=0.3`, `top_p=0.9` | 60 | algo de variedad sin perder foco |
-| **C** | muestreo, `temperature=1.0`, `top_p=0.95` | 150 | «creativa»: esperable que divague e invente |
+| Config. | Decodificación | `max_new_tokens` |
+|---|---|---|
+| **A** | codiciosa (`do_sample=False`, equivale a temperatura → 0) | 60 |
+| **B** | muestreo, `temperature=0.3`, `top_p=0.9` | 60 |
+| **C** | muestreo, `temperature=1.0`, `top_p=0.95` | 60 |
+| **D** | muestreo, `temperature=1.0`, `top_p=0.95` | 150 |
+| **E** | muestreo, `temperature=0.3`, `top_p=0.9` | 150 |
 
-En todas: `repetition_penalty=1.15` y parada en línea en blanco. Nota: el enunciado habla de
-`max_length`; en `transformers` ese parámetro cuenta también los tokens del prompt, así que el
-control correcto de la longitud de la **respuesta** es `max_new_tokens`.
+La temperatura reparte más o menos la probabilidad entre palabras poco probables y `top_p` corta la cola
+(muestreo *nucleus*, Holtzman et al., 2020). En todas: `repetition_penalty=1.15` y parada en línea en
+blanco. El enunciado habla de `max_length`; en `transformers` ese parámetro cuenta también los tokens del
+prompt, así que el control correcto de la longitud de la **respuesta** es `max_new_tokens`.
 
-**Regla de elección fijada de antemano**: gana la configuración con más respuestas de 1–2
-oraciones *sin* recorte; desempata la que menos palabras inventa (palabras de contenido de la
-respuesta que no están ni en la consulta ni en los nombres de las intenciones) y, si persiste el
-empate, la de menor temperatura.
+**Métricas** (definidas en 4.2 antes de ver resultados): *formato correcto* = 1–2 oraciones completas que no
+tocan el tope de tokens; *cita falsa* = la respuesta pone entre comillas palabras que no están en la
+consulta; *cita verificable* = cita al menos una palabra y todas existen en la consulta.
+
+**Regla de elección fijada de antemano:** gana la configuración con más respuestas en formato correcto;
+desempata la que tenga menos citas falsas; luego la menor temperatura; luego la menor longitud.
 """)
 code("""
-# Las tres configuraciones de generación que se comparan (A: codiciosa, B: T = 0.3, C: T = 1.0)
+# Las cinco configuraciones de generación (A-C: efecto de la temperatura; B-E y C-D: efecto de la longitud)
 CONFIGS = {
     "A": dict(max_new_tokens=60, temperature=None, top_p=None),
     "B": dict(max_new_tokens=60, temperature=0.3, top_p=0.9),
-    "C": dict(max_new_tokens=150, temperature=1.0, top_p=0.95),
+    "C": dict(max_new_tokens=60, temperature=1.0, top_p=0.95),
+    "D": dict(max_new_tokens=150, temperature=1.0, top_p=0.95),
+    "E": dict(max_new_tokens=150, temperature=0.3, top_p=0.9),
 }
+TEMP = {k: (v["temperature"] or 0.0) for k, v in CONFIGS.items()}
+calib = seleccion.head(8)
 
-def palabras_ajenas(salida, texto, pred, real):
-    \"\"\"Proporción de palabras de contenido de la salida que no aparecen en la consulta ni en las etiquetas.\"\"\"
-    base = set(limpiar(f"{texto} {legible(pred)} {legible(real)}").split())
-    vocab_tarea = {"query", "customer", "classifier", "intent", "predicted", "correct", "word", "words",
-                   "mention", "mentions", "mentioned", "chose", "choose", "likely", "probably", "because",
-                   "related", "refers", "instead", "classified", "suggests", "indicates"}
-    cont = [w for w in limpiar(salida).split() if w not in vocab_tarea]
-    return 0.0 if not cont else sum(w not in base for w in cont) / len(cont)
-
-# Generar con las tres configuraciones sobre las mismas 5 consultas y medir cada salida
-calibracion = []
-for _, fila in seleccion.head(5).iterrows():
-    prompt = construir_prompt(fila.text, fila.predicha, fila.category)
+# Generar con cada configuración sobre las mismas 8 consultas y medir cada salida
+filas_dec = []
+for _, f in calib.iterrows():
+    prompt = construir_prompt(f.text, f.predicha, f.category, "P1")
     for nombre, cfg in CONFIGS.items():
         salida_llm, n_tok, seg = generar(prompt, **cfg)
-        calibracion.append({"config": nombre, "orden": fila.orden, "idx_test": fila.idx_test,
-                            "salida": salida_llm, "n_oraciones": contar_oraciones(salida_llm),
-                            "n_tokens": n_tok, "segundos": round(seg, 1),
-                            "palabras_ajenas": round(palabras_ajenas(salida_llm, fila.text, fila.predicha, fila.category), 3)})
-# Tabla con todas las salidas de la calibración
-cal_df = pd.DataFrame(calibracion)
-display(cal_df[["config", "orden", "n_oraciones", "n_tokens", "segundos", "palabras_ajenas", "salida"]])
-""")
-code("""
-# Resumen por configuración: cuántas respuestas respetan 1–2 oraciones, longitud y palabras ajenas
-resumen_cal = cal_df.groupby("config").agg(
-    respuestas_1_2_oraciones=("n_oraciones", lambda s: int(s.between(1, 2).sum())),
-    oraciones_media=("n_oraciones", "mean"), tokens_media=("n_tokens", "mean"),
-    palabras_ajenas_media=("palabras_ajenas", "mean"), segundos_media=("segundos", "mean")).round(3)
-# Temperatura efectiva de cada configuración (la codiciosa equivale a T → 0)
-temp = {"A": 0.0, "B": 0.3, "C": 1.0}
-resumen_cal["temperatura"] = [temp[c] for c in resumen_cal.index]
-display(resumen_cal)
+        filas_dec.append({"config": nombre, "prompt": "P1", "orden": f.orden, "consulta_id": f.consulta_id,
+                          "salida": salida_llm, "n_tokens": n_tok, "segundos": round(seg, 1),
+                          **medir(salida_llm, n_tok, cfg["max_new_tokens"], f.text, f.predicha, f.category)})
+dec_df = pd.DataFrame(filas_dec)
 
-# Regla fijada antes de ver los resultados: más respuestas de 1–2 oraciones, luego menos palabras ajenas, luego menor temperatura
-CONFIG_ELEGIDA = (resumen_cal.sort_values(["respuestas_1_2_oraciones", "palabras_ajenas_media", "temperatura"],
-                                          ascending=[False, True, True]).index[0])
+# Resumen por configuración
+res_dec = dec_df.groupby("config").agg(
+    formato_ok=("formato_ok", "sum"), completas=("completa", "sum"), citas_falsas=("cita_falsa", "sum"),
+    citas_verificables=("cita_verificable", "sum"), oraciones_media=("n_oraciones", "mean"),
+    tokens_media=("n_tokens", "mean"), segundos_media=("segundos", "mean")).round(2)
+res_dec["temperatura"] = [TEMP[c] for c in res_dec.index]
+res_dec["max_new_tokens"] = [CONFIGS[c]["max_new_tokens"] for c in res_dec.index]
+display(res_dec)
+
+# Regla fijada antes de ver los resultados
+CONFIG_ELEGIDA = res_dec.sort_values(["formato_ok", "citas_falsas", "temperatura", "max_new_tokens"],
+                                     ascending=[False, True, True, True]).index[0]
 print(f"Configuración elegida por la regla: {CONFIG_ELEGIDA} → {CONFIGS[CONFIG_ELEGIDA]}")
-cal_df["elegida"] = cal_df["config"] == CONFIG_ELEGIDA
+
+# Todas las salidas completas, para poder leerlas
+with pd.option_context("display.max_colwidth", None):
+    display(dec_df[["config", "orden", "n_oraciones", "n_tokens", "formato_ok", "citas_falsas", "salida"]])
 """)
-interpretacion("calibracion")
-md("### 4.5 Explicación de las 20 clasificaciones incorrectas")
+interpretacion("calibracion_decodificacion")
+md("""
+### 4.5 Calibración de la claridad y la estructura del prompt
+
+Con la decodificación elegida fija, se comparan las tres estructuras de 4.2 (P1, P2 y P3) sobre las mismas 8
+consultas. **Regla fijada de antemano:** gana la variante con más respuestas de *cita verificable* menos
+respuestas con *cita falsa*; desempata la de más respuestas en formato correcto; luego el prompt más corto.
+""")
 code("""
-# Pedir a Falcon, con la configuración elegida, una explicación de cada uno de los 20 errores
+# Mismas 8 consultas, misma decodificación, tres estructuras de prompt
+cfg = CONFIGS[CONFIG_ELEGIDA]
+filas_est = [r for r in filas_dec if r["config"] == CONFIG_ELEGIDA]    # P1 ya se generó en 4.4
+for _, f in calib.iterrows():
+    for variante in ("P2", "P3"):
+        salida_llm, n_tok, seg = generar(construir_prompt(f.text, f.predicha, f.category, variante), **cfg)
+        filas_est.append({"config": CONFIG_ELEGIDA, "prompt": variante, "orden": f.orden, "consulta_id": f.consulta_id,
+                          "salida": salida_llm, "n_tokens": n_tok, "segundos": round(seg, 1),
+                          **medir(salida_llm, n_tok, cfg["max_new_tokens"], f.text, f.predicha, f.category)})
+est_df = pd.DataFrame(filas_est)
+
+# Resumen por variante de prompt
+res_est = est_df.groupby("prompt").agg(
+    citas_verificables=("cita_verificable", "sum"), citas_falsas=("cita_falsa", "sum"),
+    formato_ok=("formato_ok", "sum"), tokens_media=("n_tokens", "mean")).round(2)
+res_est["balance_citas"] = res_est["citas_verificables"] - res_est["citas_falsas"]
+res_est["longitud_prompt"] = [len(tok_llm(PROMPTS[p])["input_ids"]) for p in res_est.index]
+display(res_est)
+
+# Regla fijada antes de ver los resultados
+PROMPT_ELEGIDO = res_est.sort_values(["balance_citas", "formato_ok", "longitud_prompt"],
+                                     ascending=[False, False, True]).index[0]
+print(f"Estructura elegida por la regla: {PROMPT_ELEGIDO}")
+
+with pd.option_context("display.max_colwidth", None):
+    display(est_df[["prompt", "orden", "formato_ok", "cita_verificable", "citas_falsas", "salida"]])
+""")
+interpretacion("calibracion_estructura")
+md("### 4.6 Explicación de las 20 clasificaciones incorrectas")
+code("""
+# Pedir a Falcon, con la configuración y la estructura elegidas, una explicación de cada uno de los 20 errores
 explicaciones = []
-for _, fila in seleccion.iterrows():
-    prompt = construir_prompt(fila.text, fila.predicha, fila.category)
+for _, f in seleccion.iterrows():
+    prompt = construir_prompt(f.text, f.predicha, f.category, PROMPT_ELEGIDO)
     cruda, n_tok, seg = generar(prompt, **CONFIGS[CONFIG_ELEGIDA])
-    explicaciones.append({"orden": fila.orden, "idx_test": fila.idx_test, "texto": fila.text,
-                          "real": fila.category, "predicha": fila.predicha,
-                          "confianza": round(float(fila.confianza), 4), "prompt": prompt,
-                          "salida_cruda": cruda, "explicacion": recortar(cruda),
-                          "n_oraciones_crudas": contar_oraciones(cruda), "segundos": round(seg, 1)})
-# Cumplimiento del formato y tiempo medio por explicación
+    explicaciones.append({"orden": f.orden, "consulta_id": int(f.consulta_id), "idx_test": int(f.idx_test),
+                          "texto": f.text, "real": f.category, "predicha": f.predicha,
+                          "confianza": round(float(f.confianza), 4), "prompt": prompt, "salida_cruda": cruda,
+                          "explicacion": cruda, "n_tokens": n_tok, "segundos": round(seg, 1),
+                          **medir(cruda, n_tok, CONFIGS[CONFIG_ELEGIDA]["max_new_tokens"], f.text, f.predicha, f.category)})
 exp_df = pd.DataFrame(explicaciones)
-print(f"Respuestas crudas con 1–2 oraciones: {exp_df.n_oraciones_crudas.between(1, 2).sum()} de {len(exp_df)}")
+# Métricas automáticas sobre las 20 (la validación de fondo es la manual de 4.7)
+print(f"Formato correcto (1-2 oraciones completas): {exp_df.formato_ok.sum()} de {len(exp_df)}")
+print(f"Con cita verificable: {exp_df.cita_verificable.sum()} · con cita falsa: {exp_df.cita_falsa.sum()}")
 print(f"Tiempo medio por explicación: {exp_df.segundos.mean():.1f} s")
 # Mostrar cada explicación junto a su consulta y sus dos intenciones
 for _, e in exp_df.iterrows():
     display(Markdown(f"**{e.orden}.** *\\"{e.texto}\\"* — real: `{e.real}` · predicha: `{e.predicha}` "
                      f"({e.confianza:.2f})  \\n→ {e.explicacion}"))
-# Guardar las salidas crudas para la revisión manual
-json.dump(explicaciones, open(ART / "explicaciones_crudas.json", "w"), indent=1, ensure_ascii=False)
+# Guardar las salidas para la revisión manual
+json.dump(explicaciones, open(ART / "explicaciones_crudas.json", "w"), indent=1, ensure_ascii=False, default=float)
 """, tags=["generacion_llm"])
 md("""
-### 4.6 Validación manual y razones del LLM
+### 4.7 Validación manual de veracidad y pertinencia
 
-Cada explicación se leyó a mano contra la consulta y las dos intenciones, y se le asignó:
+Cada explicación se leyó a mano contra la consulta y las dos intenciones (la validación que pide el enunciado;
+las métricas automáticas de 4.4–4.5 solo detectan citas inexistentes). A cada una se le asignó:
 
 - **Veredicto**: `pertinente` (señala palabras reales de la consulta y la razón es plausible),
-  `parcial` (algo cierto pero vago, o repite las etiquetas sin explicar) o `alucinada` (afirma
-  algo que la consulta no dice, o se contradice).
-- **Razón que da el LLM**, en categorías: `solapamiento_lexico` (una palabra de la consulta
-  pertenece al vocabulario de la clase predicha), `ambiguedad_real` (la consulta encaja en las
-  dos intenciones), `etiqueta_dudosa` (la etiqueta del dataset es discutible), `generica`
-  (no da una razón concreta), `frecuencia_supuesta` (atribuye el error a que una clase es «más
-  común», dato que el LLM no tiene) y `otra`.
+  `parcial` (algo cierto pero vago o incompleto) o `alucinada` (afirma algo que la consulta no dice,
+  confunde las clases o se contradice). La alucinación se entiende como en Ji et al. (2023): contenido
+  no respaldado por la entrada.
+- **Razón que da el LLM**, en categorías: `solapamiento_lexico` (una palabra de la consulta pertenece al
+  vocabulario de la clase predicha), `ambiguedad_real` (la consulta encaja en las dos intenciones),
+  `etiqueta_dudosa` (la explicación sugiere que la etiqueta del dataset es discutible), `generica` (no da
+  una razón concreta), `frecuencia_supuesta` (atribuye el error a que una clase es «más común», dato que el
+  LLM no tiene) y `otra`.
 
-La revisión se guarda en `artefactos/revision_manual.json` para que sea auditable.
+La revisión es una **entrada manual**: se escribió leyendo las salidas de 4.6 y está en
+`artefactos/revision_manual.json` (en la entrega, `04-resultados/`). Cada veredicto va atado al
+`consulta_id` y al texto exacto de la explicación revisada, y la celda comprueba que coincidan: si las
+explicaciones cambiaran (otra GPU, otra versión), la celda falla en vez de asignar veredictos a salidas
+que no se revisaron.
 """)
 code("""
-# Revisión manual: veredicto y razón de cada explicación, guardados en un archivo auditable
+# Revisión manual (entrada escrita a mano tras leer 4.6), atada a consulta_id y al texto revisado
 revision = json.load(open(ART / "revision_manual.json"))
 rev_df = pd.DataFrame(revision)
-exp_df = exp_df.merge(rev_df[["orden", "veredicto", "razon_categoria", "nota_revision"]], on="orden", how="left")
+exp_df = exp_df.merge(rev_df[["consulta_id", "explicacion_revisada", "veredicto", "razon_categoria", "nota_revision"]],
+                      on="consulta_id", how="left")
 assert exp_df["veredicto"].notna().all(), "Falta el veredicto de alguna explicación"
+assert (exp_df["explicacion_revisada"] == exp_df["explicacion"]).all(), "La revisión no corresponde a estas salidas"
 
 # Tabla con cada explicación y su veredicto
-display(exp_df[["orden", "texto", "real", "predicha", "explicacion", "veredicto", "razon_categoria", "nota_revision"]])
+with pd.option_context("display.max_colwidth", None):
+    display(exp_df[["orden", "texto", "real", "predicha", "explicacion", "veredicto", "razon_categoria", "nota_revision"]])
 
 # Conteo de veredictos y de categorías de razón
 fig, ejes = plt.subplots(1, 2, figsize=(12, 3.5))
@@ -927,10 +1082,12 @@ exp_df["veredicto"].value_counts().reindex(["pertinente", "parcial", "alucinada"
 exp_df["razon_categoria"].value_counts().plot.barh(ax=ejes[1], color="#4C72B0", title="Razón que da el LLM")
 plt.tight_layout(); plt.show()
 print(exp_df["veredicto"].value_counts().to_dict(), "·", exp_df["razon_categoria"].value_counts().to_dict())
+# ¿Coinciden las métricas automáticas con el juicio humano?
+print(pd.crosstab(exp_df["veredicto"], exp_df["cita_falsa"].map({True: "con cita falsa", False: "sin cita falsa"})))
 """, tags=["pausa_revision"])
-md("### 4.7 Razones proporcionadas por el LLM")
+md("### 4.8 Razones proporcionadas por el LLM")
 interpretacion("razones")
-md("### 4.8 Conclusiones sobre el uso del LLM para interpretar el clasificador")
+md("### 4.9 Conclusiones sobre el uso del LLM para interpretar el clasificador")
 interpretacion("llm")
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -943,23 +1100,42 @@ md("""
 
 - Almazrouei, E., Alobeidli, H., Alshamsi, A., et al. (2023). *The Falcon Series of Open Language
   Models*. arXiv:2311.16867.
+- Brown, T., Mann, B., Ryder, N., et al. (2020). Language Models are Few-Shot Learners. *NeurIPS*.
 - Casanueva, I., Temčinas, T., Gerz, D., Henderson, M., & Vulić, I. (2020). Efficient Intent
   Detection with Dual Sentence Encoders. *Proceedings of the 2nd Workshop on NLP for
   Conversational AI*, 38–45. arXiv:2003.04807. (Origen del dataset BANKING77.)
+- Cui, Y., Jia, M., Lin, T.-Y., Song, Y., & Belongie, S. (2019). Class-Balanced Loss Based on Effective
+  Number of Samples. *CVPR*.
+- Dettmers, T., Pagnoni, A., Holtzman, A., & Zettlemoyer, L. (2023). QLoRA: Efficient Finetuning of
+  Quantized LLMs. *NeurIPS*. (Cuantización NF4 de 4 bits.)
 - Devlin, J., Chang, M.-W., Lee, K., & Toutanova, K. (2019). BERT: Pre-training of Deep
   Bidirectional Transformers for Language Understanding. *NAACL-HLT*.
+- Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q. (2017). On Calibration of Modern Neural Networks.
+  *ICML*.
 - Holtzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y. (2020). The Curious Case of Neural Text
   Degeneration. *ICLR*. (Muestreo *nucleus*/top-p y temperatura.)
 - Ji, Z., Lee, N., Frieske, R., et al. (2023). Survey of Hallucination in Natural Language
   Generation. *ACM Computing Surveys*, 55(12).
 - Liu, Y., Ott, M., Goyal, N., et al. (2019). *RoBERTa: A Robustly Optimized BERT Pretraining
   Approach*. arXiv:1907.11692.
+- Lundberg, S. M., & Lee, S.-I. (2017). A Unified Approach to Interpreting Model Predictions. *NeurIPS*.
+  (SHAP.)
+- Northcutt, C., Jiang, L., & Chuang, I. (2021). Confident Learning: Estimating Uncertainty in Dataset
+  Labels. *Journal of Artificial Intelligence Research*, 70, 1373–1411.
 - Sanh, V., Debut, L., Chaumond, J., & Wolf, T. (2019). *DistilBERT, a distilled version of BERT:
   smaller, faster, cheaper and lighter*. arXiv:1910.01108.
+- Sennrich, R., Haddow, B., & Birch, A. (2016). Improving Neural Machine Translation Models with
+  Monolingual Data. *ACL*. (Back-translation.)
+- Sundararajan, M., Taly, A., & Yan, Q. (2017). Axiomatic Attribution for Deep Networks. *ICML*.
+  (Gradientes integrados.)
 - Vaswani, A., Shazeer, N., Parmar, N., et al. (2017). Attention Is All You Need. *NeurIPS*.
+- Wei, J., & Zou, K. (2019). EDA: Easy Data Augmentation Techniques for Boosting Performance on Text
+  Classification Tasks. *EMNLP-IJCNLP*.
 - Wolf, T., Debut, L., Sanh, V., et al. (2020). Transformers: State-of-the-Art Natural Language
   Processing. *EMNLP: System Demonstrations*.
-- Documentación de Hugging Face: `PolyAI/banking77`, `distilbert/distilroberta-base`,
+- Ying, C., & Thomas, S. (2022). Label Errors in BANKING77. *Proceedings of the Third Workshop on
+  Insights from Negative Results in NLP*, ACL.
+- Documentación de Hugging Face: `PolyAI/banking77`, ficha de `distilbert/distilroberta-base`,
   `tiiuae/falcon-7b-instruct`, *Text generation strategies*.
 """)
 
@@ -987,7 +1163,8 @@ guardar("corrida.json", {
     "hiperparametros": {"learning_rate": 5e-5, "epocas_max": 8, "lote": 32, "max_length": MAX_LEN,
                         "warmup_ratio": 0.1, "weight_decay": 0.01, "seed": SEED,
                         "mejor_epoca": int(curva.loc[curva.eval_f1_macro.idxmax(), "epoch"]),
-                        "config_llm": CONFIG_ELEGIDA, **{f"llm_{k}": v for k, v in CONFIGS[CONFIG_ELEGIDA].items()}},
+                        "config_llm": CONFIG_ELEGIDA, "prompt_llm": PROMPT_ELEGIDO,
+                        **{f"llm_{k}": v for k, v in CONFIGS[CONFIG_ELEGIDA].items()}},
     "accuracy": ACCURACY, "f1_macro": F1_MACRO, "n_train": len(tr_df), "n_val": len(val_df),
     "n_test": len(test_df), "duracion_entrenamiento_s": DURACION_ENTRENAMIENTO})
 
@@ -1031,10 +1208,14 @@ pd.DataFrame({"consulta_id": [100000 + i for i in range(len(test_df))], "clase_p
               "top5": [json.dumps([{"clase_id": int(c), "prob": round(float(probs[k, c]), 5)} for c in top5[k]])
                        for k in range(len(test_df))]}).to_csv(ART / "predicciones.csv", index=False)
 
-# Calibración y explicaciones del LLM
-guardar("calibracion.json", [{**r, "consulta_id": 100000 + int(r["idx_test"]), "parametros": CONFIGS[r["config"]]}
-                             for r in cal_df.to_dict("records")])
-guardar("explicaciones.json", [{**r, "consulta_id": 100000 + int(r["idx_test"]), "parametros": CONFIGS[CONFIG_ELEGIDA]}
+# Calibración (decodificación y estructura) y explicaciones del LLM
+calibracion = pd.concat([dec_df, est_df[est_df["prompt"] != "P1"]], ignore_index=True)
+calibracion["elegida"] = (calibracion["config"] == CONFIG_ELEGIDA) & (calibracion["prompt"] == PROMPT_ELEGIDO)
+guardar("calibracion.json", [{**r, "consulta_id": int(r["consulta_id"]),
+                              "parametros": {**CONFIGS[r["config"]], "prompt": r["prompt"]}}
+                             for r in calibracion.to_dict("records")])
+guardar("explicaciones.json", [{**r, "consulta_id": int(r["consulta_id"]),
+                                "parametros": {**CONFIGS[CONFIG_ELEGIDA], "prompt": PROMPT_ELEGIDO}}
                                for r in exp_df.to_dict("records")])
 print("Corrida", CORRIDA_ID, "→", sorted(p.name for p in ART.iterdir()))
 """)

@@ -1,122 +1,162 @@
 [
  {
   "orden": 1,
-  "veredicto": "alucinada",
+  "consulta_id": 101866,
+  "explicacion_revisada": "The word 'pending' is related to payments and transfers, which are common when there is a delay in processing the transaction.",
+  "veredicto": "parcial",
   "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Afirma que la palabra 'card' aparece en la consulta; no aparece. La pista real es 'payment ... pending', que encaja con pending_card_payment."
+  "nota_revision": "Cita 'pending', que sí está en la consulta, pero no distingue entre las dos clases (ambas son «pendientes»); la pista que separa es 'payment', que no menciona."
  },
  {
   "orden": 2,
-  "veredicto": "alucinada",
+  "consulta_id": 101626,
+  "explicacion_revisada": "The query mentions 'double charged', which is a common occurrence of fraudulent charges. The word 'refunded' is what indicates that the charge is being processed.",
+  "veredicto": "parcial",
   "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Dice que aparece 'transaction'; no aparece. La pista real es 'double charged', casi literal de transaction_charged_twice. Además la salida quedó cortada a media oración (60 tokens)."
+  "nota_revision": "Cita la pista correcta ('double charged' → transaction_charged_twice), pero añade que es «fraude», algo que la consulta no dice; la segunda oración es confusa."
  },
  {
   "orden": 3,
-  "veredicto": "alucinada",
+  "consulta_id": 102763,
+  "explicacion_revisada": "The word 'exchange' is a common term for currency conversion. The query looks for the exchange rate, which is related to the label.",
+  "veredicto": "parcial",
   "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Se contradice: dice que 'exchange rate' no está en la consulta y sí está. La etiqueta del dataset (exchange_charge) es dudosa: la consulta pregunta literalmente por el tipo de cambio. Salida cortada."
+  "nota_revision": "Cita 'exchange', que sí está, y reconoce que la consulta pregunta por el tipo de cambio; no dice que eso es justo lo que predijo el modelo. Etiqueta del dataset dudosa: la consulta pregunta literalmente por el exchange rate."
  },
  {
   "orden": 4,
-  "veredicto": "parcial",
-  "razon_categoria": "generica",
-  "nota_revision": "'Más específica' sin citar palabras. La pregunta 'how many transactions' sí habla de límites: la predicción es defendible y la etiqueta, dudosa."
+  "consulta_id": 102637,
+  "explicacion_revisada": "The word 'disposable' is related to a limit on the number of transactions, which is the label.",
+  "veredicto": "alucinada",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Llama «label» a la clase predicha (los límites de la tarjeta desechable); la etiqueta real es get_disposable_virtual_card. Además, la pista de 'límites' es 'how many transactions', no 'disposable'."
  },
  {
   "orden": 5,
+  "consulta_id": 100264,
+  "explicacion_revisada": "The word 'exchange' is related to currency exchange, which is a common request for banks. The label indicates that the customer is asking about exchange services.",
   "veredicto": "parcial",
-  "razon_categoria": "ambiguedad_real",
-  "nota_revision": "Razonamiento plausible (fiat_currency_support es más general que exchange_via_app) pero no cita el verbo 'exchange', que es la pista real."
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "La pista es correcta ('exchange' → exchange_via_app), pero la segunda oración describe mal la etiqueta (fiat_currency_support no trata de servicios de cambio)."
  },
  {
   "orden": 6,
+  "consulta_id": 100434,
+  "explicacion_revisada": "The word 'currency' is related to exchange rates, which is a common topic for customers asking about changing their currency. The label indicates that the customer wants to know about fiat currency support.",
   "veredicto": "alucinada",
-  "razon_categoria": "ambiguedad_real",
-  "nota_revision": "Intercambia las etiquetas: dice que el clasificador eligió 'exchange via app', que es la correcta, e inventa una intención 'currency conversion' que no existe."
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Intercambia las clases: afirma que la etiqueta es fiat currency support, que es la predicha; la etiqueta real es exchange via app."
  },
  {
   "orden": 7,
+  "consulta_id": 102544,
+  "explicacion_revisada": "The word 'not' is a common trigger for card-related queries. 'working' is the label, which matches the customer's concern.",
   "veredicto": "parcial",
-  "razon_categoria": "generica",
-  "nota_revision": "No señala que la consulta nunca dice 'virtual': 'my card is just not working' es literalmente card_not_working. Etiqueta dudosa."
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "'not' y 'working' sí están y son la pista de card_not_working, pero dice que 'working' es «la etiqueta»; no señala que la consulta nunca dice 'virtual'. Etiqueta dudosa."
  },
  {
   "orden": 8,
+  "consulta_id": 102687,
+  "explicacion_revisada": "The word 'transfer' is related to bank transfers, which are often associated with timing. The query is asking about the availability of the transfer, which is related to the label.",
   "veredicto": "pertinente",
   "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Correcto: la consulta menciona 'transfer' y pregunta 'when', lo que empuja a transfer_timing. Lo de 'más común' es relleno, pero la razón central es fiel."
+  "nota_revision": "Correcto: 'transfer' y la pregunta por cuándo estará disponible empujan a transfer_timing; la relaciona bien con la etiqueta."
  },
  {
   "orden": 9,
-  "veredicto": "alucinada",
+  "consulta_id": 102761,
+  "explicacion_revisada": "The word 'exchange' is related to currency exchange rates, which is what the customer is asking about.",
+  "veredicto": "pertinente",
   "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Salida idéntica a la #3 y con la misma contradicción ('exchange rate' sí está en la consulta). Etiqueta dudosa. Salida cortada."
+  "nota_revision": "Correcto: la consulta pregunta por el exchange rate, que es lo que predijo el modelo. Etiqueta del dataset dudosa (exchange_charge)."
  },
  {
   "orden": 10,
-  "veredicto": "parcial",
-  "razon_categoria": "generica",
-  "nota_revision": "Explicación genérica; la consulta no menciona ni tarjeta ni transferencia, así que ambas clases de comisión de recarga son posibles."
+  "consulta_id": 100618,
+  "explicacion_revisada": "The word 'top up' is associated with both card and bank transfer charges, so it is reasonable to assume that the customer is asking about top-up fees.",
+  "veredicto": "pertinente",
+  "razon_categoria": "ambiguedad_real",
+  "nota_revision": "Señala la ambigüedad real: 'top-ups' sin especificar puede ser por tarjeta o por transferencia. (La métrica marcó 'top up' como cita falsa por el guion de «top-ups»: es un falso positivo de la métrica.)"
  },
  {
   "orden": 11,
+  "consulta_id": 102338,
+  "explicacion_revisada": "The word 'top up' is related to adding money to a card, which is a common action. The dataset label matches the action, so the classifier correctly predicted the intent.",
   "veredicto": "pertinente",
-  "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Correcto: 'top up my card' es casi literal de topping_up_by_card. La etiqueta del dataset (transfer_into_account) es dudosa."
+  "razon_categoria": "etiqueta_dudosa",
+  "nota_revision": "Concluye que el clasificador acertó: «How do I top up my card?» es topping_up_by_card y la etiqueta transfer_into_account es dudosa. Lo dice sin que el prompt lo sugiera."
  },
  {
   "orden": 12,
-  "veredicto": "parcial",
-  "razon_categoria": "generica",
-  "nota_revision": "Habla de 'cash withdrawal' y 'direct debit' como términos, pero no explica por qué eligió retiro en efectivo; la consulta ('someone has taken my money') es realmente ambigua."
+  "consulta_id": 101516,
+  "explicacion_revisada": "The word 'cash' is a common trigger for direct debit payments. The query is asking about a cash withdrawal, which is not recognised as a direct debit payment.",
+  "veredicto": "alucinada",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Cita 'cash', que no está en la consulta, y afirma que el cliente pregunta por un retiro de efectivo; la consulta («someone has taken my money») no lo dice."
  },
  {
   "orden": 13,
+  "consulta_id": 101006,
+  "explicacion_revisada": "The word 'top up' is related to the label, and 'failed' is a synonym for it.",
   "veredicto": "parcial",
   "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Cita 'top up' (sí aparece) pero el razonamiento es circular. La pista real es 'wouldn't accept', sinónimo de fallo (top_up_failed)."
+  "nota_revision": "'top up' sí está, pero cita 'failed', que no aparece; la intuición (no aceptar ≈ fallar) es buena, pero la pista real, 'wouldn't accept', no se cita."
  },
  {
   "orden": 14,
-  "veredicto": "alucinada",
-  "razon_categoria": "frecuencia_supuesta",
-  "nota_revision": "Inventa que pin_blocked es 'más común y buscado'; no se le dio ningún dato de frecuencia. Ignora la pista real: 'unblock'."
+  "consulta_id": 100368,
+  "explicacion_revisada": "The word 'unblock' is related to card issues, which leads to the label.",
+  "veredicto": "parcial",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Identifica la pista correcta ('unblock'), pero la conecta con la etiqueta (problemas de tarjeta) en lugar de con la clase predicha (PIN bloqueado)."
  },
  {
   "orden": 15,
+  "consulta_id": 100799,
+  "explicacion_revisada": "The word 'declined' is related to cash withdrawals, which is the label.",
   "veredicto": "pertinente",
   "razon_categoria": "solapamiento_lexico",
-  "nota_revision": "Correcto: la palabra 'declined' empuja a declined_cash_withdrawal. La etiqueta real (wrong_amount_of_cash_received) es discutible para esta consulta."
+  "nota_revision": "Correcto: 'declined' empuja a declined_cash_withdrawal; llama «label» a la clase predicha, pero la razón es fiel a la consulta."
  },
  {
   "orden": 16,
+  "consulta_id": 101394,
+  "explicacion_revisada": "The word 'disposable' matches the label, as it suggests a temporary or one-time use card.",
   "veredicto": "parcial",
-  "razon_categoria": "generica",
-  "nota_revision": "'Más específica' sin citar palabras; 'what can I use a virtual disposable card for' encaja razonablemente con las dos clases."
+  "razon_categoria": "ambiguedad_real",
+  "nota_revision": "'disposable' aparece en las dos clases; la explicación es vaga y no dice qué palabra separa una de otra ('use … for')."
  },
  {
   "orden": 17,
-  "veredicto": "alucinada",
-  "razon_categoria": "generica",
-  "nota_revision": "Inventa una intención 'view PIN' que no existe y no explica la relación PIN ↔ tarjeta física (el PIN llega con la tarjeta física, esa es la pista)."
+  "consulta_id": 100521,
+  "explicacion_revisada": "The word 'pin' is related to physical cards, which is why the classifier predicts the label.",
+  "veredicto": "pertinente",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Correcto: 'PIN' se asocia a la tarjeta física (el PIN llega con ella), que es lo que predijo el modelo."
  },
  {
   "orden": 18,
-  "veredicto": "parcial",
-  "razon_categoria": "frecuencia_supuesta",
-  "nota_revision": "Afirma sin datos que 'declined' es más común, aunque sí usa un hecho de la consulta (compras anteriores). La consulta dice literalmente 'being declined': la predicción es correcta y la etiqueta, dudosa."
+  "consulta_id": 102092,
+  "explicacion_revisada": "The customer mentions a card being declined, which is a common issue. The word 'bought' implies past usage, which is a positive sign for the dataset label.",
+  "veredicto": "pertinente",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "Correcto: el cliente dice que la tarjeta es rechazada ('declined') → declined_card_payment; 'bought' (compras anteriores) es un dato real de la consulta. Etiqueta dudosa."
  },
  {
   "orden": 19,
+  "consulta_id": 101851,
+  "explicacion_revisada": "The word 'transfer' is related to financial transactions, which is a common theme in the dataset. The label is related to pending transfers, so the classifier correctly predicted the intent.",
   "veredicto": "parcial",
-  "razon_categoria": "generica",
-  "nota_revision": "Genérica. 'How long can an EU transfer take?' es exactamente transfer_timing: la etiqueta pending_transfer es dudosa y el LLM no lo detecta."
+  "razon_categoria": "etiqueta_dudosa",
+  "nota_revision": "Sugiere que el clasificador acertó (y «How long can an EU transfer take?» es, en efecto, transfer_timing), pero su razonamiento es un non sequitur: «la etiqueta trata de transferencias pendientes, así que acertó»."
  },
  {
   "orden": 20,
-  "veredicto": "alucinada",
-  "razon_categoria": "frecuencia_supuesta",
-  "nota_revision": "Confunde las clases: dice que la correcta 'involves topping up by card', que es justamente la predicha. Además inventa una frecuencia."
+  "consulta_id": 102477,
+  "explicacion_revisada": "The word 'topping up' is related to adding money to a card, which is a common action. The dataset label indicates this action.",
+  "veredicto": "parcial",
+  "razon_categoria": "solapamiento_lexico",
+  "nota_revision": "La pista es correcta ('top-up my card' → topping_up_by_card), pero cita 'topping up', que no aparece tal cual, y describe mal la etiqueta (top up by cash or cheque)."
  }
 ]

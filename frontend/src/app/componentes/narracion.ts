@@ -7,6 +7,7 @@ import { Icono } from './icono';
   imports: [Icono],
   template: `
     <section class="panel flex flex-col gap-3 !p-4" [attr.aria-label]="'Narración: ' + titulo()">
+      @if (src()) {
       <div class="flex items-center gap-4">
         <button type="button" (click)="alternar()"
                 class="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-forest text-white transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest"
@@ -30,12 +31,17 @@ import { Icono } from './icono';
           </p>
         </div>
       </div>
-      @if (verTexto()) {
+      } @else {
+        <p class="flex items-center gap-2 font-display text-sm font-semibold text-forest"><app-icono nombre="audio" clase="h-4 w-4" /> {{ titulo() }}</p>
+      }
+      @if (verTexto() || !src()) {
         <p class="animate-fadeIn border-t border-fog/60 pt-3 text-sm leading-relaxed text-evergreen">{{ transcripcion() }}</p>
       }
+      @if (src()) {
       <audio #audio [src]="src()" preload="metadata" (timeupdate)="actual.set($any($event.target).currentTime)"
              (loadedmetadata)="duracion.set($any($event.target).duration)" (play)="sonando.set(true)"
              (pause)="sonando.set(false)" (ended)="sonando.set(false)"></audio>
+      }
     </section>
   `,
 })
@@ -48,14 +54,16 @@ export class Narracion {
   protected readonly duracion = signal(0);
   protected readonly verTexto = signal(false);
   protected readonly progreso = computed(() => (this.duracion() ? (this.actual() / this.duracion()) * 100 : 0));
-  private readonly audio = viewChild.required<ElementRef<HTMLAudioElement>>('audio');
+  private readonly audio = viewChild<ElementRef<HTMLAudioElement>>('audio');
 
   protected alternar() {
-    const a = this.audio().nativeElement;
+    const a = this.audio()?.nativeElement;
+    if (!a) return;
     a.paused ? a.play() : a.pause();
   }
   protected buscar(ev: Event) {
-    this.audio().nativeElement.currentTime = Number((ev.target as HTMLInputElement).value);
+    const a = this.audio()?.nativeElement;
+    if (a) a.currentTime = Number((ev.target as HTMLInputElement).value);
   }
   protected reloj(s: number) {
     if (!isFinite(s)) return '0:00';

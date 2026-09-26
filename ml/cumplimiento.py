@@ -38,6 +38,19 @@ md = "\n".join(c.source for c in nb.cells if c.cell_type == "markdown")
 seccion_38 = md.split("### 3.8")[1].split("**El vínculo")[0] if "### 3.8" in md else ""
 filas_38 = [l for l in seccion_38.splitlines() if l.startswith("| ") and not l.startswith("| Hallazgo")]
 n_mejoras = len(filas_38)  # filas de datos de la tabla (sin encabezado ni separador)
+cal = json.load(open(ART / "calibracion.json"))
+def resumen_cal(filas, clave):
+    out = {}
+    for f in filas:
+        d = out.setdefault(f[clave], {"formato": 0, "falsas": 0, "verif": 0, "n": 0})
+        d["n"] += 1; d["formato"] += f["formato_ok"]; d["falsas"] += f["cita_falsa"]; d["verif"] += f["cita_verificable"]
+    return out
+hp = c["hiperparametros"]
+dec = resumen_cal([f for f in cal if f["prompt"] == "P1"], "config")
+estr = resumen_cal([f for f in cal if f["config"] == hp["config_llm"]], "prompt")
+razones = {}
+for r in rev:
+    razones[r["razon_categoria"]] = razones.get(r["razon_categoria"], 0) + 1
 max_tokens = max(e["max"] for e in eda["estadisticas"] if e["metrica"] == "n_tokens")
 
 CRITERIOS = {
@@ -75,21 +88,25 @@ R = [
      f"Destino de los errores, similitud TF-IDF por percentil, Spearman ρ = {float(spearman):.2f} y ejemplos reales."),
     ("C2", "Redactar conclusiones del uso del modelo Transformer", "3.7", "/resumen", "Cinco conclusiones con cifras y propuestas de mejora."),
     ("C3", "Diseñar un prompt para tiiuae/falcon-7b-instruct con explicación breve (máximo dos oraciones)", "4.2", "/explicaciones",
-     "Prompt de cinco piezas (rol, tarea, restricciones, datos, ancla de salida) documentado pieza por pieza."),
-    ("C3", "Calibrar la temperatura", "4.4", "/simulacion", "Tres configuraciones: codiciosa (T→0), T = 0.3 y T = 1.0 sobre las mismas consultas."),
+     f"Tres estructuras ({', '.join(sorted(estr))}) con rol, tarea, restricciones, datos y ancla «Explanation:»; P3 añade dos ejemplos tomados de train. Cada pieza, documentada."),
+    ("C3", "Calibrar la temperatura", "4.4", "/simulacion", f"{len(dec)} configuraciones ({', '.join(sorted(dec))}): codiciosa, T = 0.3 y T = 1.0, cada una medida sobre las mismas {dec['A']['n']} consultas; "
+     f"elegida {hp['config_llm']} por regla fijada de antemano ({dec[hp['config_llm']]['formato']}/{dec[hp['config_llm']]['n']} en formato correcto)."),
     ("C3", "Calibrar la longitud de respuesta", "4.4", "/simulacion",
-     "max_new_tokens 60 vs 150 (+ explicación de por qué max_new_tokens y no max_length) y recorte a 2 oraciones."),
-    ("C3", "Calibrar la claridad y estructura del prompt", "4.2 · 4.4", "/explicaciones", "Formato fijo con ancla «Explanation:», parada en línea en blanco y repetition_penalty."),
+     "max_new_tokens 60 vs 150 con la temperatura fija (B vs E, C vs D), de modo que longitud y temperatura se miden por separado; "
+     "se explica por qué max_new_tokens y no max_length."),
+    ("C3", "Calibrar la claridad y estructura del prompt", "4.2 · 4.5", "/explicaciones",
+     f"{len(estr)} estructuras ({', '.join(sorted(estr))}) con la configuración {hp['config_llm']}: citas verificables "
+     + " · ".join(f"{k} {v['verif']}/{v['n']}" for k, v in sorted(estr.items())) + f"; elegida {hp['prompt_llm']}."),
     ("C3", "Seleccionar 20 muestras mal clasificadas", "4.3", "/explicaciones", f"{len(exp)} errores de mayor confianza, máximo 2 por clase (criterio reproducible)."),
-    ("C3", "Solicitar al LLM una justificación de cada clasificación incorrecta", "4.5", "/explicaciones",
-     f"{len(exp)} explicaciones generadas con la configuración {c['hiperparametros']['config_llm']}."),
-    ("C3", "Validar manualmente la veracidad y pertinencia de las respuestas", "4.6", "/explicaciones",
+    ("C3", "Solicitar al LLM una justificación de cada clasificación incorrecta", "4.6", "/explicaciones",
+     f"{len(exp)} explicaciones generadas con la configuración {hp['config_llm']} y la estructura {hp['prompt_llm']}."),
+    ("C3", "Validar manualmente la veracidad y pertinencia de las respuestas", "4.7", "/explicaciones",
      f"Veredicto por explicación: {ver['pertinente']} pertinentes, {ver['parcial']} parciales, {ver['alucinada']} alucinadas."),
-    ("C3", "Analizar y listar las razones proporcionadas por el LLM", "4.6 · 4.7", "/explicaciones",
-     "Cinco categorías de razón con conteo, tabla y los tres patrones de alucinación."),
-    ("C4", "Redactar conclusiones sobre el uso del LLM para interpretar el clasificador", "4.8", "/explicaciones", "Cuatro conclusiones, prompt mejorado propuesto y uso recomendado."),
+    ("C3", "Analizar y listar las razones proporcionadas por el LLM", "4.8", "/explicaciones",
+     f"{len(razones)} categorías de razón con conteo (" + ", ".join(f"{k} {v}" for k, v in sorted(razones.items(), key=lambda x: -x[1])) + ") y los patrones de fallo."),
+    ("C4", "Redactar conclusiones sobre el uso del LLM para interpretar el clasificador", "4.9", "/explicaciones", "Cuatro conclusiones: qué controla cada eje de la calibración, límites de fidelidad, encuadre del prompt y uso recomendado."),
     ("C4", "Conclusiones generales y limitaciones", "5", "/resumen", "Cuatro conclusiones + limitaciones explícitas."),
-    ("C5", "Todo el código debe estar debidamente comentado y estructurado en un notebook", "Todo", "/entregables", "Comentarios en cada celda; secciones numeradas 0–7."),
+    ("C5", "Todo el código debe estar debidamente comentado y estructurado en un notebook", "Todo", "/entregables", f"Comentarios en cada celda de código ({sum(c.cell_type == 'code' for c in nb.cells)}); secciones numeradas 0–7."),
     ("C5", "Notebook autoexplicativo: análisis, visualizaciones y reflexiones escritas", "Todo", "/entregables", f"{n_figuras} celdas con figuras y una interpretación escrita por sección."),
     ("C5", "Referencias", "6", "/entregables", f"{n_refs} referencias (APA)."),
     ("EN", "Dataset PolyAI/banking77: 10 003 de entrenamiento y 3 080 de prueba en 77 clases", "1", "/eda",
@@ -109,9 +126,9 @@ R_RUBRICA = [
     ("C2", "Métricas globales y por clase + errores sistemáticos en clases específicas", "3.4 · 3.5", "/clases",
      f"Accuracy {c['accuracy']*100:.2f} % y F1 macro {c['f1_macro']:.3f}; P/R/F1 de las 77 clases; 15 pares más confundidos."),
     ("C2", "Discusión de causas con base en el EDA", "3.6", "/confusion",
-     f"H1 (desbalance) rechazada: ρ = {float(h1.group(1)):.2f}, p = {float(h1.group(2)):.2f}. "
+     f"H1 (desbalance) sin evidencia a favor: ρ = {float(h1.group(1)):.2f}, p = {float(h1.group(2)):.2f}. "
      f"H2 (n-gramas compartidos) confirmada: {h2.group(1)}× más bigramas comunes en los pares que se confunden."),
-    ("C3", "Validación de la coherencia de las respuestas y discusión de las implicancias del uso del LLM", "4.6 · 4.8", "/explicaciones",
+    ("C3", "Validación de la coherencia de las respuestas y discusión de las implicancias del uso del LLM", "4.7 · 4.9", "/explicaciones",
      f"Veredicto manual de las {len(rev)} respuestas y cuatro conclusiones sobre fidelidad, calibración, encuadre del prompt y uso recomendado."),
     ("C4", "Conclusiones que integran EDA + Transformer + LLM, con limitaciones y ejemplos del experimento", "5", "/resumen",
      "Cuatro conclusiones integradas, cuatro ejemplos concretos de consultas del dataset y limitaciones explícitas."),

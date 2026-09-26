@@ -82,20 +82,23 @@ def main(dsn: str) -> None:
                 values (%s, %s, %s, %s, %s, %s)""", preds)
 
         cur.executemany(
-            f"""insert into {T('calibracion_llm')} (corrida_id, config, parametros, consulta_id, salida, n_oraciones,
-                    n_tokens, segundos, palabras_ajenas, elegida)
-                values (%(c)s, %(config)s, %(p)s, %(consulta_id)s, %(salida)s, %(n_oraciones)s, %(n_tokens)s,
-                        %(segundos)s, %(palabras_ajenas)s, %(elegida)s)""",
+            f"""insert into {T('calibracion_llm')} (corrida_id, config, prompt, parametros, consulta_id, salida, n_oraciones,
+                    n_tokens, segundos, formato_ok, cita_falsa, cita_verificable, elegida)
+                values (%(c)s, %(config)s, %(prompt)s, %(p)s, %(consulta_id)s, %(salida)s, %(n_oraciones)s, %(n_tokens)s,
+                        %(segundos)s, %(formato_ok)s, %(cita_falsa)s, %(cita_verificable)s, %(elegida)s)""",
             [{**k, "c": cid, "p": Jsonb(k["parametros"])} for k in leer("calibracion.json")])
 
         id_clase = {c["nombre"]: c["id"] for c in clases}
+        # Veredictos de la revisión manual (entrada escrita a mano), por consulta_id
+        rev = {r["consulta_id"]: {k: r[k] for k in ("veredicto", "razon_categoria", "nota_revision")}
+               for r in leer("revision_manual.json")}
         cur.executemany(
             f"""insert into {T('explicaciones_llm')} (corrida_id, orden, consulta_id, clase_real_id, clase_pred_id,
-                    confianza, prompt, parametros, salida_cruda, explicacion, razon_categoria, veredicto, nota_revision)
+                    confianza, prompt, parametros, salida_cruda, explicacion, razon_categoria, veredicto, nota_revision, cita_falsa)
                 values (%(c)s, %(orden)s, %(consulta_id)s, %(r)s, %(p)s, %(confianza)s, %(prompt)s, %(params)s,
-                        %(salida_cruda)s, %(explicacion)s, %(razon_categoria)s, %(veredicto)s, %(nota_revision)s)""",
-            [{**e, "c": cid, "r": id_clase[e["real"]], "p": id_clase[e["predicha"]], "params": Jsonb(e["parametros"])}
-             for e in leer("explicaciones.json")])
+                        %(salida_cruda)s, %(explicacion)s, %(razon_categoria)s, %(veredicto)s, %(nota_revision)s, %(cita_falsa)s)""",
+            [{**e, **rev[e["consulta_id"]], "c": cid, "r": id_clase[e["real"]], "p": id_clase[e["predicha"]],
+              "params": Jsonb(e["parametros"])} for e in leer("explicaciones.json")])
 
         # Matriz de cumplimiento del enunciado (catálogo estable: se reemplaza completa)
         if (ART / "cumplimiento.json").exists():
@@ -109,10 +112,10 @@ def main(dsn: str) -> None:
         # Salidas reales de Falcon para la simulación
         if (ART / "simulacion_llm.json").exists():
             cur.executemany(
-                f"""insert into {T('simulacion_llm')} (corrida_id, consulta_id, config, salida_cruda, explicacion,
+                f"""insert into {T('simulacion_llm')} (corrida_id, consulta_id, config, prompt, salida_cruda, explicacion,
                         n_oraciones, segundos, revisada)
-                    values (%(c)s, %(consulta_id)s, %(config)s, %(salida_cruda)s, %(explicacion)s, %(n_oraciones)s,
-                            %(segundos)s, %(revisada)s)""",
+                    values (%(c)s, %(consulta_id)s, %(config)s, %(prompt)s, %(salida_cruda)s, %(explicacion)s,
+                            %(n_oraciones)s, %(segundos)s, %(revisada)s)""",
                 [{**s, "c": cid} for s in leer("simulacion_llm.json")])
         # Catálogo de entregables con su hash
         if (ART / "entregables.json").exists():
