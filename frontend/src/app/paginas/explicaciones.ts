@@ -55,8 +55,8 @@ const RAZON: Record<string, string> = {
               <span class="etiqueta shrink-0" [class]="veredicto(e.veredicto).clase">{{ veredicto(e.veredicto).texto }}</span>
             </div>
             <dl class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-              <dt class="text-tenue">Real</dt><dd class="mono text-bien">{{ e.real }}</dd>
-              <dt class="text-tenue">Predicha</dt><dd class="mono text-mal">{{ e.pred }} <span class="text-tenue">({{ pct(e.confianza, 1) }})</span></dd>
+              <dt class="text-tenue">Real</dt><dd class="mono break-all text-bien">{{ e.real }}</dd>
+              <dt class="text-tenue">Predicha</dt><dd class="mono break-all text-mal">{{ e.pred }} <span class="text-tenue">({{ pct(e.confianza, 1) }})</span></dd>
               <dt class="text-tenue">Razón</dt><dd>{{ razon(e.razon_categoria) }}</dd>
             </dl>
             <blockquote class="border-l-2 border-acento pl-3 text-sm leading-relaxed">{{ e.explicacion }}</blockquote>

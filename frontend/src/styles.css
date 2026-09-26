@@ -37,7 +37,7 @@
 }
 
 @layer components {
-  .panel { @apply rounded-xl border border-borde bg-panel p-5; }
+  .panel { @apply min-w-0 rounded-xl border border-borde bg-panel p-5; }
   .titulo { @apply text-2xl font-semibold tracking-tight; }
   .subtitulo { @apply text-sm text-tenue; }
   .etiqueta { @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium; }
