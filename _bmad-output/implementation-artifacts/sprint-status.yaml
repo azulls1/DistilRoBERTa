@@ -24,8 +24,8 @@ development_status:
   3-1-paginas-de-resultados: done
   epic-3-retrospective: optional
 
-  epic-4: in-progress
+  epic-4: done
   4-1-worker-celery-y-clasificar: done
   4-2-despliegue: done
-  4-3-push-github-azulls1: backlog   # bloqueado: falta permiso de escritura para la cuenta adonaihernadez
+  4-3-push-github-azulls1: done   # llave SSH dedicada ~/.ssh/id_ed25519_azulls1 (host github-azulls1)
   epic-4-retrospective: optional
