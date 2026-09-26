@@ -11,7 +11,7 @@ import { pct } from '../core/formato';
     <header class="mb-6 grid gap-2">
       <h1 class="titulo">Matriz de confusión</h1>
       <p class="max-w-3xl text-tenue">
-        77 × 77 celdas: filas = clase real, columnas = clase predicha. La diagonal (azul) son aciertos; fuera de la
+        77 × 77 celdas: filas = clase real, columnas = clase predicha. La diagonal (verde bosque) son aciertos; fuera de la
         diagonal (rojo), errores. Pasa el cursor o toca una celda para ver el detalle.
       </p>
     </header>
@@ -108,8 +108,7 @@ export class ConfusionPagina {
       const ctx = canvas.getContext('2d')!;
       ctx.scale(dpr, dpr);
       const t = lado / mat.n;
-      const oscuro = matchMedia('(prefers-color-scheme: dark)').matches;
-      ctx.fillStyle = oscuro ? '#171b21' : '#ffffff';
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, lado, lado);
       const maxFuera = Math.max(1, ...Array.from(mat.x).filter((_, k) => k % (mat.n + 1) !== 0));
       for (let i = 0; i < mat.n; i++) {
@@ -117,9 +116,9 @@ export class ConfusionPagina {
           const c = mat.x[i * mat.n + j];
           if (!c) continue;
           if (i === j) {
-            ctx.fillStyle = `rgba(47, 91, 234, ${0.25 + 0.75 * (c / 40)})`;
+            ctx.fillStyle = `rgba(4, 32, 44, ${0.25 + 0.75 * (c / 40)})`;
           } else {
-            ctx.fillStyle = `rgba(196, 61, 61, ${0.25 + 0.75 * Math.sqrt(c / maxFuera)})`;
+            ctx.fillStyle = `rgba(220, 38, 38, ${0.25 + 0.75 * Math.sqrt(c / maxFuera)})`;
           }
           ctx.fillRect(j * t, i * t, Math.max(1, t - 0.5), Math.max(1, t - 0.5));
         }

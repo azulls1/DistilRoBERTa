@@ -1,0 +1,79 @@
+/* ═══════════════════════════════════════════════════════════
+   FOREST PRINT — Clean report output
+
+   Usage:
+     @import "@forest-ds/core/print";
+   ═══════════════════════════════════════════════════════════ */
+
+@media print {
+  /* Hide interactive elements */
+  .no-print,
+  .navbar,
+  .sidebar,
+  nav,
+  aside,
+  footer,
+  button:not(.print-keep),
+  .btn:not(.print-keep) {
+    display: none !important;
+  }
+
+  /* Reset body */
+  body {
+    font-size: 12pt !important;
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Full width content */
+  main,
+  .main-content,
+  [role="main"] {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Remove shadows and decorations */
+  .card,
+  .card-stat,
+  .card-section,
+  .card-feature {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+  }
+
+  /* Glassmorphism → solid background */
+  .glass,
+  .glass-strong,
+  .glass-subtle {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Page breaks */
+  .print-break-before { page-break-before: always; }
+  .print-break-after  { page-break-after: always; }
+  .print-avoid-break  { page-break-inside: avoid; }
+
+  /* Tables */
+  .table-wrapper {
+    overflow: visible !important;
+    border: none !important;
+  }
+  .table th,
+  .table td {
+    border: 1px solid #ccc !important;
+  }
+
+  /* Links show URL */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+}

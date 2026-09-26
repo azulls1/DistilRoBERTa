@@ -1,6 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
+interface Enlace {
+  ruta: string;
+  texto: string;
+  /** Trazo SVG 24×24 (sin librería de iconos, como pide el Forest DS). */
+  icono: string;
+  criterio?: string;
+}
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
@@ -8,12 +16,28 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 })
 export class App {
   protected readonly menuAbierto = signal(false);
-  protected readonly enlaces = [
-    { ruta: '/resumen', texto: 'Resumen' },
-    { ruta: '/eda', texto: 'Análisis exploratorio' },
-    { ruta: '/clases', texto: 'Desempeño por clase' },
-    { ruta: '/confusion', texto: 'Matriz de confusión' },
-    { ruta: '/explicaciones', texto: 'Explicaciones del LLM' },
-    { ruta: '/clasificar', texto: 'Clasificar en vivo' },
+  protected readonly grupos: { titulo: string; enlaces: Enlace[] }[] = [
+    {
+      titulo: 'Principal',
+      enlaces: [{ ruta: '/resumen', texto: 'Resumen', icono: 'M3 11l9-8 9 8M5 10v10h14V10' }],
+    },
+    {
+      titulo: 'Clasificador',
+      enlaces: [
+        { ruta: '/eda', texto: 'Análisis exploratorio', criterio: 'C1', icono: 'M4 19V5M4 19h16M8 15v-3M12 15V8M16 15v-6' },
+        { ruta: '/clases', texto: 'Desempeño por clase', criterio: 'C2', icono: 'M4 6h16M4 12h10M4 18h6' },
+        { ruta: '/confusion', texto: 'Matriz de confusión', criterio: 'C2', icono: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z' },
+      ],
+    },
+    {
+      titulo: 'LLM',
+      enlaces: [
+        { ruta: '/explicaciones', texto: 'Explicaciones del LLM', criterio: 'C3', icono: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5' },
+      ],
+    },
+    {
+      titulo: 'En vivo',
+      enlaces: [{ ruta: '/clasificar', texto: 'Clasificar consulta', icono: 'M13 2L3 14h9l-1 8 10-12h-9z' }],
+    },
   ];
 }

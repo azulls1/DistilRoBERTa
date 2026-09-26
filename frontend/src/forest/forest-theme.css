@@ -1,0 +1,138 @@
+/* ═══════════════════════════════════════════════════════════
+   FOREST THEME — Tailwind CSS v4 @theme overrides
+   Import this file AFTER @import "tailwindcss" in your styles.
+
+   Usage:
+     @import "tailwindcss";
+     @import "@forest-ds/core/theme";
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Color Scale Overrides ─── */
+@theme {
+  /* Gray → Forest-tinted greens */
+  --color-gray-50:  #F7F8F7;
+  --color-gray-100: #EFF2F0;
+  --color-gray-200: #DFE4E0;
+  --color-gray-300: #C9D1C8;
+  --color-gray-400: #9EADA3;
+  --color-gray-500: #7D8F84;
+  --color-gray-600: #5B7065;
+  --color-gray-700: #304040;
+  --color-gray-800: #1A3036;
+  --color-gray-900: #04202C;
+  --color-gray-950: #021519;
+
+  /* Slate → Same forest scale */
+  --color-slate-50:  #F7F8F7;
+  --color-slate-100: #EFF2F0;
+  --color-slate-200: #DFE4E0;
+  --color-slate-300: #C9D1C8;
+  --color-slate-400: #9EADA3;
+  --color-slate-500: #7D8F84;
+  --color-slate-600: #5B7065;
+  --color-slate-700: #304040;
+  --color-slate-800: #1A3036;
+  --color-slate-900: #04202C;
+  --color-slate-950: #021519;
+
+  /* Violet → Forest accent scale */
+  --color-violet-50:  #EFF2F0;
+  --color-violet-100: #DFE4E0;
+  --color-violet-200: #C9D1C8;
+  --color-violet-300: #9EADA3;
+  --color-violet-400: #7D8F84;
+  --color-violet-500: #5B7065;
+  --color-violet-600: #466053;
+  --color-violet-700: #304040;
+  --color-violet-800: #1A3036;
+  --color-violet-900: #04202C;
+  --color-violet-950: #021519;
+
+  /* Forest named colors for direct use: bg-forest, text-pine, etc. */
+  --color-forest:    #04202C;
+  --color-evergreen: #304040;
+  --color-pine:      #5B7065;
+  --color-fog:       #C9D1C8;
+  --color-moss:      #9EADA3;
+  --color-bark:      #1A3036;
+  --color-midnight:  #021519;
+}
+
+/* ─── Design Tokens ─── */
+:root {
+  /* Primary scale (CSS custom properties) */
+  --forest-50:  #EFF2F0;
+  --forest-100: #DFE4E0;
+  --forest-200: #C9D1C8;
+  --forest-300: #9EADA3;
+  --forest-400: #7D8F84;
+  --forest-500: #5B7065;
+  --forest-600: #466053;
+  --forest-700: #304040;
+  --forest-800: #1A3036;
+  --forest-900: #04202C;
+
+  /* Accent tokens */
+  --accent:       #5B7065;
+  --accent-light: #9EADA3;
+  --accent-dark:  #304040;
+
+  /* Easing */
+  --ease-apple:  cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Durations */
+  --duration-fast:   150ms;
+  --duration-normal: 200ms;
+  --duration-slow:   300ms;
+  --stagger-delay:   60ms;
+
+  /* Radii */
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
+
+  /* Semantic color tokens — use these in components */
+  --color-bg-page:       #F7F8F7;
+  --color-bg-surface:    #FFFFFF;
+  --color-bg-hover:      #EFF2F0;
+  --color-bg-muted:      #F7F8F7;
+  --color-border:        #DFE4E0;
+  --color-border-subtle: #EFF2F0;
+  --color-text-primary:  #04202C;
+  --color-text-secondary:#304040;
+  --color-text-muted:    #7D8F84;
+  --color-text-placeholder: #9EADA3;
+  --color-text-accent:   #5B7065;
+  --color-focus-ring:    #04202C;
+
+  /* Breakpoints (reference only — CSS media queries cannot use var()) */
+  --bp-sm:  640px;
+  --bp-md:  768px;
+  --bp-lg:  1024px;
+  --bp-xl:  1280px;
+}
+
+/* ─── Base ─── */
+body {
+  background-color: #F7F8F7;
+  color: #04202C;
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Font Utilities ─── */
+.font-display { font-family: 'Sora', sans-serif; }
+.font-body    { font-family: 'DM Sans', system-ui, -apple-system, sans-serif; }
+.font-mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { border-radius: 9999px; background: rgba(91, 112, 101, 0.4); }
+::-webkit-scrollbar-thumb:hover { background: rgba(4, 32, 44, 0.5); }
+* { scrollbar-width: thin; scrollbar-color: rgba(91, 112, 101, 0.4) transparent; }

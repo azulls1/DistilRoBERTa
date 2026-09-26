@@ -1,34 +1,74 @@
-<a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-panel focus:px-3 focus:py-2">Saltar al contenido</a>
+<a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-forest focus:px-4 focus:py-2 focus:text-white">Saltar al contenido</a>
 
-<div class="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
-  <header class="sticky top-0 z-30 border-b border-borde bg-panel/90 backdrop-blur lg:static lg:h-dvh lg:border-b-0 lg:border-r">
-    <div class="flex items-center justify-between px-4 py-3 lg:block lg:px-5 lg:py-6">
-      <a routerLink="/resumen" class="block">
-        <span class="block text-base font-semibold tracking-tight">DistilRoBERTa</span>
-        <span class="block text-xs text-tenue">Banking77 · 77 intenciones</span>
+<div class="min-h-dvh lg:grid lg:grid-cols-[15rem_1fr]">
+  <!-- Barra lateral (Forest DS · iAgentek) -->
+  <header class="sticky top-0 z-30 flex flex-col border-b border-fog/60 bg-white lg:h-dvh lg:border-b-0 lg:border-r">
+    <div class="flex items-center justify-between gap-3 border-fog/60 px-4 py-3 lg:border-b lg:py-4">
+      <a routerLink="/resumen" class="flex min-w-0 items-center gap-3">
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-forest shadow-sm">
+          <img src="/images/logo_ia_withe.webp" alt="iAgentek" class="h-7 w-7 object-contain" />
+        </span>
+        <span class="flex min-w-0 flex-col leading-tight">
+          <span class="truncate font-display text-sm font-semibold text-forest">DistilRoBERTa</span>
+          <span class="truncate font-mono text-[10px] text-moss">Banking77 · 77 intenciones</span>
+        </span>
       </a>
-      <button type="button" class="rounded-lg border border-borde px-3 py-1.5 text-sm lg:hidden"
+      <button type="button" class="rounded-lg border border-fog px-3 py-1.5 text-sm text-evergreen lg:hidden"
               [attr.aria-expanded]="menuAbierto()" aria-controls="menu" (click)="menuAbierto.set(!menuAbierto())">
         Menú
       </button>
     </div>
-    <nav id="menu" class="px-2 pb-3 lg:block lg:px-3" [class.hidden]="!menuAbierto()" aria-label="Secciones">
-      <ul class="grid gap-0.5">
-        @for (e of enlaces; track e.ruta) {
-          <li>
-            <a [routerLink]="e.ruta" routerLinkActive="bg-acento-suave text-acento font-medium"
-               ariaCurrentWhenActive="page" (click)="menuAbierto.set(false)"
-               class="block rounded-lg px-3 py-2 text-sm text-texto/80 transition hover:bg-borde/40">{{ e.texto }}</a>
-          </li>
-        }
-      </ul>
-      <p class="mt-6 hidden px-3 text-xs leading-relaxed text-tenue lg:block">
-        UNIR · Sistemas Cognitivos Artificiales<br />Actividad 2 · Transformers y LLM
-      </p>
+
+    <nav id="menu" class="flex-1 overflow-y-auto px-3 pb-3 lg:block lg:py-4" [class.hidden]="!menuAbierto()" aria-label="Secciones">
+      @for (g of grupos; track g.titulo) {
+        <p class="mb-1 mt-4 px-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-moss first:mt-0">{{ g.titulo }}</p>
+        <ul class="grid gap-0.5">
+          @for (e of g.enlaces; track e.ruta) {
+            <li>
+              <a [routerLink]="e.ruta" routerLinkActive="active" ariaCurrentWhenActive="page" class="sidebar-link" (click)="menuAbierto.set(false)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
+                     stroke-linejoin="round" class="sidebar-link__icon shrink-0" aria-hidden="true"><path [attr.d]="e.icono" /></svg>
+                <span class="flex-1">{{ e.texto }}</span>
+                @if (e.criterio) { <span class="font-mono text-[10px] text-moss">{{ e.criterio }}</span> }
+              </a>
+            </li>
+          }
+        </ul>
+      }
     </nav>
+
+    <div class="hidden border-t border-fog/60 px-4 py-3 font-mono text-[10px] text-moss lg:block">
+      <p class="mb-2 leading-snug text-pine">Adonai Samael Hernández Mata<br />Maestría en IA · UNIR</p>
+      <div class="-mx-1 mb-2 flex items-center gap-2 rounded bg-forest px-2 py-1.5">
+        <img src="/images/logo_ia_withe.webp" alt="" class="h-5 w-auto" />
+        <span class="flex flex-col leading-tight">
+          <span class="text-[8px] uppercase tracking-wider text-white/60">powered by</span>
+          <span class="font-display text-[11px] font-semibold text-white">iagentek</span>
+        </span>
+      </div>
+      <p>v1.0.0 · Maestría 2026</p>
+    </div>
   </header>
 
-  <main id="contenido" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-    <router-outlet />
-  </main>
+  <div class="flex min-w-0 flex-col">
+    <main id="contenido" class="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+      <router-outlet />
+    </main>
+
+    <footer class="mt-8 bg-forest px-4 py-6 sm:px-8">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 text-xs text-white/80">
+        <div class="flex items-center gap-3">
+          <img src="/images/logo_ia_withe.webp" alt="iAgentek" class="h-8 w-auto" />
+          <div class="flex flex-col leading-tight">
+            <span class="font-display text-sm font-semibold text-white">iagentek</span>
+            <span class="text-[11px] text-white/60">Desarrollado para la actividad académica · 2026</span>
+          </div>
+        </div>
+        <div class="flex flex-col leading-tight sm:text-right">
+          <span>Sistemas Cognitivos Artificiales · Actividad 2</span>
+          <span class="font-mono text-white/60">distilroberta-banking77</span>
+        </div>
+      </div>
+    </footer>
+  </div>
 </div>

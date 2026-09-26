@@ -1,0 +1,171 @@
+/* ═══════════════════════════════════════════════════════════
+   FOREST DARK SURFACE — Component variants for dark backgrounds
+
+   IMPORTANT: This is NOT dark mode. Forest is light-mode only.
+   These are variants for components placed on dark backgrounds
+   (hero sections, gradient cards, dark sidebars) within the
+   light-mode system. Use the .dark-surface wrapper class or
+   the --on-dark modifier classes.
+
+   Usage:
+     @import "@forest-ds/core/dark-surface";
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Buttons on dark ─── */
+.dark-surface .btn-primary,
+.btn-primary--on-dark {
+  background: white;
+  color: #04202C;
+}
+.dark-surface .btn-primary:hover,
+.btn-primary--on-dark:hover {
+  background: #EFF2F0;
+}
+
+.dark-surface .btn-secondary,
+.btn-secondary--on-dark {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.dark-surface .btn-secondary:hover,
+.btn-secondary--on-dark:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dark-surface .btn-ghost,
+.btn-ghost--on-dark {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.dark-surface .btn-ghost:hover,
+.btn-ghost--on-dark:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* ─── Inputs on dark ─── */
+.dark-surface .input,
+.input--on-dark {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+.dark-surface .input::placeholder,
+.input--on-dark::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+.dark-surface .input:focus-visible,
+.input--on-dark:focus-visible {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.dark-surface .label,
+.label--on-dark {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ─── Text on dark ─── */
+.dark-surface h1,
+.dark-surface h2,
+.dark-surface h3,
+.dark-surface h4 {
+  color: white;
+}
+.dark-surface p {
+  color: #C9D1C8;
+}
+.dark-surface .text-muted {
+  color: #9EADA3;
+}
+
+/* ─── Badges on dark ─── */
+.dark-surface .badge,
+.badge--on-dark {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
+
+.dark-surface .tag,
+.tag--on-dark {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ─── Dividers on dark ─── */
+.dark-surface .divider,
+.divider--on-dark {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Cards on dark (glass effect) ─── */
+.dark-surface .card,
+.card--on-dark {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+.dark-surface .card:hover,
+.card--on-dark:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ─── Links on dark ─── */
+.dark-surface a,
+.link--on-dark {
+  color: #9EADA3;
+  transition: color 200ms ease;
+}
+.dark-surface a:hover,
+.link--on-dark:hover {
+  color: white;
+}
+
+/* ─── Table on dark ─── */
+.dark-surface .table thead tr {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+.dark-surface .table th {
+  color: rgba(255, 255, 255, 0.5);
+}
+.dark-surface .table tbody tr {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+.dark-surface .table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.dark-surface .table td {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Sidebar link on dark ─── */
+.dark-surface .sidebar-link {
+  color: rgba(255, 255, 255, 0.6);
+}
+.dark-surface .sidebar-link:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+}
+.dark-surface .sidebar-link.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ─── Scrollbar on dark ─── */
+.dark-surface::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+.dark-surface::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+.dark-surface {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}

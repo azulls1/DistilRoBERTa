@@ -1,0 +1,29 @@
+/* ═══════════════════════════════════════════════════════════
+   FOREST DESIGN SYSTEM v1.0 — Full bundle
+
+   This is the main entry point. Import this single file to
+   get everything: theme, components, utilities, animations.
+
+   Usage in your project's main CSS file:
+
+     @import "tailwindcss";
+     @import "@forest-ds/core";
+
+   Or import individually:
+
+     @import "tailwindcss";
+     @import "@forest-ds/core/theme";
+     @import "@forest-ds/core/components";
+     @import "@forest-ds/core/utilities";
+     @import "@forest-ds/core/animations";
+     @import "@forest-ds/core/print";
+
+   ═══════════════════════════════════════════════════════════ */
+
+@import "./forest-theme.css";
+@import "./forest-layout.css";
+@import "./forest-components.css";
+@import "./forest-page.css";
+@import "./forest-utilities.css";
+@import "./forest-animations.css";
+@import "./forest-print.css";

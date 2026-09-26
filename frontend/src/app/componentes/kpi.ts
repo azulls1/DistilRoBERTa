@@ -1,13 +1,14 @@
 import { Component, input } from '@angular/core';
 
+/** Tarjeta de indicador (card-stat del Forest DS). */
 @Component({
   selector: 'app-kpi',
   template: `
-    <div class="panel flex flex-col gap-1">
-      <span class="text-xs font-medium uppercase tracking-wide text-tenue">{{ etiqueta() }}</span>
-      <span class="text-2xl font-semibold tabular-nums">{{ valor() }}</span>
+    <div class="card-stat h-full min-w-0">
+      <p class="card-stat__label">{{ etiqueta() }}</p>
+      <p class="card-stat__value font-display tabular-nums">{{ valor() }}</p>
       @if (detalle()) {
-        <span class="text-xs text-tenue">{{ detalle() }}</span>
+        <p class="card-stat__desc truncate" [title]="detalle()">{{ detalle() }}</p>
       }
     </div>
   `,

@@ -11,17 +11,37 @@ import { num, pct } from '../core/formato';
   selector: 'app-resumen',
   imports: [Estado, Kpi, Curva, RouterLink],
   template: `
-    <header class="mb-6 grid gap-2">
-      <h1 class="titulo">Clasificación de intenciones bancarias</h1>
-      <p class="max-w-3xl text-tenue">
-        DistilRoBERTa afinado sobre <strong>PolyAI/banking77</strong> para asignar cada consulta de un cliente a una de
-        77 intenciones. Los errores del modelo se explican con <strong>Falcon-7b-instruct</strong> usando un prompt calibrado.
-        Todas las cifras salen de la ejecución del notebook y se leen de la base de datos.
-      </p>
-    </header>
+    <section class="card-hero mb-8" aria-labelledby="titulo-hero">
+      <div class="pointer-events-none absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 24px 24px;"></div>
+      <div class="relative">
+        <div class="mb-5 flex flex-wrap justify-center gap-2">
+          <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-medium tracking-wide text-white/85">
+            <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span> Actividad 2 · individual
+          </span>
+          <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] text-white/85">Sistemas Cognitivos Artificiales</span>
+          <span class="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] text-white/85">Maestría en IA · UNIR 2026</span>
+        </div>
+        <h1 id="titulo-hero" class="font-display text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
+          Transformers y LLM
+          <span class="mt-2 block text-xl font-medium text-white/70 sm:text-2xl">DistilRoBERTa + Falcon-7b-instruct</span>
+        </h1>
+        <p class="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base">
+          Clasificación de consultas bancarias de <strong class="text-white">PolyAI/banking77</strong> en 77 intenciones con un
+          Transformer afinado, y explicación de sus errores con un LLM mediante un prompt calibrado.
+        </p>
+        <p class="mx-auto mt-2 max-w-xl text-xs text-white/50">Todas las cifras salen de la ejecución del notebook y se leen de la base de datos.</p>
+        <p class="mt-5 text-base font-semibold text-white">Adonai Samael Hernández Mata</p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <a routerLink="/explicaciones" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-forest transition hover:-translate-y-px">Ver explicaciones del LLM →</a>
+          <a href="https://github.com/azulls1/DistilRoBERTa" target="_blank" rel="noopener"
+             class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">GitHub</a>
+        </div>
+      </div>
+    </section>
 
     <app-estado [cargando]="r.isLoading()" [error]="r.error()" [vacio]="!r.hasValue()" (reintentar)="r.reload()">
       @if (r.value(); as d) {
+        <h2 class="seccion">Resultados en prueba</h2>
         <section class="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Indicadores principales">
           <app-kpi etiqueta="Accuracy en prueba" [valor]="pct(d.corrida.accuracy)" [detalle]="num(d.corrida.n_test) + ' consultas'" />
           <app-kpi etiqueta="F1 macro" [valor]="pct(d.corrida.f1_macro)" detalle="promedio sin ponderar de 77 clases" />
@@ -53,9 +73,9 @@ import { num, pct } from '../core/formato';
         <section class="panel mt-6">
           <h2 class="mb-3 font-semibold">Cómo se hizo</h2>
           <ol class="grid gap-3 text-sm md:grid-cols-3">
-            <li><span class="font-medium">1. Análisis exploratorio.</span> Longitudes, limpieza, n-gramas, nube de palabras y balance de clases. <a routerLink="/eda" class="text-acento underline-offset-2 hover:underline">Ver</a></li>
-            <li><span class="font-medium">2. Fine-tuning.</span> {{ d.corrida.modelo_base }}, max_length {{ d.corrida.hiperparametros['max_length'] }}, lr {{ d.corrida.hiperparametros['learning_rate'] }}, lote {{ d.corrida.hiperparametros['lote'] }}. <a routerLink="/clases" class="text-acento underline-offset-2 hover:underline">Ver</a></li>
-            <li><span class="font-medium">3. Explicación de errores.</span> {{ d.corrida.llm }} sobre 20 errores, con revisión manual. <a routerLink="/explicaciones" class="text-acento underline-offset-2 hover:underline">Ver</a></li>
+            <li><span class="font-medium">1. Análisis exploratorio.</span> Longitudes, limpieza, n-gramas, nube de palabras y balance de clases. <a routerLink="/eda" class="font-medium text-pine underline underline-offset-2 hover:text-forest">Ver</a></li>
+            <li><span class="font-medium">2. Fine-tuning.</span> {{ d.corrida.modelo_base }}, max_length {{ d.corrida.hiperparametros['max_length'] }}, lr {{ d.corrida.hiperparametros['learning_rate'] }}, lote {{ d.corrida.hiperparametros['lote'] }}. <a routerLink="/clases" class="font-medium text-pine underline underline-offset-2 hover:text-forest">Ver</a></li>
+            <li><span class="font-medium">3. Explicación de errores.</span> {{ d.corrida.llm }} sobre 20 errores, con revisión manual. <a routerLink="/explicaciones" class="font-medium text-pine underline underline-offset-2 hover:text-forest">Ver</a></li>
           </ol>
         </section>
       }
@@ -72,15 +92,15 @@ export class ResumenPagina {
   protected readonly seriesPerdida = computed(() => {
     const h = this.h.value() ?? [];
     return [
-      { nombre: 'train', valores: h.map((e) => e.train_loss), clase: 'text-acento' },
-      { nombre: 'validación', valores: h.map((e) => e.eval_loss), clase: 'text-aviso' },
+      { nombre: 'train', valores: h.map((e) => e.train_loss), clase: 'text-forest' },
+      { nombre: 'validación', valores: h.map((e) => e.eval_loss), clase: 'text-moss' },
     ];
   });
   protected readonly seriesMetricas = computed(() => {
     const h = this.h.value() ?? [];
     return [
-      { nombre: 'accuracy', valores: h.map((e) => e.eval_accuracy), clase: 'text-bien' },
-      { nombre: 'F1 macro', valores: h.map((e) => e.eval_f1_macro), clase: 'text-acento' },
+      { nombre: 'accuracy', valores: h.map((e) => e.eval_accuracy), clase: 'text-pine' },
+      { nombre: 'F1 macro', valores: h.map((e) => e.eval_f1_macro), clase: 'text-forest' },
     ];
   });
 
