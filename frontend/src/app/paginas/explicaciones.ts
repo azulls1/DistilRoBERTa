@@ -172,12 +172,13 @@ export class ExplicacionesPagina {
   protected readonly conteo = computed(() => {
     const e = this.r.value() ?? [];
     const n = (v: string) => e.filter((x) => x.veredicto === v).length;
+    const recortadas = e.filter((x) => x.explicacion.trim() !== x.salida_cruda.trim()).length;
     const dos = e.filter((x) => (x.explicacion.match(/[.!?](\s|$)/g) ?? []).length <= 2).length;
     return [
       { etiqueta: 'Pertinentes', valor: `${n('pertinente')} / ${e.length}`, detalle: 'razón plausible y fiel a la consulta' },
       { etiqueta: 'Parciales', valor: `${n('parcial')} / ${e.length}`, detalle: 'algo cierto pero vago' },
       { etiqueta: 'Alucinadas', valor: `${n('alucinada')} / ${e.length}`, detalle: 'afirma lo que la consulta no dice' },
-      { etiqueta: '≤ 2 oraciones', valor: `${dos} / ${e.length}`, detalle: 'tras el postproceso' },
+      { etiqueta: '≤ 2 oraciones', valor: `${dos} / ${e.length}`, detalle: recortadas ? `${recortadas} recortadas en el postproceso` : 'salida cruda, sin recortes' },
     ];
   });
 

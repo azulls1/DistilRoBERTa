@@ -158,7 +158,7 @@ def simulacion_llm(cid: str, consulta_id: int) -> list[dict]:
 
 
 def calibracion_completa(cid: str) -> list[dict]:
-    """Las 20 consultas revisadas con sus tres configuraciones (A, B, C) y el veredicto de la B."""
+    """Las consultas revisadas con todas sus configuraciones de decodificación y el veredicto de la elegida."""
     return db.todos(
         f"""select e.orden, s.consulta_id, q.texto, r.nombre as real, p.nombre as pred, e.veredicto,
                    json_agg(json_build_object('config', s.config, 'prompt', s.prompt, 'explicacion', s.explicacion,
