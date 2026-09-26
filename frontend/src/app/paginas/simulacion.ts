@@ -68,8 +68,8 @@ const CONFIG = {
         @for (p of pasos; track p.titulo; let i = $index) {
           @if (visibles() > i) {
             <li class="relative grid grid-cols-[2.75rem_1fr] gap-3 animate-fadeInUp">
-              <span class="z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 bg-white transition"
-                    [class]="visibles() > i + 1 || i === pasos.length - 1 && visibles() === pasos.length ? 'border-forest bg-forest text-white' : 'border-forest text-forest'">
+              <span class="z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 border-forest transition duration-500"
+                    [class.bg-forest]="hecho(i)" [class.text-white]="hecho(i)" [class.bg-white]="!hecho(i)" [class.text-forest]="!hecho(i)">
                 <app-icono [nombre]="p.icono" clase="h-5 w-5" />
               </span>
               <div class="panel !p-4">
@@ -106,7 +106,7 @@ const CONFIG = {
                     @if (resultado(); as r) {
                       <div class="mb-4 grid grid-cols-7 gap-1.5" aria-hidden="true">
                         @for (c of capas; track c; let k = $index) {
-                          <span class="capa-activa rounded-md py-2 text-center font-mono text-[10px] text-pine" [style.animation-delay.ms]="k * 110">{{ c }}</span>
+                          <span class="capa-activa rounded-md bg-acento-suave py-2 text-center font-mono text-[10px] text-pine" [style.animation-delay.ms]="k * 110">{{ c }}</span>
                         }
                       </div>
                       <app-barras titulo="Cinco intenciones más probables" [max]="1" [datos]="top5(r)" />
@@ -215,7 +215,7 @@ const CONFIG = {
                 @if (e.epoca === 6) { <span class="ml-1 text-bien">← mejor época (early stopping)</span> }</span>
             }
           </div>
-          <app-curva titulo="Pérdida por época" [epocas]="epocasVisibles()" [series]="seriesVisibles()" />
+          <div class="max-w-3xl"><app-curva titulo="Pérdida por época" [epocas]="epocasVisibles()" [series]="seriesVisibles()" /></div>
         </div>
       </app-estado>
     </section>
@@ -339,6 +339,10 @@ export class SimulacionPagina {
     this.nEpocas.set(1);
   }
 
+  /** Un paso queda «hecho» cuando ya se reveló el siguiente (o es el último y todos están visibles). */
+  protected hecho(i: number) {
+    return this.visibles() > i + 1 || (i === PASOS.length - 1 && this.visibles() === PASOS.length);
+  }
   protected palabras(t: string) {
     return t ? t.split(' ') : [];
   }

@@ -16,8 +16,8 @@
    "nombre": "Notebook exportado a PDF",
    "detalle": "Versión PDF exigida por el enunciado.",
    "ruta": "SCA_Actividad2_DistilRoBERTa_Banking77.pdf",
-   "bytes": 3654951,
-   "sha256": "9097094656ee908e16770ed7dedf71e98ede478bacf4c2c4765ffac9e4e9afbf"
+   "bytes": 3671421,
+   "sha256": "eea0c44c89660a21c48928c02c26c2204f2fa5bc3aefc3e8dbd6e1f6c5fa378e"
   },
   {
    "criterio": "C1",
@@ -178,8 +178,8 @@
    "nombre": "simulacion_llm.json",
    "detalle": "Salidas reales de Falcon para los 208 errores y A/B/C sobre las 20",
    "ruta": "datos/simulacion_llm.json",
-   "bytes": 60445,
-   "sha256": "44084165116edd4562e26b0bdf939cee32bc7bc19632e2d5d3bb03bc1f07db1e"
+   "bytes": 192529,
+   "sha256": "92f1d27a57a9cec56f89b7c241f859e3cb066101d4eda4c9e92cc38c41a5be92"
   },
   {
    "criterio": "C5",
@@ -241,8 +241,8 @@
    "nombre": "cargar_resultados.py",
    "detalle": "Carga los resultados en la base de datos",
    "ruta": "codigo/cargar_resultados.py",
-   "bytes": 6812,
-   "sha256": "aa8c115194718817102b89d2ffb501fef70e8f107411e2323d8c93a5e83d301e"
+   "bytes": 8509,
+   "sha256": "92e262bbc2c7a77f58683836b249be341aaa619cdc636affc396f40a58fee358"
   },
   {
    "criterio": "C5",
