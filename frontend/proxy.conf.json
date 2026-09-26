@@ -1,0 +1,3 @@
+{
+  "/api": { "target": "https://distilroberta.iagentek.com.mx", "secure": true, "changeOrigin": true }
+}

@@ -1,0 +1,34 @@
+<a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-panel focus:px-3 focus:py-2">Saltar al contenido</a>
+
+<div class="min-h-dvh lg:grid lg:grid-cols-[16rem_1fr]">
+  <header class="sticky top-0 z-30 border-b border-borde bg-panel/90 backdrop-blur lg:static lg:h-dvh lg:border-b-0 lg:border-r">
+    <div class="flex items-center justify-between px-4 py-3 lg:block lg:px-5 lg:py-6">
+      <a routerLink="/resumen" class="block">
+        <span class="block text-base font-semibold tracking-tight">DistilRoBERTa</span>
+        <span class="block text-xs text-tenue">Banking77 · 77 intenciones</span>
+      </a>
+      <button type="button" class="rounded-lg border border-borde px-3 py-1.5 text-sm lg:hidden"
+              [attr.aria-expanded]="menuAbierto()" aria-controls="menu" (click)="menuAbierto.set(!menuAbierto())">
+        Menú
+      </button>
+    </div>
+    <nav id="menu" class="px-2 pb-3 lg:block lg:px-3" [class.hidden]="!menuAbierto()" aria-label="Secciones">
+      <ul class="grid gap-0.5">
+        @for (e of enlaces; track e.ruta) {
+          <li>
+            <a [routerLink]="e.ruta" routerLinkActive="bg-acento-suave text-acento font-medium"
+               ariaCurrentWhenActive="page" (click)="menuAbierto.set(false)"
+               class="block rounded-lg px-3 py-2 text-sm text-texto/80 transition hover:bg-borde/40">{{ e.texto }}</a>
+          </li>
+        }
+      </ul>
+      <p class="mt-6 hidden px-3 text-xs leading-relaxed text-tenue lg:block">
+        UNIR · Sistemas Cognitivos Artificiales<br />Actividad 2 · Transformers y LLM
+      </p>
+    </nav>
+  </header>
+
+  <main id="contenido" class="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+    <router-outlet />
+  </main>
+</div>

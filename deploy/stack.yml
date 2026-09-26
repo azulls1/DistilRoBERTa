@@ -1,0 +1,101 @@
+# Docker Swarm · VPS iaGentek · https://distilroberta.iagentek.com.mx
+# Despliegue: deploy/deploy.sh (construye con el sha del commit y exporta TAG).
+version: "3.8"
+
+x-reinicio: &reinicio
+  # "any": un servicio que sale con código 0 también se relanza (con on-failure se queda en 0/1)
+  condition: any
+  delay: 5s
+  window: 60s
+
+services:
+  api:
+    image: distilroberta-backend:${TAG}
+    environment:
+      - DATABASE_URL_FILE=/run/secrets/distilroberta_db_dsn
+      - REDIS_URL=redis://redis:6379/0
+      - REDIS_RESULT_URL=redis://redis:6379/1
+      - CORS_ORIGINS=https://distilroberta.iagentek.com.mx,http://localhost:4200
+    secrets: [distilroberta_db_dsn]
+    networks: [interna, iagenteknet, supabase_maestria]
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources: { limits: { memory: 768M, cpus: "1.0" } }
+      update_config: { order: start-first, failure_action: rollback }
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=iagenteknet
+        - traefik.http.routers.distilroberta-api.rule=Host(`distilroberta.iagentek.com.mx`) && PathPrefix(`/api`)
+        - traefik.http.routers.distilroberta-api.entrypoints=websecure
+        - traefik.http.routers.distilroberta-api.tls.certresolver=letsencryptresolver
+        # Prioridad explícita ALTA: debe ganarle al router del frontend (Host a secas)
+        - traefik.http.routers.distilroberta-api.priority=100
+        - traefik.http.routers.distilroberta-api.service=distilroberta-api
+        - traefik.http.services.distilroberta-api.loadbalancer.server.port=8000
+
+  worker:
+    image: distilroberta-backend:${TAG}
+    command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=INFO", "--concurrency=2", "-n", "clasificador@%h"]
+    environment:
+      - DATABASE_URL_FILE=/run/secrets/distilroberta_db_dsn
+      - REDIS_URL=redis://redis:6379/0
+      - REDIS_RESULT_URL=redis://redis:6379/1
+    secrets: [distilroberta_db_dsn]
+    networks: [interna, supabase_maestria]
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A app.celery_app inspect ping -d clasificador@$$HOSTNAME -t 5 | grep -q pong"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 60s
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources: { limits: { memory: 2G, cpus: "2.0" } }
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    networks: [interna]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources: { limits: { memory: 192M } }
+
+  web:
+    image: distilroberta-frontend:${TAG}
+    networks: [iagenteknet]
+    deploy:
+      replicas: 1
+      restart_policy: *reinicio
+      resources: { limits: { memory: 128M, cpus: "0.5" } }
+      update_config: { order: start-first, failure_action: rollback }
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=iagenteknet
+        - traefik.http.routers.distilroberta-web.rule=Host(`distilroberta.iagentek.com.mx`)
+        - traefik.http.routers.distilroberta-web.entrypoints=websecure
+        - traefik.http.routers.distilroberta-web.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.distilroberta-web.priority=10
+        - traefik.http.routers.distilroberta-web.service=distilroberta-web
+        - traefik.http.services.distilroberta-web.loadbalancer.server.port=80
+
+networks:
+  interna:
+    driver: overlay
+  iagenteknet:
+    external: true
+  supabase_maestria:
+    external: true
+    name: supabase_maestria_internal
+
+secrets:
+  distilroberta_db_dsn:
+    external: true
+    name: distilroberta_db_dsn_v1

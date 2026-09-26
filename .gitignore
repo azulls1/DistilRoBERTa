@@ -1,0 +1,27 @@
+# Entornos
+.venv*/
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Pesos y salidas pesadas (se regeneran con el notebook)
+modelo/
+salidas_entrenamiento/
+*.safetensors
+*.bin
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# BMad: renders locales
+_bmad/render/
+
+# Secretos
+.env
+*.env
+
+.DS_Store
