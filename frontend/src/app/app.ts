@@ -37,7 +37,17 @@ export class App {
     },
     {
       titulo: 'En vivo',
-      enlaces: [{ ruta: '/clasificar', texto: 'Clasificar consulta', icono: 'M13 2L3 14h9l-1 8 10-12h-9z' }],
+      enlaces: [
+        { ruta: '/simulacion', texto: 'Simulación', icono: 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z' },
+        { ruta: '/clasificar', texto: 'Clasificar consulta', icono: 'M13 2L3 14h9l-1 8 10-12h-9z' },
+      ],
+    },
+    {
+      titulo: 'Entrega',
+      enlaces: [
+        { ruta: '/cumplimiento', texto: 'Cumplimiento', criterio: '33/33', icono: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4' },
+        { ruta: '/entregables', texto: 'Entregables', icono: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3' },
+      ],
     },
   ];
 }

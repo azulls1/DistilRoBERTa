@@ -18,6 +18,8 @@ TAG="$(git rev-parse --short=12 HEAD)"
 [[ -n "$(git status --porcelain -- backend frontend deploy)" ]] && TAG="${TAG}-dirty"
 [[ -f modelo/model.safetensors ]] || { echo "Falta modelo/model.safetensors: ejecuta el notebook primero"; exit 1; }
 echo "▶ Desplegando TAG=$TAG"
+# Carpeta entregables/ + manifiesto con SHA-256 (se hornea en la imagen del backend)
+"$RAIZ/.venv-ml/bin/python" ml/preparar_entregables.py
 
 rsync -az --delete -e "ssh -p $PUERTO -i $LLAVE" \
   --exclude .git --exclude '.venv*' --exclude node_modules --exclude dist --exclude .angular \

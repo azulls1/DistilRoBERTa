@@ -17,6 +17,7 @@ services:
       - REDIS_RESULT_URL=redis://redis:6379/1
       - CORS_ORIGINS=https://distilroberta.iagentek.com.mx,http://localhost:4200
     secrets: [distilroberta_db_dsn]
+    volumes: [paquetes:/data/paquetes]
     networks: [interna, iagenteknet, supabase_maestria]
     deploy:
       replicas: 1
@@ -42,6 +43,7 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - REDIS_RESULT_URL=redis://redis:6379/1
     secrets: [distilroberta_db_dsn]
+    volumes: [paquetes:/data/paquetes]
     networks: [interna, supabase_maestria]
     healthcheck:
       test: ["CMD-SHELL", "celery -A app.celery_app inspect ping -d clasificador@$$HOSTNAME -t 5 | grep -q pong"]
@@ -85,6 +87,9 @@ services:
         - traefik.http.routers.distilroberta-web.priority=10
         - traefik.http.routers.distilroberta-web.service=distilroberta-web
         - traefik.http.services.distilroberta-web.loadbalancer.server.port=80
+
+volumes:
+  paquetes:   # ZIP de entregables generados desde la web (compartido por api y worker)
 
 networks:
   interna:

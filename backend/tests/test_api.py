@@ -52,7 +52,8 @@ def test_clasificar_encola(cliente, monkeypatch):
 def test_tarea_completada(cliente, monkeypatch):
     monkeypatch.setattr(consultas, "inferencia_por_tarea", lambda t: {
         "estado": "completada", "clase": "card_arrival", "nombre_legible": "card arrival", "confianza": 0.98,
-        "top5": [{"clase": "card_arrival", "prob": 0.98}], "duracion_ms": 30, "error": None})
+        "top5": [{"clase": "card_arrival", "prob": 0.98}], "duracion_ms": 30, "error": None,
+        "tokens": [{"id": 0, "token": "<s>"}], "texto_limpio": "still received card"})
     r = cliente.get("/api/tareas/abc").json()
     assert r["estado"] == "completada" and r["resultado"]["clase"] == "card_arrival"
 
@@ -60,3 +61,30 @@ def test_tarea_completada(cliente, monkeypatch):
 def test_tarea_inexistente(cliente, monkeypatch):
     monkeypatch.setattr(consultas, "inferencia_por_tarea", lambda t: None)
     assert cliente.get("/api/tareas/nada").status_code == 404
+
+
+def test_muestra_tipo_invalido(cliente):
+    assert cliente.get("/api/simulacion/muestra?tipo=otro").status_code == 422
+
+
+@pytest.mark.parametrize("ruta", ["../../etc/passwd", "no_registrado.txt"])
+def test_archivo_no_registrado_no_se_sirve(cliente, monkeypatch, ruta):
+    monkeypatch.setattr(consultas, "entregable_por_ruta", lambda cid, r: None)
+    assert cliente.get("/api/entregables/archivo", params={"ruta": ruta}).status_code == 404
+
+
+def test_archivo_registrado_fuera_de_la_carpeta_no_se_sirve(cliente, monkeypatch, tmp_path):
+    from app import config as cfg
+    monkeypatch.setattr(consultas, "entregable_por_ruta", lambda cid, r: {"ruta": r, "nombre": "x"})
+    monkeypatch.setattr(cfg.config(), "dir_entregables", tmp_path)
+    assert cliente.get("/api/entregables/archivo", params={"ruta": "../secreto"}).status_code == 404
+
+
+def test_archivo_registrado_se_descarga(cliente, monkeypatch, tmp_path):
+    from app import config as cfg
+    (tmp_path / "figuras").mkdir()
+    (tmp_path / "figuras" / "a.png").write_bytes(b"png")
+    monkeypatch.setattr(consultas, "entregable_por_ruta", lambda cid, r: {"ruta": r, "nombre": "a"})
+    monkeypatch.setattr(cfg.config(), "dir_entregables", tmp_path)
+    r = cliente.get("/api/entregables/archivo", params={"ruta": "figuras/a.png"})
+    assert r.status_code == 200 and r.content == b"png"

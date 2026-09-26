@@ -18,6 +18,8 @@ class Config:
         self.redis_url = os.getenv("REDIS_URL", "redis://redis:6379/0")
         self.redis_resultados = os.getenv("REDIS_RESULT_URL", "redis://redis:6379/1")
         self.ruta_modelo = os.getenv("MODELO_DIR", "/app/modelo")
+        self.dir_entregables = Path(os.getenv("ENTREGABLES_DIR", "/app/entregables"))
+        self.dir_paquetes = Path(os.getenv("PAQUETES_DIR", "/data/paquetes"))
         self.cors = [o.strip() for o in os.getenv(
             "CORS_ORIGINS", "https://distilroberta.iagentek.com.mx,http://localhost:4200").split(",") if o.strip()]
         self.max_caracteres = 512

@@ -1,6 +1,10 @@
 import { Component, computed, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { Estado } from '../componentes/estado';
+import { Encabezado } from '../componentes/encabezado';
+import { Narracion } from '../componentes/narracion';
+import { NARRACIONES } from '../core/narraciones';
+
 import { Clase } from '../core/modelos';
 import { dec } from '../core/formato';
 
@@ -8,15 +12,13 @@ type Columna = 'nombre' | 'precision' | 'recall' | 'f1' | 'errores' | 'n_train';
 
 @Component({
   selector: 'app-clases',
-  imports: [Estado],
+  imports: [Encabezado, Narracion, Estado],
   template: `
-    <header class="mb-6 grid gap-2">
-      <h1 class="titulo">Desempeño por clase</h1>
-      <p class="max-w-3xl text-tenue">
-        Precision, recall y F1 de cada una de las 77 intenciones sobre las 40 consultas de prueba de cada clase.
-        En verde, las siete mejor clasificadas; en rojo, las siete con más errores.
-      </p>
-    </header>
+    <app-encabezado titulo="Desempeño por clase" icono="lista" etiqueta="C2 · 2.5 pts">
+      <span entrada>Precision, recall y F1 de cada una de las 77 intenciones sobre las 40 consultas de prueba de cada clase.
+        En verde, las siete mejor clasificadas; en rojo, las siete con más errores.</span>
+    </app-encabezado>
+    <app-narracion class="mb-6 block animate-fadeInUp" [src]="narracion.src" [titulo]="narracion.titulo" [transcripcion]="narracion.texto" />
 
     <app-estado [cargando]="r.isLoading()" [error]="r.error()" [vacio]="!r.value()?.length" (reintentar)="r.reload()">
       <section class="grid gap-6 lg:grid-cols-2">
@@ -83,6 +85,7 @@ type Columna = 'nombre' | 'precision' | 'recall' | 'f1' | 'errores' | 'n_train';
   `,
 })
 export class ClasesPagina {
+  protected readonly narracion = NARRACIONES.transformer;
   protected readonly r = httpResource<Clase[]>(() => '/api/clases');
   protected readonly dec = dec;
   protected readonly filtro = signal('');

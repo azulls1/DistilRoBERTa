@@ -1,6 +1,8 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { HttpClient, httpResource } from '@angular/common/http';
 import { Estado } from '../componentes/estado';
+import { Encabezado } from '../componentes/encabezado';
+
 import { Barras } from '../componentes/barras';
 import { EstadoTarea, Inferencia } from '../core/modelos';
 import { legible, pct } from '../core/formato';
@@ -18,15 +20,12 @@ const ESPANOL = /\b(el|la|los|las|mi|tarjeta|cuenta|dinero|por qué|cómo|transf
 
 @Component({
   selector: 'app-clasificar',
-  imports: [Estado, Barras],
+  imports: [Encabezado, Estado, Barras],
   template: `
-    <header class="mb-6 grid gap-2">
-      <h1 class="titulo">Clasificar una consulta</h1>
-      <p class="max-w-3xl text-tenue">
-        Escribe una consulta bancaria en inglés. La petición se encola (Celery + Redis) y un worker la clasifica con el
-        DistilRoBERTa afinado, en CPU.
-      </p>
-    </header>
+    <app-encabezado titulo="Clasificar una consulta" icono="rayo" etiqueta="En vivo · Celery + Redis">
+      <span entrada>Escribe una consulta bancaria en inglés. La petición se encola (Celery + Redis) y un worker la clasifica con el
+        DistilRoBERTa afinado, en CPU.</span>
+    </app-encabezado>
 
     <section class="panel">
       <form class="grid gap-3" (submit)="$event.preventDefault(); enviar()">

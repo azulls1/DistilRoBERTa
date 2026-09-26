@@ -3,16 +3,23 @@ import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Estado } from '../componentes/estado';
 import { Kpi } from '../componentes/kpi';
+import { Icono, NombreIcono } from '../componentes/icono';
+import { Narracion } from '../componentes/narracion';
+import { NARRACIONES } from '../core/narraciones';
 import { Curva } from '../componentes/curva';
 import { Epoca, Resumen } from '../core/modelos';
 import { num, pct } from '../core/formato';
 
 @Component({
   selector: 'app-resumen',
-  imports: [Estado, Kpi, Curva, RouterLink],
+  imports: [Estado, Kpi, Curva, RouterLink, Icono, Narracion],
   template: `
     <section class="card-hero mb-8" aria-labelledby="titulo-hero">
-      <div class="pointer-events-none absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 24px 24px;"></div>
+      <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div class="orbe absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[#5B7065]/25 blur-3xl"></div>
+        <div class="orbe orbe--lento absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-[#9EADA3]/15 blur-3xl"></div>
+        <div class="absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 24px 24px;"></div>
+      </div>
       <div class="relative">
         <div class="mb-5 flex flex-wrap justify-center gap-2">
           <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-medium tracking-wide text-white/85">
@@ -32,25 +39,28 @@ import { num, pct } from '../core/formato';
         <p class="mx-auto mt-2 max-w-xl text-xs text-white/50">Todas las cifras salen de la ejecución del notebook y se leen de la base de datos.</p>
         <p class="mt-5 text-base font-semibold text-white">Adonai Samael Hernández Mata</p>
         <div class="mt-6 flex flex-wrap justify-center gap-3">
-          <a routerLink="/explicaciones" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-forest transition hover:-translate-y-px">Ver explicaciones del LLM →</a>
+          <a routerLink="/simulacion" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-forest transition hover:-translate-y-px"><app-icono nombre="simulacion" clase="h-4 w-4" /> Probar la simulación</a>
+          <a routerLink="/entregables" class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"><app-icono nombre="descarga" clase="h-4 w-4" /> Entregables</a>
           <a href="https://github.com/azulls1/DistilRoBERTa" target="_blank" rel="noopener"
-             class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10">GitHub</a>
+             class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"><app-icono nombre="github" clase="h-4 w-4" /> GitHub</a>
         </div>
       </div>
     </section>
 
+    <app-narracion class="mb-8 block animate-fadeInUp" [src]="narracion.src" [titulo]="narracion.titulo" [transcripcion]="narracion.texto" />
+
     <app-estado [cargando]="r.isLoading()" [error]="r.error()" [vacio]="!r.hasValue()" (reintentar)="r.reload()">
       @if (r.value(); as d) {
         <h2 class="seccion">Resultados en prueba</h2>
-        <section class="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Indicadores principales">
-          <app-kpi etiqueta="Accuracy en prueba" [valor]="pct(d.corrida.accuracy)" [detalle]="num(d.corrida.n_test) + ' consultas'" />
-          <app-kpi etiqueta="F1 macro" [valor]="pct(d.corrida.f1_macro)" detalle="promedio sin ponderar de 77 clases" />
-          <app-kpi etiqueta="Errores" [valor]="num(d.n_errores)" [detalle]="'de ' + num(d.corrida.n_test)" />
-          <app-kpi etiqueta="Clases" [valor]="num(d.n_clases)" detalle="intenciones bancarias" />
-          <app-kpi etiqueta="Entrenamiento" [valor]="num(d.corrida.n_train)" [detalle]="'+ ' + num(d.corrida.n_val) + ' de validación'" />
-          <app-kpi etiqueta="Mejor época" [valor]="'' + (d.corrida.hiperparametros['mejor_epoca'] ?? '—')" [detalle]="'de ' + d.corrida.hiperparametros['epocas_max'] + ' máx., early stopping'" />
-          <app-kpi etiqueta="Duración" [valor]="minutos(d.corrida.duracion_entrenamiento_s)" [detalle]="'dispositivo: ' + d.corrida.dispositivo" />
-          <app-kpi etiqueta="Prompt LLM" [valor]="'Config. ' + (d.corrida.hiperparametros['config_llm'] ?? '—')" [detalle]="temperatura(d)" />
+        <section class="stagger-children grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Indicadores principales">
+          <app-kpi icono="diana" etiqueta="Accuracy en prueba" [valor]="pct(d.corrida.accuracy)" [detalle]="num(d.corrida.n_test) + ' consultas'" />
+          <app-kpi icono="grafica" etiqueta="F1 macro" [valor]="pct(d.corrida.f1_macro)" detalle="promedio sin ponderar de 77 clases" />
+          <app-kpi icono="alerta" etiqueta="Errores" [valor]="num(d.n_errores)" [detalle]="'de ' + num(d.corrida.n_test)" />
+          <app-kpi icono="etiqueta" etiqueta="Clases" [valor]="num(d.n_clases)" detalle="intenciones bancarias" />
+          <app-kpi icono="datos" etiqueta="Entrenamiento" [valor]="num(d.corrida.n_train)" [detalle]="'+ ' + num(d.corrida.n_val) + ' de validación'" />
+          <app-kpi icono="reiniciar" etiqueta="Mejor época" [valor]="'' + (d.corrida.hiperparametros['mejor_epoca'] ?? '—')" [detalle]="'de ' + d.corrida.hiperparametros['epocas_max'] + ' máx., early stopping'" />
+          <app-kpi icono="reloj" etiqueta="Duración" [valor]="minutos(d.corrida.duracion_entrenamiento_s)" [detalle]="'dispositivo: ' + d.corrida.dispositivo" />
+          <app-kpi icono="termometro" etiqueta="Prompt LLM" [valor]="'Config. ' + (d.corrida.hiperparametros['config_llm'] ?? '—')" [detalle]="temperatura(d)" />
         </section>
 
         <section class="mt-6 grid gap-6 lg:grid-cols-2">
@@ -70,19 +80,31 @@ import { num, pct } from '../core/formato';
           </div>
         </section>
 
-        <section class="panel mt-6">
-          <h2 class="mb-3 font-semibold">Cómo se hizo</h2>
-          <ol class="grid gap-3 text-sm md:grid-cols-3">
-            <li><span class="font-medium">1. Análisis exploratorio.</span> Longitudes, limpieza, n-gramas, nube de palabras y balance de clases. <a routerLink="/eda" class="font-medium text-pine underline underline-offset-2 hover:text-forest">Ver</a></li>
-            <li><span class="font-medium">2. Fine-tuning.</span> {{ d.corrida.modelo_base }}, max_length {{ d.corrida.hiperparametros['max_length'] }}, lr {{ d.corrida.hiperparametros['learning_rate'] }}, lote {{ d.corrida.hiperparametros['lote'] }}. <a routerLink="/clases" class="font-medium text-pine underline underline-offset-2 hover:text-forest">Ver</a></li>
-            <li><span class="font-medium">3. Explicación de errores.</span> {{ d.corrida.llm }} sobre 20 errores, con revisión manual. <a routerLink="/explicaciones" class="font-medium text-pine underline underline-offset-2 hover:text-forest">Ver</a></li>
-          </ol>
+        <h2 class="seccion mt-8">Explora la actividad</h2>
+        <section class="stagger-children grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          @for (t of tarjetas; track t.ruta) {
+            <a [routerLink]="t.ruta" class="panel group flex flex-col gap-3 transition duration-300 hover:-translate-y-1">
+              <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-acento-suave text-pine transition group-hover:bg-forest group-hover:text-white">
+                <app-icono [nombre]="t.icono" clase="h-5 w-5" /></span>
+              <span class="font-mono text-[10px] uppercase tracking-[0.12em] text-moss">{{ t.criterio }}</span>
+              <span class="font-display font-semibold text-forest">{{ t.titulo }}</span>
+              <span class="text-sm text-tenue">{{ t.texto }}</span>
+              <span class="mt-auto inline-flex items-center gap-1 text-xs font-medium text-pine">Abrir <app-icono nombre="flecha" clase="h-3.5 w-3.5 transition group-hover:translate-x-1" /></span>
+            </a>
+          }
         </section>
       }
     </app-estado>
   `,
 })
 export class ResumenPagina {
+  protected readonly narracion = NARRACIONES.recorrido;
+  protected readonly tarjetas: { ruta: string; icono: NombreIcono; criterio: string; titulo: string; texto: string }[] = [
+    { ruta: '/eda', icono: 'grafica', criterio: 'C1 · 15 %', titulo: 'Análisis exploratorio', texto: 'Longitudes, limpieza, n-gramas, nube de palabras y balance de las 77 clases.' },
+    { ruta: '/clases', icono: 'lista', criterio: 'C2 · 25 %', titulo: 'Transformer', texto: 'Fine-tuning de DistilRoBERTa, métricas por clase y las 7 mejores y 7 peores.' },
+    { ruta: '/explicaciones', icono: 'mensaje', criterio: 'C3 · 30 %', titulo: 'Prompt con Falcon-7b', texto: 'Calibración de temperatura y longitud, 20 explicaciones y su revisión manual.' },
+    { ruta: '/simulacion', icono: 'simulacion', criterio: 'En vivo', titulo: 'Simulación', texto: 'Una consulta real, paso a paso: tokens, 6 capas, top-5 y la respuesta de Falcon.' },
+  ];
   protected readonly r = httpResource<Resumen>(() => '/api/resumen');
   protected readonly h = httpResource<Epoca[]>(() => '/api/entrenamiento');
   protected readonly pct = pct;

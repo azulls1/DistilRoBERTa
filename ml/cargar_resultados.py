@@ -96,9 +96,33 @@ def main(dsn: str) -> None:
                         %(salida_cruda)s, %(explicacion)s, %(razon_categoria)s, %(veredicto)s, %(nota_revision)s)""",
             [{**e, "c": cid, "r": id_clase[e["real"]], "p": id_clase[e["predicha"]], "params": Jsonb(e["parametros"])}
              for e in leer("explicaciones.json")])
+
+        # Matriz de cumplimiento del enunciado (catálogo estable: se reemplaza completa)
+        if (ART / "cumplimiento.json").exists():
+            cur.execute(f"delete from {T('cumplimiento')}")
+            cur.executemany(
+                f"""insert into {T('cumplimiento')} (orden, criterio, criterio_nombre, puntos, peso, requisito,
+                        seccion_notebook, ruta_web, evidencia, cumplido)
+                    values (%(orden)s, %(criterio)s, %(criterio_nombre)s, %(puntos)s, %(peso)s, %(requisito)s,
+                            %(seccion_notebook)s, %(ruta_web)s, %(evidencia)s, %(cumplido)s)""",
+                leer("cumplimiento.json"))
+        # Salidas reales de Falcon para la simulación
+        if (ART / "simulacion_llm.json").exists():
+            cur.executemany(
+                f"""insert into {T('simulacion_llm')} (corrida_id, consulta_id, config, salida_cruda, explicacion,
+                        n_oraciones, segundos, revisada)
+                    values (%(c)s, %(consulta_id)s, %(config)s, %(salida_cruda)s, %(explicacion)s, %(n_oraciones)s,
+                            %(segundos)s, %(revisada)s)""",
+                [{**s, "c": cid} for s in leer("simulacion_llm.json")])
+        # Catálogo de entregables con su hash
+        if (ART / "entregables.json").exists():
+            cur.executemany(
+                f"""insert into {T('entregables')} (corrida_id, criterio, tipo, nombre, detalle, ruta, bytes, sha256)
+                    values (%(c)s, %(criterio)s, %(tipo)s, %(nombre)s, %(detalle)s, %(ruta)s, %(bytes)s, %(sha256)s)""",
+                [{**a, "c": cid} for a in leer("entregables.json")["archivos"]])
         conn.commit()
 
-        for tabla in ("clases", "consultas", "predicciones", "confusion", "explicaciones_llm", "calibracion_llm"):
+        for tabla in ("clases", "consultas", "predicciones", "confusion", "explicaciones_llm", "calibracion_llm", "simulacion_llm", "entregables"):
             cur.execute(f"select count(*) from {T(tabla)}" + ("" if tabla in ("clases", "consultas") else " where corrida_id = %s"),
                         () if tabla in ("clases", "consultas") else (cid,))
             print(f"DistilRoBERTa_{tabla}: {cur.fetchone()[0]:,}")

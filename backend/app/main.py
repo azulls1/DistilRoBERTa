@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import redis
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field, field_validator
 
 from . import consultas, db
@@ -137,7 +137,8 @@ def tarea(task_id: str):
     respuesta = {"estado": i["estado"]}
     if i["estado"] == "completada":
         respuesta["resultado"] = {"clase": i["clase"], "nombre_legible": i["nombre_legible"],
-                                  "confianza": i["confianza"], "top5": i["top5"], "duracion_ms": i["duracion_ms"]}
+                                  "confianza": i["confianza"], "top5": i["top5"], "duracion_ms": i["duracion_ms"],
+                                  "tokens": i["tokens"], "texto_limpio": i["texto_limpio"]}
     elif i["estado"] == "error":
         respuesta["error"] = i["error"]
     return respuesta
@@ -146,3 +147,79 @@ def tarea(task_id: str):
 @app.get("/api/inferencias")
 def inferencias(limit: int = Query(20, ge=1, le=100)):
     return consultas.inferencias_recientes(limit)
+
+
+# ── Simulación ──────────────────────────────────────────────────────────────
+@app.get("/api/simulacion/muestra")
+def simulacion_muestra(tipo: str = Query("aleatoria", pattern="^(error|acierto|aleatoria)$")):
+    m = consultas.muestra(_corrida(None), tipo)
+    if not m:
+        raise HTTPException(404, "No hay consultas para ese filtro")
+    return m
+
+
+@app.get("/api/simulacion/llm/{consulta_id}")
+def simulacion_llm(consulta_id: int):
+    return consultas.simulacion_llm(_corrida(None), consulta_id)
+
+
+@app.get("/api/simulacion/calibracion")
+def simulacion_calibracion():
+    return consultas.calibracion_completa(_corrida(None))
+
+
+# ── Cumplimiento del enunciado y entregables ──────────────────────────────
+@app.get("/api/cumplimiento")
+def cumplimiento():
+    return consultas.cumplimiento()
+
+
+@app.get("/api/entregables")
+def entregables():
+    archivos = consultas.entregables(_corrida(None))
+    return {"archivos": archivos, "total_bytes": sum(a["bytes"] for a in archivos),
+            "ultimo_paquete": consultas.ultimo_paquete(), "recientes": consultas.paquetes_recientes()}
+
+
+@app.get("/api/entregables/archivo")
+def entregable_archivo(ruta: str):
+    """Descarga un archivo del catálogo. Solo se sirven rutas registradas (sin recorrer el disco)."""
+    registro = consultas.entregable_por_ruta(_corrida(None), ruta)
+    base = config().dir_entregables.resolve()
+    destino = (base / ruta).resolve() if registro else None
+    if not registro or base not in destino.parents or not destino.is_file():
+        raise HTTPException(404, "Archivo no encontrado")
+    return FileResponse(destino, filename=destino.name)
+
+
+@app.post("/api/entregables/generar", status_code=202)
+def entregables_generar():
+    from .tareas import generar_entregable
+
+    p = consultas.crear_paquete()
+    try:
+        r = generar_entregable.apply_async(args=[p["id"]], task_id=p["id"])
+    except Exception as e:
+        consultas.fallar_paquete(p["id"], f"No se pudo encolar: {e}")
+        raise HTTPException(503, "La cola de trabajos no está disponible") from e
+    consultas.asignar_tarea_paquete(p["id"], r.id)
+    return {"paquete_id": p["id"], "task_id": r.id}
+
+
+@app.get("/api/entregables/paquete/{pid}")
+def entregables_paquete(pid: str):
+    p = consultas.paquete(pid)
+    if not p:
+        raise HTTPException(404, "Paquete no encontrado")
+    return p
+
+
+@app.get("/api/entregables/paquete/{pid}/descargar")
+def entregables_descargar(pid: str):
+    p = consultas.paquete(pid)
+    if not p or p["estado"] != "completada":
+        raise HTTPException(404, "El paquete no existe o todavía no está listo")
+    destino = config().dir_paquetes / p["archivo"]
+    if not destino.is_file():
+        raise HTTPException(410, "El archivo del paquete ya no está en el servidor; genera uno nuevo")
+    return FileResponse(destino, filename=p["archivo"], media_type="application/zip")

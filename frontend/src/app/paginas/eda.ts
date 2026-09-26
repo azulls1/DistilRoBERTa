@@ -1,6 +1,8 @@
 import { Component, computed } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { Estado } from '../componentes/estado';
+import { Encabezado } from '../componentes/encabezado';
+
 import { Barras } from '../componentes/barras';
 import { Kpi } from '../componentes/kpi';
 import { Clase, Eda } from '../core/modelos';
@@ -14,15 +16,12 @@ const NOMBRE_METRICA: Record<string, string> = {
 
 @Component({
   selector: 'app-eda',
-  imports: [Estado, Barras, Kpi],
+  imports: [Encabezado, Estado, Barras, Kpi],
   template: `
-    <header class="mb-6 grid gap-2">
-      <h1 class="titulo">Análisis exploratorio</h1>
-      <p class="max-w-3xl text-tenue">
-        13 083 consultas en inglés (10 003 de entrenamiento y 3 080 de prueba). Las frecuencias se calculan sobre el
-        texto limpio: minúsculas, sin caracteres especiales y sin stopwords.
-      </p>
-    </header>
+    <app-encabezado titulo="Análisis exploratorio" icono="grafica" etiqueta="C1 · 1.5 pts">
+      <span entrada>13 083 consultas en inglés (10 003 de entrenamiento y 3 080 de prueba). Las frecuencias se calculan sobre el
+        texto limpio: minúsculas, sin caracteres especiales y sin stopwords.</span>
+    </app-encabezado>
 
     <app-estado [cargando]="r.isLoading()" [error]="r.error()" [vacio]="!r.hasValue()" (reintentar)="r.reload()">
       @if (r.value(); as d) {

@@ -13,8 +13,11 @@ RUN pip install -r requirements.txt
 COPY backend/app ./app
 # Pesos afinados en el notebook (no están en git; deploy.sh los copia al contexto de build)
 COPY modelo ./modelo
+# Archivos entregables (notebook, PDF, figuras, datos, código): deploy.sh ejecuta ml/preparar_entregables.py
+COPY entregables ./entregables
+RUN mkdir -p /data/paquetes
 
-RUN useradd --uid 10001 --no-create-home app && chown -R app /app
+RUN useradd --uid 10001 --no-create-home app && chown -R app /app /data
 USER app
 
 EXPOSE 8000

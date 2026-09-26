@@ -1,6 +1,10 @@
 import { Component, computed, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { Estado } from '../componentes/estado';
+import { Encabezado } from '../componentes/encabezado';
+import { Narracion } from '../componentes/narracion';
+import { NARRACIONES } from '../core/narraciones';
+
 import { Kpi } from '../componentes/kpi';
 import { Calibracion, Explicacion } from '../core/modelos';
 import { pct } from '../core/formato';
@@ -22,15 +26,13 @@ const RAZON: Record<string, string> = {
 
 @Component({
   selector: 'app-explicaciones',
-  imports: [Estado, Kpi],
+  imports: [Encabezado, Narracion, Estado, Kpi],
   template: `
-    <header class="mb-6 grid gap-2">
-      <h1 class="titulo">Explicaciones del LLM</h1>
-      <p class="max-w-3xl text-tenue">
-        Falcon-7b-instruct explica, en máximo dos oraciones, por qué el clasificador se equivocó en las 20 consultas que
-        falló con más confianza. Cada explicación se revisó a mano y lleva su veredicto.
-      </p>
-    </header>
+    <app-encabezado titulo="Explicaciones del LLM" icono="mensaje" etiqueta="C3 · 3 pts · C4">
+      <span entrada>Falcon-7b-instruct explica, en máximo dos oraciones, por qué el clasificador se equivocó en las 20 consultas que
+        falló con más confianza. Cada explicación se revisó a mano y lleva su veredicto.</span>
+    </app-encabezado>
+    <app-narracion class="mb-6 block animate-fadeInUp" [src]="narracion.src" [titulo]="narracion.titulo" [transcripcion]="narracion.texto" />
 
     <app-estado [cargando]="r.isLoading()" [error]="r.error()" [vacio]="!r.value()?.length" (reintentar)="r.reload()">
       <section class="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Resumen de la revisión manual">
@@ -107,6 +109,7 @@ const RAZON: Record<string, string> = {
   `,
 })
 export class ExplicacionesPagina {
+  protected readonly narracion = NARRACIONES.llm;
   protected readonly r = httpResource<Explicacion[]>(() => '/api/explicaciones');
   protected readonly c = httpResource<Calibracion[]>(() => '/api/calibracion');
   protected readonly pct = pct;

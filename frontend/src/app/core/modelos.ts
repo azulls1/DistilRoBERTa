@@ -122,7 +122,10 @@ export interface Top5 {
 
 export interface EstadoTarea {
   estado: 'pendiente' | 'completada' | 'error';
-  resultado?: { clase: string; nombre_legible: string; confianza: number; top5: Top5[]; duracion_ms: number };
+  resultado?: {
+    clase: string; nombre_legible: string; confianza: number; top5: Top5[]; duracion_ms: number;
+    tokens: { id: number; token: string }[]; texto_limpio: string;
+  };
   error?: string;
 }
 
@@ -133,4 +136,75 @@ export interface Inferencia {
   confianza: number | null;
   estado: string;
   creado_en: string;
+}
+
+export interface Muestra {
+  consulta_id: number;
+  texto: string;
+  real: string;
+  real_legible: string;
+  pred_guardada: string;
+  correcta: boolean;
+  tiene_llm: boolean;
+}
+
+export interface SalidaLlm {
+  config: 'A' | 'B' | 'C';
+  salida_cruda: string;
+  explicacion: string;
+  n_oraciones: number;
+  segundos: number;
+  revisada: boolean;
+}
+
+export interface CalibracionCompleta {
+  orden: number;
+  consulta_id: number;
+  texto: string;
+  real: string;
+  pred: string;
+  veredicto: 'pertinente' | 'parcial' | 'alucinada';
+  configs: { config: 'A' | 'B' | 'C'; explicacion: string; salida_cruda: string; n_oraciones: number; segundos: number }[];
+}
+
+export interface Requisito {
+  orden: number;
+  criterio: string;
+  criterio_nombre: string;
+  puntos: number | null;
+  peso: number | null;
+  requisito: string;
+  seccion_notebook: string;
+  ruta_web: string;
+  evidencia: string;
+  cumplido: boolean;
+}
+
+export interface ArchivoEntregable {
+  criterio: string;
+  tipo: string;
+  nombre: string;
+  detalle: string;
+  ruta: string;
+  bytes: number;
+  sha256: string;
+}
+
+export interface Paquete {
+  id: string;
+  estado: 'pendiente' | 'completada' | 'error';
+  archivo: string | null;
+  bytes: number | null;
+  sha256: string | null;
+  n_archivos: number | null;
+  error?: string | null;
+  creado_en: string;
+  completado_en: string | null;
+}
+
+export interface Entregables {
+  archivos: ArchivoEntregable[];
+  total_bytes: number;
+  ultimo_paquete: Paquete | null;
+  recientes: Paquete[];
 }

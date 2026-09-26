@@ -1,20 +1,19 @@
 import { Component, ElementRef, afterRenderEffect, computed, signal, viewChild } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { Estado } from '../componentes/estado';
+import { Encabezado } from '../componentes/encabezado';
+
 import { Confusion, ErrorPrediccion, Par } from '../core/modelos';
 import { pct } from '../core/formato';
 
 @Component({
   selector: 'app-confusion',
-  imports: [Estado],
+  imports: [Encabezado, Estado],
   template: `
-    <header class="mb-6 grid gap-2">
-      <h1 class="titulo">Matriz de confusión</h1>
-      <p class="max-w-3xl text-tenue">
-        77 × 77 celdas: filas = clase real, columnas = clase predicha. La diagonal (verde bosque) son aciertos; fuera de la
-        diagonal (rojo), errores. Pasa el cursor o toca una celda para ver el detalle.
-      </p>
-    </header>
+    <app-encabezado titulo="Matriz de confusión" icono="cuadricula" etiqueta="C2 · análisis de causas">
+      <span entrada>77 × 77 celdas: filas = clase real, columnas = clase predicha. La diagonal (verde bosque) son aciertos; fuera de la
+        diagonal (rojo), errores. Pasa el cursor o toca una celda para ver el detalle.</span>
+    </app-encabezado>
 
     <app-estado [cargando]="m.isLoading()" [error]="m.error()" [vacio]="!m.hasValue()" (reintentar)="m.reload()">
       <section class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">

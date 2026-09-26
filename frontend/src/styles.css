@@ -56,3 +56,19 @@
 
 code, .mono { font-family: var(--font-mono); font-size: .85em; }
 h1, h2, h3 { font-family: var(--font-display); }
+
+/* ─── Movimiento ─── */
+/* Cada página entra con un desplazamiento suave; las cuadrículas marcadas aparecen escalonadas. */
+router-outlet + * { display: block; animation: fadeInUp 400ms var(--ease-apple) both; }
+.stagger-children > * { animation: fadeInUp var(--duration-slow) var(--ease-apple) backwards; }
+.stagger-children > *:nth-child(n+9) { animation-delay: 540ms; }
+@keyframes flotar { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(18px, -14px); } }
+.orbe { animation: flotar 12s ease-in-out infinite; }
+.orbe--lento { animation-duration: 18s; animation-direction: reverse; }
+@keyframes aparecerToken { from { opacity: 0; transform: translateY(6px) scale(.9); } to { opacity: 1; transform: none; } }
+.token-entra { animation: aparecerToken 280ms var(--ease-spring) backwards; }
+@keyframes pulsoCapa { 0%, 100% { background-color: #EFF2F0; } 50% { background-color: #04202C; color: #fff; } }
+.capa-activa { animation: pulsoCapa 700ms ease-in-out; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+}

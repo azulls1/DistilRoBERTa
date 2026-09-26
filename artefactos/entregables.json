@@ -1,0 +1,293 @@
+{
+ "corrida_id": "2026-09-25T23-53",
+ "archivos": [
+  {
+   "criterio": "Entrega",
+   "tipo": "Notebook",
+   "nombre": "Notebook completo (.ipynb)",
+   "detalle": "Código comentado, análisis, visualizaciones y conclusiones; ejecutado de punta a punta.",
+   "ruta": "SCA_Actividad2_DistilRoBERTa_Banking77.ipynb",
+   "bytes": 1940180,
+   "sha256": "be3f405a2d1daf064b50f0a62091bd0cf477e2fcf702b06f3f45c578394f3e64"
+  },
+  {
+   "criterio": "Entrega",
+   "tipo": "PDF",
+   "nombre": "Notebook exportado a PDF",
+   "detalle": "Versión PDF exigida por el enunciado.",
+   "ruta": "SCA_Actividad2_DistilRoBERTa_Banking77.pdf",
+   "bytes": 3654951,
+   "sha256": "9097094656ee908e16770ed7dedf71e98ede478bacf4c2c4765ffac9e4e9afbf"
+  },
+  {
+   "criterio": "C1",
+   "tipo": "Figura",
+   "nombre": "Distribución de longitud y número de palabras",
+   "detalle": "Sección 2.1 del notebook.",
+   "ruta": "figuras/seccion_2_1.png",
+   "bytes": 38162,
+   "sha256": "d138701963cc428004a0782b89e9bb085be94b5f26daec313e6bf2851ed3de64"
+  },
+  {
+   "criterio": "C1",
+   "tipo": "Figura",
+   "nombre": "Palabras, bigramas y trigramas más frecuentes",
+   "detalle": "Sección 2.3 del notebook.",
+   "ruta": "figuras/seccion_2_3.png",
+   "bytes": 67758,
+   "sha256": "b1fd78aa4f4aedcd403e2927b7991759551ea345a22079c51ab714c77e645a29"
+  },
+  {
+   "criterio": "C1",
+   "tipo": "Figura",
+   "nombre": "Nube de palabras",
+   "detalle": "Sección 2.4 del notebook.",
+   "ruta": "figuras/seccion_2_4.png",
+   "bytes": 412776,
+   "sha256": "f6e92121a2ba4e3a9e4f33d1c9f8d900eecc96b2ea1007a30b9655ab9bb813ed"
+  },
+  {
+   "criterio": "C1",
+   "tipo": "Figura",
+   "nombre": "Balance de clases en entrenamiento",
+   "detalle": "Sección 2.5 del notebook.",
+   "ruta": "figuras/seccion_2_5.png",
+   "bytes": 135035,
+   "sha256": "114edf1853051d6ebbd1fee03b398d2e89c44fb257d4d4eab7a60e3ff3c23db1"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Figura",
+   "nombre": "Curvas de entrenamiento y validación",
+   "detalle": "Sección 3.3 del notebook.",
+   "ruta": "figuras/seccion_3_3.png",
+   "bytes": 54707,
+   "sha256": "a03fc766e677bbc84f4c9752f7de047c02e24f67d18a146bac1155d8ebc51fd0"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Figura",
+   "nombre": "Matriz de confusión (conteos y solo errores)",
+   "detalle": "Sección 3.4 del notebook.",
+   "ruta": "figuras/seccion_3_4.png",
+   "bytes": 411240,
+   "sha256": "e8551e5ff7f9cdf826733041b97fc71ffd64358a3b29ecb5c4fc4f0732752428"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Figura",
+   "nombre": "F1 por clase con las 7 mejores y 7 peores",
+   "detalle": "Sección 3.5 del notebook.",
+   "ruta": "figuras/seccion_3_5.png",
+   "bytes": 133357,
+   "sha256": "2aaa1d94ef812c54a5735e9ba58c411a9e1bc3aedd2087bc74db7fd0b5bbff7d"
+  },
+  {
+   "criterio": "C3",
+   "tipo": "Figura",
+   "nombre": "Veredicto manual y razones del LLM",
+   "detalle": "Sección 4.6 del notebook.",
+   "ruta": "figuras/seccion_4_6.png",
+   "bytes": 24902,
+   "sha256": "8dd1f0e104d2328fbb2dfd5637802624cd6ded6f6dc796af4d5ffb5f68b8b20e"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Datos",
+   "nombre": "corrida.json",
+   "detalle": "Hiperparámetros, accuracy, F1 macro y duración de la corrida",
+   "ruta": "datos/corrida.json",
+   "bytes": 585,
+   "sha256": "8fde95c5f3a56d6c401286d311304600c3ad46872ec2a79c95d3ccb5b8a84a8f"
+  },
+  {
+   "criterio": "C1",
+   "tipo": "Datos",
+   "nombre": "eda.json",
+   "detalle": "Estadísticas descriptivas, n-gramas y balance",
+   "ruta": "datos/eda.json",
+   "bytes": 12641,
+   "sha256": "a134477706e0edd09787d848fb65c299289763ecce139c2cd0a1c645d44b3bf9"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Datos",
+   "nombre": "entrenamiento.json",
+   "detalle": "Pérdida y métricas por época",
+   "ruta": "datos/entrenamiento.json",
+   "bytes": 1361,
+   "sha256": "94abfcc03656469f9a894cf1203a248bc8d3b3475c00957c72c6ea59d45674d5"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Datos",
+   "nombre": "metricas_clase.json",
+   "detalle": "Precision, recall, F1 y errores de las 77 clases",
+   "ruta": "datos/metricas_clase.json",
+   "bytes": 11573,
+   "sha256": "24d3f755267bae48ec4ba8cbd2eb21c214fa1070fa36c5bd3625d350e9f4d2d2"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Datos",
+   "nombre": "confusion.json",
+   "detalle": "Matriz de confusión dispersa",
+   "ruta": "datos/confusion.json",
+   "bytes": 4845,
+   "sha256": "87e4a52113648b50c18bdf9684eb484624847f9bd20658491aea58cbb11bceb6"
+  },
+  {
+   "criterio": "C2",
+   "tipo": "Datos",
+   "nombre": "predicciones.csv",
+   "detalle": "Predicción, confianza y top-5 de las 3 080 consultas de prueba",
+   "ruta": "datos/predicciones.csv",
+   "bytes": 661263,
+   "sha256": "73999353dc1c7a624f761fe6abb0dc00b5f3286e3b4e0944113361f5bcb64e67"
+  },
+  {
+   "criterio": "C3",
+   "tipo": "Datos",
+   "nombre": "calibracion.json",
+   "detalle": "Calibración del prompt: 3 configuraciones × 5 consultas",
+   "ruta": "datos/calibracion.json",
+   "bytes": 8374,
+   "sha256": "09eb1b205ddcf992eecd123e9935544d5f82f57e719d08d6897ae81f181c3f82"
+  },
+  {
+   "criterio": "C3",
+   "tipo": "Datos",
+   "nombre": "explicaciones.json",
+   "detalle": "Las 20 explicaciones de Falcon-7b-instruct con su prompt",
+   "ruta": "datos/explicaciones.json",
+   "bytes": 33508,
+   "sha256": "26eb301b30c7446e8fb8a7a513ed576a4ab8d5a8c2d9c4b6db330f5618617e91"
+  },
+  {
+   "criterio": "C3",
+   "tipo": "Datos",
+   "nombre": "revision_manual.json",
+   "detalle": "Veredicto manual y razón de cada explicación",
+   "ruta": "datos/revision_manual.json",
+   "bytes": 5212,
+   "sha256": "4a25d1ad8cf744fca07933afb3e813d22c34febe9a11d300d80d567fd05ac080"
+  },
+  {
+   "criterio": "C3",
+   "tipo": "Datos",
+   "nombre": "simulacion_llm.json",
+   "detalle": "Salidas reales de Falcon para los 208 errores y A/B/C sobre las 20",
+   "ruta": "datos/simulacion_llm.json",
+   "bytes": 60445,
+   "sha256": "44084165116edd4562e26b0bdf939cee32bc7bc19632e2d5d3bb03bc1f07db1e"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Datos",
+   "nombre": "cumplimiento.json",
+   "detalle": "Matriz de cumplimiento del enunciado (33 requisitos)",
+   "ruta": "datos/cumplimiento.json",
+   "bytes": 11965,
+   "sha256": "eab038a9ebb2ef8256ed15aa3f377c6ed2f8d03fc9f3bcf546e89080b885b21c"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Código",
+   "nombre": "construir_notebook.py",
+   "detalle": "Genera el notebook celda a celda",
+   "ruta": "codigo/construir_notebook.py",
+   "bytes": 46969,
+   "sha256": "fb70446148ddb27f310e60c1c271293d29c373e67adbb502fc5285d96ff88131"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Código",
+   "nombre": "ejecutar_notebook.py",
+   "detalle": "Ejecuta el notebook en un kernel vivo con pausa para la revisión manual",
+   "ruta": "codigo/ejecutar_notebook.py",
+   "bytes": 1631,
+   "sha256": "39c6ef693272512190772d93666501152d8c90ec03105282f224c51fc62105ef"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Código",
+   "nombre": "interpretar.py",
+   "detalle": "Inserta las interpretaciones escritas con las cifras reales",
+   "ruta": "codigo/interpretar.py",
+   "bytes": 17855,
+   "sha256": "25c88789d94099f71662f16f33d68b211eb200306ad8cb9acc2eee732c22a05b"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Código",
+   "nombre": "exportar_pdf.py",
+   "detalle": "Exporta el notebook a PDF",
+   "ruta": "codigo/exportar_pdf.py",
+   "bytes": 2715,
+   "sha256": "26b2bd50b1d571f17f5cb8e051aa1765168092e6fe08278d2eac1c5c97029333"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Código",
+   "nombre": "simulacion_llm.py",
+   "detalle": "Genera las salidas de Falcon para la simulación",
+   "ruta": "codigo/simulacion_llm.py",
+   "bytes": 5892,
+   "sha256": "989fa849cbdde1f5f36bb5d1011d11f7a057e253100a8cc6158ed111aec05eea"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Código",
+   "nombre": "cargar_resultados.py",
+   "detalle": "Carga los resultados en la base de datos",
+   "ruta": "codigo/cargar_resultados.py",
+   "bytes": 6812,
+   "sha256": "aa8c115194718817102b89d2ffb501fef70e8f107411e2323d8c93a5e83d301e"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Documento",
+   "nombre": "README del repositorio",
+   "detalle": "Cómo reproducir todo.",
+   "ruta": "README.md",
+   "bytes": 2885,
+   "sha256": "276cb055e042c9fe10627c33b5d79baa01bcebf980383660c013e527684f011c"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Especificación",
+   "nombre": "constitution.md",
+   "detalle": "Constitución del proyecto (Spec Kit)",
+   "ruta": "especificaciones/constitution.md",
+   "bytes": 4507,
+   "sha256": "65b35bc95b5fff1e8a9c6cce5923453156316cf3eb5040f365a514b6812c38c6"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Especificación",
+   "nombre": "spec.md",
+   "detalle": "Especificación funcional (Spec Kit)",
+   "ruta": "especificaciones/spec.md",
+   "bytes": 12426,
+   "sha256": "bc3b8a733c7fee1cbc5587da04751495542a4322aeb6db2261b0261712fdd58e"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Especificación",
+   "nombre": "plan.md",
+   "detalle": "Plan técnico (Spec Kit)",
+   "ruta": "especificaciones/plan.md",
+   "bytes": 6068,
+   "sha256": "bee2ee53a6baf4612c093b0d2137aba1ad2b894addb7d7f201b97abd29e655b7"
+  },
+  {
+   "criterio": "C5",
+   "tipo": "Especificación",
+   "nombre": "tasks.md",
+   "detalle": "Tareas y criterios de éxito medidos (Spec Kit)",
+   "ruta": "especificaciones/tasks.md",
+   "bytes": 6328,
+   "sha256": "a184520c6f5a44fd162c654c4df4050a29a8391ed4d74a6e5413bc6c359eafc8"
+  }
+ ]
+}

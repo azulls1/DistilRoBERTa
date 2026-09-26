@@ -4,7 +4,8 @@ from . import db
 T = {  # nombres de tabla con la nomenclatura del proyecto
     n: f'public."DistilRoBERTa_{n}"' for n in (
         "corridas", "clases", "consultas", "eda_estadisticas", "eda_balance", "ngramas", "entrenamiento",
-        "metricas_clase", "confusion", "predicciones", "calibracion_llm", "explicaciones_llm", "inferencias")
+        "metricas_clase", "confusion", "predicciones", "calibracion_llm", "explicaciones_llm", "inferencias",
+        "cumplimiento", "simulacion_llm", "entregables", "entregables_generados")
 }
 
 
@@ -108,6 +109,7 @@ def asignar_tarea(inferencia_id: str, task_id: str) -> None:
 def inferencia_por_tarea(task_id: str) -> dict | None:
     return db.uno(
         f"""select i.id::text, i.estado, i.texto, i.confianza::float, i.top5, i.error, i.duracion_ms,
+                   i.tokens, i.texto_limpio,
                    c.nombre as clase, c.nombre_legible
             from {T['inferencias']} i left join {T['clases']} c on c.id = i.clase_pred_id
             where i.task_id = %s""", (task_id,))
@@ -120,13 +122,99 @@ def inferencias_recientes(limite: int) -> list[dict]:
             order by i.creado_en desc limit %s""", (limite,))
 
 
-def completar_inferencia(inferencia_id: str, clase_id: int, confianza: float, top5: list, ms: int) -> None:
+def completar_inferencia(inferencia_id: str, r: dict) -> None:
     from psycopg.types.json import Jsonb
     db.uno(f"""update {T['inferencias']} set estado = 'completada', clase_pred_id = %s, confianza = %s,
-                      top5 = %s, duracion_ms = %s, completado_en = now() where id = %s returning id""",
-           (clase_id, confianza, Jsonb(top5), ms, inferencia_id))
+                      top5 = %s, tokens = %s, texto_limpio = %s, duracion_ms = %s, completado_en = now()
+               where id = %s returning id""",
+           (r["clase_id"], r["confianza"], Jsonb(r["top5"]), Jsonb(r["tokens"]), r["texto_limpio"],
+            r["duracion_ms"], inferencia_id))
 
 
 def fallar_inferencia(inferencia_id: str, error: str) -> None:
     db.uno(f"""update {T['inferencias']} set estado = 'error', error = %s, completado_en = now()
                where id = %s returning id""", (error[:500], inferencia_id))
+
+
+# ── Simulación ──────────────────────────────────────────────────────────────
+def muestra(cid: str, tipo: str) -> dict | None:
+    """Una consulta real del conjunto de prueba: 'error' (el modelo falló), 'acierto' o 'aleatoria'."""
+    filtro = {"error": "and not p.correcta", "acierto": "and p.correcta", "aleatoria": ""}[tipo]
+    return db.uno(
+        f"""select q.id as consulta_id, q.texto, c.nombre as real, c.nombre_legible as real_legible,
+                   pc.nombre as pred_guardada, p.correcta,
+                   exists(select 1 from {T['simulacion_llm']} s where s.corrida_id = p.corrida_id
+                          and s.consulta_id = q.id) as tiene_llm
+            from {T['predicciones']} p join {T['consultas']} q on q.id = p.consulta_id
+                 join {T['clases']} c on c.id = q.clase_id join {T['clases']} pc on pc.id = p.clase_pred_id
+            where p.corrida_id = %s {filtro} order by random() limit 1""", (cid,))
+
+
+def simulacion_llm(cid: str, consulta_id: int) -> list[dict]:
+    return db.todos(
+        f"""select config, salida_cruda, explicacion, n_oraciones, segundos::float, revisada
+            from {T['simulacion_llm']} where corrida_id = %s and consulta_id = %s order by config""",
+        (cid, consulta_id))
+
+
+def calibracion_completa(cid: str) -> list[dict]:
+    """Las 20 consultas revisadas con sus tres configuraciones (A, B, C) y el veredicto de la B."""
+    return db.todos(
+        f"""select e.orden, s.consulta_id, q.texto, r.nombre as real, p.nombre as pred, e.veredicto,
+                   json_agg(json_build_object('config', s.config, 'explicacion', s.explicacion,
+                            'salida_cruda', s.salida_cruda, 'n_oraciones', s.n_oraciones, 'segundos', s.segundos)
+                            order by s.config) as configs
+            from {T['explicaciones_llm']} e
+                 join {T['simulacion_llm']} s on s.corrida_id = e.corrida_id and s.consulta_id = e.consulta_id
+                 join {T['consultas']} q on q.id = e.consulta_id
+                 join {T['clases']} r on r.id = e.clase_real_id join {T['clases']} p on p.id = e.clase_pred_id
+            where e.corrida_id = %s group by e.orden, s.consulta_id, q.texto, r.nombre, p.nombre, e.veredicto
+            order by e.orden""", (cid,))
+
+
+# ── Cumplimiento y entregables ─────────────────────────────────────────────
+def cumplimiento() -> list[dict]:
+    return db.todos(f"select *, puntos::float as puntos from {T['cumplimiento']} order by orden")
+
+
+def entregables(cid: str) -> list[dict]:
+    return db.todos(f"select criterio, tipo, nombre, detalle, ruta, bytes, sha256 from {T['entregables']} "
+                    f"where corrida_id = %s order by id", (cid,))
+
+
+def entregable_por_ruta(cid: str, ruta: str) -> dict | None:
+    return db.uno(f"select ruta, nombre from {T['entregables']} where corrida_id = %s and ruta = %s", (cid, ruta))
+
+
+def crear_paquete() -> dict:
+    return db.uno(f"insert into {T['entregables_generados']} default values returning id::text")
+
+
+def asignar_tarea_paquete(pid: str, task_id: str) -> None:
+    db.uno(f"update {T['entregables_generados']} set task_id = %s where id = %s returning id", (task_id, pid))
+
+
+def completar_paquete(pid: str, archivo: str, n: int, bytes_: int, sha: str) -> None:
+    db.uno(f"""update {T['entregables_generados']} set estado = 'completada', archivo = %s, n_archivos = %s,
+                      bytes = %s, sha256 = %s, completado_en = now() where id = %s returning id""",
+           (archivo, n, bytes_, sha, pid))
+
+
+def fallar_paquete(pid: str, error: str) -> None:
+    db.uno(f"""update {T['entregables_generados']} set estado = 'error', error = %s, completado_en = now()
+               where id = %s returning id""", (error[:500], pid))
+
+
+def paquete(pid: str) -> dict | None:
+    return db.uno(f"select id::text, estado, archivo, bytes, sha256, n_archivos, error, creado_en, completado_en "
+                  f"from {T['entregables_generados']} where id::text = %s or task_id = %s", (pid, pid))
+
+
+def ultimo_paquete() -> dict | None:
+    return db.uno(f"select id::text, estado, archivo, bytes, sha256, n_archivos, creado_en, completado_en "
+                  f"from {T['entregables_generados']} where estado = 'completada' order by completado_en desc limit 1")
+
+
+def paquetes_recientes(limite: int = 5) -> list[dict]:
+    return db.todos(f"select id::text, estado, archivo, bytes, sha256, n_archivos, creado_en, completado_en "
+                    f"from {T['entregables_generados']} order by creado_en desc limit %s", (limite,))

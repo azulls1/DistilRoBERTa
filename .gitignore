@@ -25,3 +25,4 @@ _bmad/render/
 *.env
 
 .DS_Store
+entregables/

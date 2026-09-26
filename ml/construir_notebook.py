@@ -88,8 +88,11 @@ Para Colab basta con descomentar la celda de instalación. Se fija la semilla `4
 librerías para que los resultados sean reproducibles.
 """)
 code("""
-# En Google Colab, descomentar para instalar las dependencias:
+# En Google Colab, descomentar para instalar las dependencias y verificar la GPU:
 # !pip install -q "transformers>=4.46" accelerate datasets scikit-learn nltk wordcloud seaborn bitsandbytes
+# !nvidia-smi          # comprobar GPU T4 y ≥ 15 GB de VRAM libres antes de cargar Falcon-7b
+# Solo si aparece "ValueError: Unable to avoid copy while creating an array":
+# !pip install -q "numpy<=1.24.3"
 """)
 code("""
 # ── Librerías ────────────────────────────────────────────────────────────────
