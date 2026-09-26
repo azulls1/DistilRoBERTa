@@ -472,6 +472,7 @@ sequenceDiagram
 | 💬 LLM | Falcon-7b (≈ 14 GB) **no** se sirve: sus salidas se generaron offline y se publican como datos |
 | 🐘 Datos | Tablas `DistilRoBERTa_*` con RLS forzado; solo el rol de la app las lee; `anon` recibe *permission denied* |
 | 🔐 Secretos | DSN en un secreto de Docker Swarm, nunca en el repositorio |
+| 🛡️ Seguridad web | HSTS, CSP estricta sin scripts inline, anti-*clickjacking*, límite de peticiones por IP, cuerpo máx. 8 KB, escrituras con cabecera anti-CSRF, sin `/docs` públicos, nginx sin privilegios |
 | 🎨 Diseño | Forest Design System de iAgentek (el mismo de las demás apps de la maestría) |
 | 🔊 Narraciones | {len(audios)} de {n_narraciones} con audio generado con ElevenLabs; todas con transcripción en el portal |
 
