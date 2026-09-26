@@ -29,7 +29,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
                      stroke-linejoin="round" class="sidebar-link__icon shrink-0" aria-hidden="true"><path [attr.d]="e.icono" /></svg>
                 <span class="flex-1">{{ e.texto }}</span>
-                @if (e.criterio) { <span class="font-mono text-[10px] text-moss">{{ e.criterio }}</span> }
+                @if (e.criterio ?? insignias()[e.ruta]; as c) { <span class="font-mono text-[10px] text-moss">{{ c }}</span> }
               </a>
             </li>
           }

@@ -204,6 +204,7 @@ export interface Paquete {
 
 export interface Entregables {
   archivos: ArchivoEntregable[];
+  entrega: (ArchivoEntregable & { contenido: { nombre: string; bytes: number }[]; leeme: string }) | null;
   total_bytes: number;
   ultimo_paquete: Paquete | null;
   recientes: Paquete[];

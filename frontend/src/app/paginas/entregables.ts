@@ -7,7 +7,7 @@ import { Kpi } from '../componentes/kpi';
 import { ArchivoEntregable, Entregables, Paquete } from '../core/modelos';
 
 const ICONO_TIPO: Record<string, NombreIcono> = {
-  Notebook: 'libro', PDF: 'archivo', Figura: 'imagen', Datos: 'datos', 'Código': 'codigo', Documento: 'archivo', 'Especificación': 'escudo',
+  Notebook: 'libro', PDF: 'archivo', Paquete: 'paquete', Figura: 'imagen', Datos: 'datos', 'Código': 'codigo', Documento: 'archivo', 'Especificación': 'escudo',
 };
 const NOMBRE_CRITERIO: Record<string, string> = {
   Entrega: 'Entrega', C1: 'C1 · EDA', C2: 'C2 · Transformer', C3: 'C3 · Prompt', C5: 'C5 · Código y referencias',
@@ -32,8 +32,56 @@ const NOMBRE_CRITERIO: Record<string, string> = {
           <app-kpi etiqueta="Paquetes generados" [valor]="'' + d.recientes.length" detalle="últimos registrados" icono="paquete" />
         </section>
 
+        <!-- Entrega para el profesor -->
+        @if (d.entrega; as z) {
+          <h2 class="seccion mt-8">Entrega para el profesor</h2>
+          <section class="card-hero !p-6 !text-left sm:!p-8 animate-fadeInUp">
+            <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+              <div class="orbe absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#5B7065]/25 blur-3xl"></div>
+              <div class="orbe orbe--lento absolute -bottom-24 left-10 h-56 w-56 rounded-full bg-[#9EADA3]/15 blur-3xl"></div>
+            </div>
+            <div class="relative grid gap-6 lg:grid-cols-[1fr_22rem]">
+              <div>
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] text-white/85">
+                  <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span> Listo para subir a Moodle</span>
+                <p class="mt-4 font-display text-2xl font-semibold text-white">{{ z.ruta }}</p>
+                <p class="mt-2 max-w-xl text-sm text-white/70">El paquete que se entrega: notebook ejecutado, su PDF, las figuras y los resultados,
+                  con un LEEME que mapea cada criterio de la rúbrica a su evidencia. Se regenera en cada despliegue a partir de los archivos reales.</p>
+                <div class="mt-5 flex flex-wrap gap-3">
+                  <a [href]="url(z)" download class="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-forest shadow-lg transition hover:-translate-y-0.5">
+                    <app-icono nombre="descarga" clase="h-4 w-4" [grosor]="2" /> Descargar entregable ({{ kb(z.bytes) }})</a>
+                  <button type="button" (click)="verLeeme.set(!verLeeme())" [attr.aria-expanded]="verLeeme()"
+                          class="inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2.5 text-sm text-white transition hover:bg-white/10">
+                    <app-icono nombre="libro" clase="h-4 w-4" /> {{ verLeeme() ? 'Ocultar' : 'Ver' }} LEEME</button>
+                </div>
+                <p class="mt-4 break-all font-mono text-[10px] text-white/50">SHA-256 {{ z.sha256 }}</p>
+              </div>
+              <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+                <p class="mb-2 font-mono text-[10px] uppercase tracking-[0.14em] text-white/50">Contenido · {{ z.contenido.length }} archivos</p>
+                <ul class="grid gap-1 font-mono text-[11px] text-white/85">
+                  @for (g of arbol(); track g.carpeta; let k = $index) {
+                    <li class="animate-fadeInUp" [style.animation-delay.ms]="200 + k * 90">
+                      <span class="flex items-center gap-1.5"><app-icono [nombre]="g.carpeta ? 'paquete' : 'archivo'" clase="h-3.5 w-3.5 text-emerald-300" />
+                        {{ g.carpeta || g.archivos[0].nombre }}@if (g.carpeta) {/ <span class="text-white/45">· {{ g.archivos.length }}</span>}</span>
+                      @if (g.carpeta) {
+                        <ul class="ml-5 mt-0.5 grid gap-0.5 border-l border-white/10 pl-2 text-white/60">
+                          @for (a of g.archivos.slice(0, 3); track a.nombre) { <li class="truncate">{{ a.nombre.split('/').pop() }}</li> }
+                          @if (g.archivos.length > 3) { <li class="text-white/40">… {{ g.archivos.length - 3 }} más</li> }
+                        </ul>
+                      }
+                    </li>
+                  }
+                </ul>
+              </div>
+            </div>
+            @if (verLeeme()) {
+              <pre class="relative mt-6 max-h-96 overflow-auto whitespace-pre-wrap rounded-xl bg-black/25 p-4 font-mono text-[11px] leading-relaxed text-white/85 animate-fadeIn">{{ z.leeme }}</pre>
+            }
+          </section>
+        }
+
         <!-- Lo que se sube a Moodle -->
-        <h2 class="seccion mt-8">Lo que se sube a Moodle</h2>
+        <h2 class="seccion mt-8">O descarga por separado</h2>
         <section class="grid gap-4 md:grid-cols-2">
           @for (a of principales(); track a.ruta) {
             <a [href]="url(a)" download class="panel group flex items-center gap-4 transition hover:-translate-y-0.5">
@@ -51,12 +99,12 @@ const NOMBRE_CRITERIO: Record<string, string> = {
         </section>
 
         <!-- Paquete ZIP -->
-        <h2 class="seccion mt-8">Paquete completo</h2>
+        <h2 class="seccion mt-8">Paquete completo del proyecto</h2>
         <section class="card-hero !p-6 !text-left sm:!p-8">
           <div class="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/5 blur-2xl orbe"></div>
           <div class="relative grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
             <div>
-              <p class="font-display text-xl font-semibold text-white">Generar el ZIP de la entrega</p>
+              <p class="font-display text-xl font-semibold text-white">Generar el ZIP con todo el proyecto</p>
               <p class="mt-1 max-w-xl text-sm text-white/70">Un worker de Celery empaqueta los {{ d.archivos.length }} archivos del catálogo más un
                 manifiesto con el SHA-256 de cada uno, y calcula la huella del ZIP. Tarda unos segundos.</p>
               @if (paquete(); as p) {
@@ -143,7 +191,19 @@ export class EntregablesPagina {
   protected readonly generado = signal<Paquete | null>(null);
   protected readonly paquete = computed(() => this.generado() ?? this.r.value()?.ultimo_paquete ?? null);
 
-  protected readonly principales = computed(() => (this.r.value()?.archivos ?? []).filter((a) => a.criterio === 'Entrega'));
+  protected readonly principales = computed(() => (this.r.value()?.archivos ?? []).filter((a) => a.criterio === 'Entrega' && a.tipo !== 'Paquete'));
+  protected readonly verLeeme = signal(false);
+  /** Agrupa el contenido real del ZIP por su carpeta numerada. */
+  protected readonly arbol = computed(() => {
+    const grupos = new Map<string, { nombre: string; bytes: number }[]>();
+    for (const a of this.r.value()?.entrega?.contenido ?? []) {
+      const carpeta = a.nombre.includes('/') ? a.nombre.split('/')[0] : '';
+      const clave = carpeta || a.nombre;
+      if (!grupos.has(clave)) grupos.set(clave, []);
+      grupos.get(clave)!.push(a);
+    }
+    return [...grupos.entries()].map(([k, archivos]) => ({ carpeta: archivos[0].nombre.includes('/') ? k : '', archivos }));
+  });
   protected readonly figuras = computed(() => (this.r.value()?.archivos ?? []).filter((a) => a.tipo === 'Figura'));
   protected readonly criterios = computed(() => {
     const a = this.r.value()?.archivos ?? [];

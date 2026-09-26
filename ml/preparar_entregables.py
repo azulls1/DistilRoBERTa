@@ -64,6 +64,86 @@ def sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
 
+ZIP_ENTREGA = "entregable-actividad-2-adonai-hernandez.zip"
+CARPETAS_ZIP = {"Notebook": "01-notebook", "PDF": "02-pdf", "Figura": "03-figuras"}
+RESULTADOS_ZIP = {"corrida.json", "metricas_clase.json", "explicaciones.json", "revision_manual.json",
+                  "calibracion.json", "cumplimiento.json"}
+
+
+def construir_zip_entrega(items: list[dict]) -> str:
+    """ZIP que se sube a Moodle. El LEEME se escribe con las cifras de los artefactos, no a mano."""
+    import zipfile
+    from collections import defaultdict
+    from datetime import date
+
+    art = RAIZ / "artefactos"
+    c = json.load(open(art / "corrida.json"))
+    cumpl = json.load(open(art / "cumplimiento.json"))
+    rev = json.load(open(art / "revision_manual.json"))
+    ver = {v: sum(r["veredicto"] == v for r in rev) for v in ("pertinente", "parcial", "alucinada")}
+
+    elegidos = []  # (ruta en catálogo, ruta dentro del zip)
+    for i in items:
+        if i["tipo"] in CARPETAS_ZIP:
+            elegidos.append((i["ruta"], f"{CARPETAS_ZIP[i['tipo']]}/{Path(i['ruta']).name}"))
+        elif i["tipo"] == "Datos" and Path(i["ruta"]).name in RESULTADOS_ZIP:
+            elegidos.append((i["ruta"], f"04-resultados/{Path(i['ruta']).name}"))
+
+    por_crit = defaultdict(list)
+    for q in cumpl:
+        por_crit[q["criterio"]].append(q)
+    filas = []
+    for crit, qs in por_crit.items():
+        if qs[0]["puntos"] is None:
+            continue
+        partes = [x.strip() for q in qs for x in q["seccion_notebook"].split("·") if x.strip() not in ("Todo", "—")]
+        secciones = ", ".join(sorted(dict.fromkeys(partes), key=lambda x: [int(n) for n in x.split(".")]))
+        filas.append(f"| **{crit}** {qs[0]['criterio_nombre']} | {qs[0]['puntos']:g} | "
+                     f"{sum(q['cumplido'] for q in qs)}/{len(qs)} | Notebook § {secciones or 'todo'} |")
+    leeme = f"""# Entregable — Actividad 2: Transformers y Modelos de Lenguaje Grande (LLM)
+
+Autor: **Adonai Samael Hernández Mata**
+Asignatura: Sistemas Cognitivos Artificiales — Maestría en Inteligencia Artificial, UNIR México
+Fecha de generación: {date.today():%d/%m/%Y}
+
+---
+
+## Resultados principales
+
+- DistilRoBERTa afinado: **accuracy {c['accuracy'] * 100:.2f} %** y **F1 macro {c['f1_macro']:.3f}** en {c['n_test']:,} consultas de prueba.
+- Prompt calibrado para Falcon-7b-instruct (configuración {c['hiperparametros']['config_llm']}):
+  {len(rev)} errores explicados → {ver['pertinente']} pertinentes, {ver['parcial']} parciales, {ver['alucinada']} alucinadas (revisión manual).
+
+## Mapeo a la rúbrica ({len(filas)} criterios · 10 pts)
+
+| Criterio | Pts | Exigencias cubiertas | Dónde |
+|---|---|---|---|
+{chr(10).join(filas)}
+
+## Contenido
+
+| Carpeta | Qué contiene |
+|---|---|
+| `01-notebook/` | Notebook ejecutado (.ipynb): código comentado, análisis, visualizaciones y conclusiones |
+| `02-pdf/` | El mismo notebook exportado a PDF |
+| `03-figuras/` | Las figuras del notebook, extraídas de sus salidas |
+| `04-resultados/` | Métricas, explicaciones del LLM, revisión manual y matriz de cumplimiento (JSON) |
+
+`MANIFIESTO_SHA256.txt` trae la huella de cada archivo. Portal con todos los resultados y la simulación:
+https://distilroberta.iagentek.com.mx · Código: https://github.com/azulls1/DistilRoBERTa
+"""
+    destino = DEST / ZIP_ENTREGA
+    raiz = Path(ZIP_ENTREGA).stem
+    manifiesto = []
+    with zipfile.ZipFile(destino, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+        z.writestr(f"{raiz}/LEEME.md", leeme)
+        for origen, dentro in elegidos:
+            z.write(DEST / origen, arcname=f"{raiz}/{dentro}")
+            manifiesto.append(f"{sha(DEST / origen)}  {dentro}")
+        z.writestr(f"{raiz}/MANIFIESTO_SHA256.txt", "\n".join(manifiesto) + "\n")
+    return ZIP_ENTREGA
+
+
 def main():
     if DEST.exists():
         shutil.rmtree(DEST)
@@ -110,6 +190,12 @@ def main():
         for archivo, detalle in ESPECS:
             agregar(ESPEC / archivo, f"especificaciones/{Path(archivo).name}", "C5", "Especificación",
                     Path(archivo).name, detalle)
+
+    # ZIP oficial para el profesor (mismo patrón que las otras actividades: LEEME + carpetas numeradas)
+    zip_ruta = construir_zip_entrega(items)
+    agregar(DEST / zip_ruta, zip_ruta, "Entrega", "Paquete", "Entregable para el profesor (.zip)",
+            "Notebook, PDF, figuras y resultados, con LEEME que mapea cada criterio de la rúbrica a su evidencia.")
+    items.insert(0, items.pop())  # el paquete encabeza el catálogo
 
     json.dump({"corrida_id": corrida, "archivos": items},
               open(RAIZ / "artefactos" / "entregables.json", "w"), indent=1, ensure_ascii=False)

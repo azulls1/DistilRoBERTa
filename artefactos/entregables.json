@@ -3,6 +3,15 @@
  "archivos": [
   {
    "criterio": "Entrega",
+   "tipo": "Paquete",
+   "nombre": "Entregable para el profesor (.zip)",
+   "detalle": "Notebook, PDF, figuras y resultados, con LEEME que mapea cada criterio de la rúbrica a su evidencia.",
+   "ruta": "entregable-actividad-2-adonai-hernandez.zip",
+   "bytes": 4522004,
+   "sha256": "651fb9511cccc52426f95049090d5b17cc75865bbae8ad6919253640b2ba45e2"
+  },
+  {
+   "criterio": "Entrega",
    "tipo": "Notebook",
    "nombre": "Notebook completo (.ipynb)",
    "detalle": "Código comentado, análisis, visualizaciones y conclusiones; ejecutado de punta a punta.",

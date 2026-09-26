@@ -320,7 +320,7 @@
   "requisito": "Notebook autoexplicativo: análisis, visualizaciones y reflexiones escritas",
   "seccion_notebook": "Todo",
   "ruta_web": "/entregables",
-  "evidencia": "9 celdas con figuras y una interpretación escrita por sección.",
+  "evidencia": "8 celdas con figuras y una interpretación escrita por sección.",
   "cumplido": true
  },
  {
@@ -332,7 +332,7 @@
   "requisito": "Referencias",
   "seccion_notebook": "6",
   "ruta_web": "/entregables",
-  "evidencia": "10 referencias académicas (APA).",
+  "evidencia": "10 referencias (APA).",
   "cumplido": true
  },
  {
@@ -356,7 +356,7 @@
   "requisito": "Ejecutable en Colab con GPU T4 · verificar VRAM con !nvidia-smi",
   "seccion_notebook": "0",
   "ruta_web": "/entregables",
-  "evidencia": "Detección CUDA/MPS/CPU; Falcon en 4 bits en Colab; celda de !nvidia-smi; aquí 14.06 GB en MPS.",
+  "evidencia": "Detección CUDA/MPS/CPU; Falcon en 4 bits en Colab; celda de !nvidia-smi; en MPS, float16 (≈ 14 GB medidos en la prueba de carga).",
   "cumplido": true
  },
  {
@@ -392,7 +392,7 @@
   "requisito": "Versión exportada en PDF",
   "seccion_notebook": "—",
   "ruta_web": "/entregables",
-  "evidencia": "PDF de 38 páginas generado desde el notebook ejecutado.",
+  "evidencia": "PDF de 39 páginas generado desde el notebook ejecutado.",
   "cumplido": true
  }
 ]

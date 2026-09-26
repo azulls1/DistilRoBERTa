@@ -19,7 +19,7 @@ const NOMBRE_METRICA: Record<string, string> = {
   imports: [Encabezado, Estado, Barras, Kpi],
   template: `
     <app-encabezado titulo="Análisis exploratorio" icono="grafica" etiqueta="C1 · 1.5 pts">
-      <span entrada>13 083 consultas en inglés (10 003 de entrenamiento y 3 080 de prueba). Las frecuencias se calculan sobre el
+      <span entrada>{{ num(total()) }} consultas en inglés ({{ num(n('train')) }} de entrenamiento y {{ num(n('test')) }} de prueba). Las frecuencias se calculan sobre el
         texto limpio: minúsculas, sin caracteres especiales y sin stopwords.</span>
     </app-encabezado>
 
@@ -74,7 +74,7 @@ const NOMBRE_METRICA: Record<string, string> = {
 
         <section class="panel mt-6">
           <h2 class="mb-1 font-semibold">Consultas por clase (entrenamiento)</h2>
-          <p class="subtitulo mb-4">En prueba todas las clases tienen exactamente 40 consultas.</p>
+          <p class="subtitulo mb-4">{{ textoPrueba() }}</p>
           <app-estado [cargando]="c.isLoading()" [error]="c.error()" (reintentar)="c.reload()">
             <app-barras titulo="Consultas por clase" [datos]="balanceClases()" />
           </app-estado>
@@ -87,6 +87,16 @@ export class EdaPagina {
   protected readonly r = httpResource<Eda>(() => '/api/eda');
   protected readonly c = httpResource<Clase[]>(() => '/api/clases');
   protected readonly dec = dec;
+  protected readonly num = num;
+  /** Tamaño de cada partición según las estadísticas del EDA guardadas en la base. */
+  protected n(particion: string) {
+    return this.r.value()?.estadisticas.find((e) => e.metrica === 'n_caracteres' && e.particion === particion)?.count ?? 0;
+  }
+  protected readonly total = computed(() => this.n('train') + this.n('test'));
+  protected readonly textoPrueba = computed(() => {
+    const v = [...new Set((this.c.value() ?? []).map((c) => c.n_test))];
+    return v.length === 1 ? `En prueba todas las clases tienen exactamente ${v[0]} consultas.` : `En prueba, entre ${Math.min(...v)} y ${Math.max(...v)} consultas por clase.`;
+  });
 
   protected nombreMetrica(m: string) {
     return NOMBRE_METRICA[m] ?? m;

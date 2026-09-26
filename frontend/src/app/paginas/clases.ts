@@ -15,7 +15,7 @@ type Columna = 'nombre' | 'precision' | 'recall' | 'f1' | 'errores' | 'n_train';
   imports: [Encabezado, Narracion, Estado],
   template: `
     <app-encabezado titulo="Desempeño por clase" icono="lista" etiqueta="C2 · 2.5 pts">
-      <span entrada>Precision, recall y F1 de cada una de las 77 intenciones sobre las 40 consultas de prueba de cada clase.
+      <span entrada>Precision, recall y F1 de cada una de las {{ r.value()?.length }} intenciones sobre las {{ soporte() }} consultas de prueba de cada clase.
         En verde, las siete mejor clasificadas; en rojo, las siete con más errores.</span>
     </app-encabezado>
     <app-narracion class="mb-6 block animate-fadeInUp" [src]="narracion.src" [titulo]="narracion.titulo" [transcripcion]="narracion.texto" />
@@ -88,6 +88,7 @@ export class ClasesPagina {
   protected readonly narracion = NARRACIONES.transformer;
   protected readonly r = httpResource<Clase[]>(() => '/api/clases');
   protected readonly dec = dec;
+  protected readonly soporte = computed(() => [...new Set((this.r.value() ?? []).map((c) => c.soporte))].join('–'));
   protected readonly filtro = signal('');
   protected readonly orden = signal<{ col: Columna; asc: boolean }>({ col: 'f1', asc: true });
   protected readonly columnas: { id: Columna; texto: string }[] = [

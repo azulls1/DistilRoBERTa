@@ -174,10 +174,26 @@ def cumplimiento():
     return consultas.cumplimiento()
 
 
+def _entrega(archivos: list[dict]) -> dict | None:
+    """El ZIP oficial para el profesor, con su contenido leído del propio archivo (no de una lista fija)."""
+    import zipfile
+
+    registro = next((a for a in archivos if a["tipo"] == "Paquete"), None)
+    if not registro:
+        return None
+    ruta = config().dir_entregables / registro["ruta"]
+    if not ruta.is_file():
+        return None
+    with zipfile.ZipFile(ruta) as z:
+        contenido = [{"nombre": i.filename.split("/", 1)[1], "bytes": i.file_size} for i in z.infolist() if not i.is_dir()]
+        leeme = next((z.read(i).decode() for i in z.namelist() if i.endswith("LEEME.md")), "")
+    return {**registro, "contenido": contenido, "leeme": leeme}
+
+
 @app.get("/api/entregables")
 def entregables():
     archivos = consultas.entregables(_corrida(None))
-    return {"archivos": archivos, "total_bytes": sum(a["bytes"] for a in archivos),
+    return {"archivos": archivos, "total_bytes": sum(a["bytes"] for a in archivos), "entrega": _entrega(archivos),
             "ultimo_paquete": consultas.ultimo_paquete(), "recientes": consultas.paquetes_recientes()}
 
 

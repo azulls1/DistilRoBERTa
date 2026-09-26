@@ -5,7 +5,8 @@ import { Estado } from '../componentes/estado';
 import { Icono, NombreIcono } from '../componentes/icono';
 import { Barras } from '../componentes/barras';
 import { Curva } from '../componentes/curva';
-import { CalibracionCompleta, Epoca, EstadoTarea, Muestra, SalidaLlm } from '../core/modelos';
+import { CalibracionCompleta, Epoca, EstadoTarea, Explicacion, Muestra, Resumen, SalidaLlm } from '../core/modelos';
+import { num } from '../core/formato';
 import { legible, pct } from '../core/formato';
 
 type Resultado = NonNullable<EstadoTarea['resultado']>;
@@ -45,7 +46,7 @@ const CONFIG = {
       </div>
 
       @if (modo() === 'real') {
-        <p class="mt-4 text-sm text-tenue">Toma al azar una de las 3 080 consultas que el modelo nunca vio en el entrenamiento.</p>
+        <p class="mt-4 text-sm text-tenue">Toma al azar una de las {{ num(resumen.value()?.corrida?.n_test) }} consultas de prueba que el modelo nunca vio en el entrenamiento.</p>
         <div class="mt-3 flex flex-wrap gap-2">
           <button type="button" class="boton" [disabled]="corriendo()" (click)="simularReal('error')"><app-icono nombre="alerta" clase="h-4 w-4" /> Un error del modelo</button>
           <button type="button" class="boton" [disabled]="corriendo()" (click)="simularReal('acierto')"><app-icono nombre="checkCirculo" clase="h-4 w-4" /> Un acierto</button>
@@ -141,7 +142,7 @@ const CONFIG = {
                             <p class="mb-2 text-xs text-tenue">Falcon explicó por qué el modelo eligió <span class="mono text-mal">{{ m.pred_guardada }}</span> en vez de <span class="mono text-bien">{{ m.real }}</span> (configuración B, {{ s.segundos }} s en MPS):</p>
                             <blockquote class="border-l-2 border-forest pl-3 text-sm leading-relaxed text-forest">{{ s.explicacion }}</blockquote>
                             <p class="mt-2 text-xs" [class]="s.revisada ? 'text-pine' : 'text-aviso'">
-                              {{ s.revisada ? 'Es una de las 20 explicaciones revisadas a mano: consulta su veredicto en «Explicaciones del LLM».' : 'Sin revisión manual: en la revisión de 20 casos, el 40 % de las explicaciones de Falcon afirmaba algo falso. Léela con ese filtro.' }}
+                              {{ s.revisada ? 'Es una de las ' + nRevisadas() + ' explicaciones revisadas a mano: consulta su veredicto en «Explicaciones del LLM».' : 'Sin revisión manual: en la revisión de ' + nRevisadas() + ' casos, el ' + pctAlucinadas() + ' de las explicaciones de Falcon afirmaba algo falso. Léela con ese filtro.' }}
                             </p>
                           }
                         </app-estado>
@@ -149,7 +150,7 @@ const CONFIG = {
                         <p class="text-sm text-tenue">El modelo acertó en la evaluación: no hay error que explicar.</p>
                       }
                     } @else {
-                      <p class="text-sm text-tenue">Falcon-7b (≈ 14 GB) no se sirve en vivo: el servidor no tiene GPU. Sus explicaciones se generaron offline para los 208 errores del conjunto de prueba; elige «Un error del modelo» para ver una real.</p>
+                      <p class="text-sm text-tenue">Falcon-7b (7 mil millones de parámetros, ≈ 14 GB en float16) no se sirve en vivo: el servidor no tiene GPU. Sus explicaciones se generaron offline para los {{ num(resumen.value()?.n_errores) }} errores del conjunto de prueba; elige «Un error del modelo» para ver una real.</p>
                     }
                   }
                 }
@@ -165,7 +166,7 @@ const CONFIG = {
       <h2 class="seccion flex items-center gap-2"><app-icono nombre="termometro" clase="h-4 w-4" /> Simulador de calibración del prompt</h2>
       <app-estado [cargando]="cal.isLoading()" [error]="cal.error()" [vacio]="!cal.value()?.length" (reintentar)="cal.reload()">
         <div class="panel grid gap-4">
-          <p class="text-sm text-tenue">Elige uno de los 20 errores revisados y cambia la configuración: las tres salidas son reales, generadas con el mismo prompt y la misma semilla.</p>
+          <p class="text-sm text-tenue">Elige uno de los {{ cal.value()?.length }} errores revisados y cambia la configuración: las tres salidas son reales, generadas con el mismo prompt y la misma semilla.</p>
           <div class="grid gap-3 md:grid-cols-[1fr_auto]">
             <label class="grid gap-1 text-sm"><span class="text-tenue">Error</span>
               <select class="campo" [value]="ordenCal()" (change)="ordenCal.set(+$any($event.target).value)">
@@ -209,10 +210,10 @@ const CONFIG = {
         <div class="panel">
           <div class="mb-4 flex flex-wrap items-center gap-3">
             <button type="button" class="boton" (click)="reproducirEntrenamiento()" [disabled]="reproduciendo()">
-              <app-icono [nombre]="reproduciendo() ? 'reloj' : 'reproducir'" clase="h-4 w-4" /> {{ reproduciendo() ? 'Entrenando…' : 'Reproducir las 8 épocas' }}</button>
+              <app-icono [nombre]="reproduciendo() ? 'reloj' : 'reproducir'" clase="h-4 w-4" /> {{ reproduciendo() ? 'Entrenando…' : 'Reproducir las ' + (h.value()?.length ?? '') + ' épocas' }}</button>
             @if (epocaActual(); as e) {
               <span class="font-mono text-xs text-pine">Época {{ e.epoca }} · pérdida val. {{ e.eval_loss.toFixed(3) }} · accuracy val. {{ pct(e.eval_accuracy, 1) }}
-                @if (e.epoca === 6) { <span class="ml-1 text-bien">← mejor época (early stopping)</span> }</span>
+                @if (e.epoca === mejorEpoca()) { <span class="ml-1 text-bien">← mejor época (early stopping)</span> }</span>
             }
           </div>
           <div class="max-w-3xl"><app-curva titulo="Pérdida por época" [epocas]="epocasVisibles()" [series]="seriesVisibles()" /></div>
@@ -228,7 +229,16 @@ export class SimulacionPagina {
   protected readonly capas = ['capa 1', 'capa 2', 'capa 3', 'capa 4', 'capa 5', 'capa 6', 'softmax'];
   protected readonly claves = ['A', 'B', 'C'] as const;
   protected readonly pct = pct;
+  protected readonly num = num;
   protected readonly leg = legible;
+  protected readonly resumen = httpResource<Resumen>(() => '/api/resumen');
+  private readonly exps = httpResource<Explicacion[]>(() => '/api/explicaciones');
+  protected readonly nRevisadas = computed(() => this.exps.value()?.length ?? 0);
+  protected readonly pctAlucinadas = computed(() => {
+    const e = this.exps.value() ?? [];
+    return e.length ? pct(e.filter((x) => x.veredicto === 'alucinada').length / e.length, 0) : '—';
+  });
+  protected readonly mejorEpoca = computed(() => Number(this.resumen.value()?.corrida?.hiperparametros['mejor_epoca'] ?? 0));
 
   protected readonly modo = signal<'real' | 'propia'>('real');
   protected readonly propia = signal('');

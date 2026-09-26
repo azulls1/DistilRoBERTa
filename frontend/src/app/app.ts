@@ -1,4 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { Requisito } from './core/modelos';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 interface Enlace {
@@ -16,6 +18,14 @@ interface Enlace {
 })
 export class App {
   protected readonly menuAbierto = signal(false);
+  private readonly cumplimiento = httpResource<Requisito[]>(() => '/api/cumplimiento');
+  /** Insignia del menú calculada desde la base, no escrita a mano. */
+  protected readonly insignias = computed<Record<string, string>>(() => {
+    const c = this.cumplimiento.value();
+    const r: Record<string, string> = {};
+    if (c) r['/cumplimiento'] = `${c.filter((q) => q.cumplido).length}/${c.length}`;
+    return r;
+  });
   protected readonly grupos: { titulo: string; enlaces: Enlace[] }[] = [
     {
       titulo: 'Principal',
@@ -45,7 +55,7 @@ export class App {
     {
       titulo: 'Entrega',
       enlaces: [
-        { ruta: '/cumplimiento', texto: 'Cumplimiento', criterio: '33/33', icono: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4' },
+        { ruta: '/cumplimiento', texto: 'Cumplimiento', icono: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM9 12l2 2 4-4' },
         { ruta: '/entregables', texto: 'Entregables', icono: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3' },
       ],
     },

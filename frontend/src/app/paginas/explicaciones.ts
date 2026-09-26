@@ -74,8 +74,8 @@ const RAZON: Record<string, string> = {
       <section class="panel mt-8">
         <h2 class="mb-1 font-semibold">Calibración del prompt</h2>
         <p class="subtitulo mb-4">
-          Tres configuraciones sobre las mismas 5 consultas. A: decodificación codiciosa; B: temperatura 0.3;
-          C: temperatura 1.0 con 150 tokens. La elegida se marca.
+          {{ nConfigs() }} configuraciones sobre las mismas {{ nConsultasCal() }} consultas; los parámetros de cada una
+          salen de la base. La elegida por la regla del notebook se marca.
         </p>
         <app-estado [cargando]="c.isLoading()" [error]="c.error()" (reintentar)="c.reload()">
           <div class="overflow-x-auto">
@@ -86,7 +86,7 @@ const RAZON: Record<string, string> = {
                 @for (k of c.value() ?? []; track $index) {
                   <tr [class.bg-acento-suave]="k.elegida">
                     <td class="max-w-[14rem]">{{ k.consulta }}</td>
-                    <td class="mono">{{ k.config }}@if (k.elegida) { ✓ }</td>
+                    <td class="mono" [title]="parametros(k)">{{ k.config }}@if (k.elegida) { ✓ }<span class="block text-[10px] text-moss">{{ parametros(k) }}</span></td>
                     <td class="text-right tabular-nums" [class.text-mal]="k.n_oraciones > 2">{{ k.n_oraciones }}</td>
                     <td class="text-right tabular-nums">{{ k.n_tokens }}</td>
                     <td class="text-right tabular-nums">{{ pct(k.palabras_ajenas, 0) }}</td>
@@ -113,6 +113,12 @@ export class ExplicacionesPagina {
   protected readonly r = httpResource<Explicacion[]>(() => '/api/explicaciones');
   protected readonly c = httpResource<Calibracion[]>(() => '/api/calibracion');
   protected readonly pct = pct;
+  protected readonly nConfigs = computed(() => new Set((this.c.value() ?? []).map((k) => k.config)).size);
+  protected readonly nConsultasCal = computed(() => new Set((this.c.value() ?? []).map((k) => k.consulta)).size);
+  protected parametros(k: Calibracion) {
+    const p = k.parametros;
+    return (p['temperature'] == null ? 'T→0' : 'T=' + p['temperature']) + ' · ' + p['max_new_tokens'] + ' tok';
+  }
   protected readonly filtro = signal<'todas' | Explicacion['veredicto']>('todas');
   protected readonly filtros = [
     { id: 'todas' as const, texto: 'Todas' },
