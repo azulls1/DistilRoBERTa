@@ -346,7 +346,7 @@ sequenceDiagram
 | 🐘 Datos | Tablas `DistilRoBERTa_*` con RLS forzado; solo el rol de la app las lee; `anon` recibe *permission denied* |
 | 🔐 Secretos | DSN en un secreto de Docker Swarm, nunca en el repositorio |
 | 🎨 Diseño | Forest Design System de iAgentek (el mismo de las demás apps de la maestría) |
-| 🔊 Narraciones | 1 de 3 con audio generado con ElevenLabs; todas con transcripción en el portal |
+| 🔊 Narraciones | 3 de 3 con audio generado con ElevenLabs; todas con transcripción en el portal |
 
 ## 🛠️ Reproducir
 
