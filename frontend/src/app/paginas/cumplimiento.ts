@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { Encabezado } from '../componentes/encabezado';
@@ -20,7 +20,9 @@ import { Requisito } from '../core/modelos';
       <!-- Resumen por criterio -->
       <section class="stagger-children grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         @for (g of grupos(); track g.criterio) {
-          <a [href]="'#' + g.criterio" class="card-stat group relative overflow-hidden transition hover:-translate-y-0.5">
+          <button type="button" (click)="elegir(g.criterio)" [attr.aria-pressed]="criterio() === g.criterio" [attr.aria-controls]="'detalle-cumplimiento'"
+             class="card-stat group relative overflow-hidden text-left transition hover:-translate-y-0.5"
+             [class]="criterio() === g.criterio ? '!border-forest ring-2 ring-forest/20' : ''">
             <div class="flex items-start justify-between gap-2">
               <p class="card-stat__label">{{ g.criterio }} · {{ g.nombre }}</p>
               <span class="flex h-7 w-7 items-center justify-center rounded-full bg-bien-suave text-bien"><app-icono nombre="check" clase="h-4 w-4" [grosor]="2.5" /></span>
@@ -30,7 +32,7 @@ import { Requisito } from '../core/modelos';
             @if (g.peso) {
               <span class="mt-3 block h-1.5 overflow-hidden rounded-full bg-acento-suave"><span class="block h-full rounded-full bg-forest" [style.width.%]="g.peso * 100 / 30"></span></span>
             }
-          </a>
+          </button>
         }
       </section>
 
@@ -39,9 +41,9 @@ import { Requisito } from '../core/modelos';
         ({{ porFuente('Enunciado') }} del enunciado · {{ porFuente('Rúbrica detallada') }} del nivel 4 de la rúbrica · {{ porFuente('Solicitud') }} solicitud), con evidencia en el notebook y en este portal.
       </p>
 
-      <!-- Detalle -->
-      @for (g of grupos(); track g.criterio) {
-        <section class="mt-8 scroll-mt-24" [id]="g.criterio">
+      <!-- Detalle: un criterio a la vez (se elige en las tarjetas) -->
+      @if (grupoActual(); as g) {
+        <section id="detalle-cumplimiento" class="mt-8 scroll-mt-24 animate-fadeIn">
           <h2 class="seccion">{{ g.criterio }} · {{ g.nombre }}</h2>
           <ol class="panel !p-0 divide-y divide-fog/60 overflow-hidden">
             @for (q of g.items; track q.orden) {
@@ -64,6 +66,11 @@ import { Requisito } from '../core/modelos';
               </li>
             }
           </ol>
+          <div class="mt-3 flex items-center justify-between text-sm">
+            <button type="button" class="inline-flex items-center gap-1 text-pine hover:underline disabled:opacity-30 disabled:no-underline" [disabled]="indice() === 0" (click)="mover(-1)">← {{ grupos()[indice() - 1]?.criterio ?? '' }}</button>
+            <span class="font-mono text-[11px] text-moss">criterio {{ indice() + 1 }} de {{ grupos().length }}</span>
+            <button type="button" class="inline-flex items-center gap-1 text-pine hover:underline disabled:opacity-30 disabled:no-underline" [disabled]="indice() === grupos().length - 1" (click)="mover(1)">{{ grupos()[indice() + 1]?.criterio ?? '' }} →</button>
+          </div>
         </section>
       }
     </app-estado>
@@ -73,6 +80,18 @@ export class CumplimientoPagina {
   protected readonly r = httpResource<Requisito[]>(() => '/api/cumplimiento');
   protected porFuente(f: Requisito['fuente']) {
     return (this.r.value() ?? []).filter((q) => q.fuente === f).length;
+  }
+  protected readonly criterio = signal<string | null>(null);
+  protected readonly indice = computed(() => Math.max(0, this.grupos().findIndex((g) => g.criterio === this.criterio())));
+  protected readonly grupoActual = computed(() => this.grupos()[this.indice()] ?? null);
+  protected elegir(c: string) {
+    this.criterio.set(c);
+    const el = document.getElementById('detalle-cumplimiento');
+    if (el && el.getBoundingClientRect().top > innerHeight * 0.8) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  protected mover(d: number) {
+    const g = this.grupos()[this.indice() + d];
+    if (g) this.elegir(g.criterio);
   }
   protected readonly totalCumplidos = computed(() => (this.r.value() ?? []).filter((q) => q.cumplido).length);
   protected readonly grupos = computed(() => {

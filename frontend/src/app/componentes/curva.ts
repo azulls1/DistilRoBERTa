@@ -44,7 +44,8 @@ export class Curva {
   protected readonly P = 40;
 
   private readonly rango = computed(() => {
-    const v = this.series().flatMap((s) => s.valores);
+    const v = this.series().flatMap((s) => s.valores).filter((x) => Number.isFinite(x));
+    if (!v.length) return [0, 1];
     const min = Math.min(...v), max = Math.max(...v);
     const m = (max - min) * 0.1 || 0.05;
     return [Math.max(0, min - m), max + m];

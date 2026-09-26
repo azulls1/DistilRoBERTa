@@ -54,7 +54,7 @@ import { num, pct } from '../core/formato';
         <h2 class="seccion">Resultados en prueba</h2>
         <section class="stagger-children grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="Indicadores principales">
           <app-kpi icono="diana" etiqueta="Accuracy en prueba" [valor]="pct(d.corrida.accuracy)" [detalle]="num(d.corrida.n_test) + ' consultas'" />
-          <app-kpi icono="grafica" etiqueta="F1 macro" [valor]="pct(d.corrida.f1_macro)" detalle="promedio sin ponderar de 77 clases" />
+          <app-kpi icono="grafica" etiqueta="F1 macro" [valor]="pct(d.corrida.f1_macro)" [detalle]="'promedio sin ponderar de ' + d.n_clases + ' clases'" />
           <app-kpi icono="alerta" etiqueta="Errores" [valor]="num(d.n_errores)" [detalle]="'de ' + num(d.corrida.n_test)" />
           <app-kpi icono="etiqueta" etiqueta="Clases" [valor]="num(d.n_clases)" detalle="intenciones bancarias" />
           <app-kpi icono="datos" etiqueta="Entrenamiento" [valor]="num(d.corrida.n_train)" [detalle]="'+ ' + num(d.corrida.n_val) + ' de validación'" />
@@ -102,7 +102,7 @@ export class ResumenPagina {
   protected readonly tarjetas: { ruta: string; icono: NombreIcono; criterio: string; titulo: string; texto: string }[] = [
     { ruta: '/eda', icono: 'grafica', criterio: 'C1 · 15 %', titulo: 'Análisis exploratorio', texto: 'Longitudes, limpieza, n-gramas, nube de palabras y balance de las 77 clases.' },
     { ruta: '/clases', icono: 'lista', criterio: 'C2 · 25 %', titulo: 'Transformer', texto: 'Fine-tuning de DistilRoBERTa, métricas por clase y las 7 mejores y 7 peores.' },
-    { ruta: '/explicaciones', icono: 'mensaje', criterio: 'C3 · 30 %', titulo: 'Prompt con Falcon-7b', texto: 'Calibración de temperatura y longitud, 20 explicaciones y su revisión manual.' },
+    { ruta: '/explicaciones', icono: 'mensaje', criterio: 'C3 · 30 %', titulo: 'Prompt con Falcon-7b', texto: 'Calibración de temperatura, longitud y estructura del prompt; explicaciones de los errores y su revisión manual.' },
     { ruta: '/simulacion', icono: 'simulacion', criterio: 'En vivo', titulo: 'Simulación', texto: 'Una consulta real, paso a paso: tokens, 6 capas, top-5 y la respuesta de Falcon.' },
   ];
   protected readonly r = httpResource<Resumen>(() => '/api/resumen');

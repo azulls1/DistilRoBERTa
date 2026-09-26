@@ -6,13 +6,14 @@ import { Narracion } from '../componentes/narracion';
 import { NARRACIONES } from '../core/narraciones';
 
 import { Clase } from '../core/modelos';
+import { Paginador, pagina } from '../componentes/paginador';
 import { dec } from '../core/formato';
 
 type Columna = 'nombre' | 'precision' | 'recall' | 'f1' | 'errores' | 'n_train';
 
 @Component({
   selector: 'app-clases',
-  imports: [Encabezado, Narracion, Estado],
+  imports: [Encabezado, Narracion, Estado, Paginador],
   template: `
     <app-encabezado titulo="Desempeño por clase" icono="lista" etiqueta="C2 · 2.5 pts">
       <span entrada>Precision, recall y F1 de cada una de las {{ r.value()?.length }} intenciones sobre las {{ soporte() }} consultas de prueba de cada clase.
@@ -37,13 +38,13 @@ type Columna = 'nombre' | 'precision' | 'recall' | 'f1' | 'errores' | 'n_train';
         }
       </section>
 
-      <section class="panel mt-6">
+      <section id="tabla-clases" class="panel mt-6 scroll-mt-24">
         <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <h2 class="font-semibold">Las 77 clases</h2>
-          <label class="grid gap-1 text-sm">
+          <h2 class="font-semibold">Las {{ r.value()?.length }} clases</h2>
+          <label class="grid w-full gap-1 text-sm sm:w-auto">
             <span class="text-tenue">Filtrar por nombre</span>
-            <input class="campo w-64" type="search" placeholder="p. ej. card, transfer, top up"
-                   [value]="filtro()" (input)="filtro.set($any($event.target).value)" />
+            <input class="campo w-full sm:w-64" type="search" placeholder="p. ej. card, transfer, top up"
+                   [value]="filtro()" (input)="filtro.set($any($event.target).value); pag.set(1)" />
           </label>
         </div>
         <div class="overflow-x-auto">
@@ -60,7 +61,7 @@ type Columna = 'nombre' | 'precision' | 'recall' | 'f1' | 'errores' | 'n_train';
               </tr>
             </thead>
             <tbody class="tabular-nums">
-              @for (c of filas(); track c.id) {
+              @for (c of paginaFilas(); track c.id) {
                 <tr [class.bg-bien-suave]="c.categoria === 'mejor'" [class.bg-mal-suave]="c.categoria === 'peor'">
                   <td class="font-medium">{{ c.nombre }}</td>
                   <td class="text-right">{{ dec(c.precision) }}</td>
@@ -80,6 +81,7 @@ type Columna = 'nombre' | 'precision' | 'recall' | 'f1' | 'errores' | 'n_train';
             </tbody>
           </table>
         </div>
+        <app-paginador [total]="filas().length" [(pagina)]="pag" [(tamano)]="tam" [opciones]="[10, 20, 77]" etiqueta="clases" ancla="tabla-clases" />
       </section>
     </app-estado>
   `,
@@ -90,6 +92,8 @@ export class ClasesPagina {
   protected readonly dec = dec;
   protected readonly soporte = computed(() => [...new Set((this.r.value() ?? []).map((c) => c.soporte))].join('–'));
   protected readonly filtro = signal('');
+  protected readonly pag = signal(1);
+  protected readonly tam = signal(10);
   protected readonly orden = signal<{ col: Columna; asc: boolean }>({ col: 'f1', asc: true });
   protected readonly columnas: { id: Columna; texto: string }[] = [
     { id: 'nombre', texto: 'Clase' }, { id: 'precision', texto: 'Precision' }, { id: 'recall', texto: 'Recall' },
@@ -117,7 +121,10 @@ export class ClasesPagina {
       });
   });
 
+  protected readonly paginaFilas = computed(() => pagina(this.filas(), this.pag(), this.tam()));
+
   protected ordenar(col: Columna) {
+    this.pag.set(1);
     this.orden.update((o) => ({ col, asc: o.col === col ? !o.asc : col === 'nombre' }));
   }
   protected flecha(col: Columna) {

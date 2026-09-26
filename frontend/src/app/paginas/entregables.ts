@@ -4,6 +4,7 @@ import { Encabezado } from '../componentes/encabezado';
 import { Estado } from '../componentes/estado';
 import { Icono, NombreIcono } from '../componentes/icono';
 import { Kpi } from '../componentes/kpi';
+import { Paginador, pagina } from '../componentes/paginador';
 import { ArchivoEntregable, Entregables, Paquete } from '../core/modelos';
 
 const ICONO_TIPO: Record<string, NombreIcono> = {
@@ -15,7 +16,7 @@ const NOMBRE_CRITERIO: Record<string, string> = {
 
 @Component({
   selector: 'app-entregables',
-  imports: [Encabezado, Estado, Icono, Kpi],
+  imports: [Encabezado, Estado, Icono, Kpi, Paginador],
   template: `
     <app-encabezado titulo="Entregables" icono="paquete" etiqueta="Entrega · Moodle">
       <span entrada>Todo lo que compone la entrega de la Actividad 2: el notebook y su PDF (lo que pide el enunciado),
@@ -135,9 +136,9 @@ const NOMBRE_CRITERIO: Record<string, string> = {
         </section>
 
         <!-- Figuras -->
-        <h2 class="seccion mt-8">Figuras del notebook</h2>
+        <h2 id="figuras" class="seccion mt-8 scroll-mt-24">Figuras del notebook</h2>
         <section class="stagger-children grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          @for (f of figuras(); track f.ruta) {
+          @for (f of paginaFiguras(); track f.ruta) {
             <a [href]="url(f)" target="_blank" rel="noopener" class="panel group !p-2 transition hover:-translate-y-0.5">
               <span class="block aspect-[4/3] overflow-hidden rounded-lg bg-acento-suave">
                 <img [src]="url(f)" [alt]="f.nombre" loading="lazy" class="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105" />
@@ -147,12 +148,13 @@ const NOMBRE_CRITERIO: Record<string, string> = {
             </a>
           }
         </section>
+        <app-paginador [total]="figuras().length" [(pagina)]="pagFig" [(tamano)]="tamFig" [opciones]="[4, 8]" etiqueta="figuras" ancla="figuras" />
 
         <!-- Catálogo -->
-        <h2 class="seccion mt-8">Catálogo completo</h2>
+        <h2 id="catalogo" class="seccion mt-8 scroll-mt-24">Catálogo completo</h2>
         <div class="mb-3 flex flex-wrap gap-2" role="group" aria-label="Filtrar por criterio">
           @for (c of criterios(); track c.id) {
-            <button type="button" (click)="filtro.set(c.id)" [attr.aria-pressed]="filtro() === c.id"
+            <button type="button" (click)="filtro.set(c.id); pagCat.set(1)" [attr.aria-pressed]="filtro() === c.id"
                     class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition"
                     [class]="filtro() === c.id ? 'border-forest bg-forest text-white' : 'border-fog bg-white text-evergreen hover:border-forest'">
               {{ c.texto }} <span class="rounded-full px-1.5 font-mono text-[10px]" [class]="filtro() === c.id ? 'bg-white/20' : 'bg-acento-suave'">{{ c.n }}</span>
@@ -161,7 +163,7 @@ const NOMBRE_CRITERIO: Record<string, string> = {
         </div>
         <section class="panel !p-0 overflow-hidden">
           <ul class="divide-y divide-fog/60">
-            @for (a of filtrados(); track a.ruta) {
+            @for (a of paginaCatalogo(); track a.ruta) {
               <li class="group flex flex-wrap items-center gap-3 px-4 py-3 transition hover:bg-acento-suave/60">
                 <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-acento-suave text-pine group-hover:bg-forest group-hover:text-white">
                   <app-icono [nombre]="icono(a.tipo)" clase="h-4 w-4" /></span>
@@ -178,6 +180,7 @@ const NOMBRE_CRITERIO: Record<string, string> = {
             }
           </ul>
         </section>
+        <app-paginador [total]="filtrados().length" [(pagina)]="pagCat" [(tamano)]="tamCat" [opciones]="[8, 16, 40]" etiqueta="archivos" ancla="catalogo" />
       }
     </app-estado>
   `,
@@ -187,6 +190,12 @@ export class EntregablesPagina {
   private temporizador: ReturnType<typeof setTimeout> | undefined;
   protected readonly r = httpResource<Entregables>(() => '/api/entregables');
   protected readonly filtro = signal('todos');
+  protected readonly pagFig = signal(1);
+  protected readonly tamFig = signal(4);
+  protected readonly pagCat = signal(1);
+  protected readonly tamCat = signal(8);
+  protected readonly paginaFiguras = computed(() => pagina(this.figuras(), this.pagFig(), this.tamFig()));
+  protected readonly paginaCatalogo = computed(() => pagina(this.filtrados(), this.pagCat(), this.tamCat()));
   protected readonly generando = signal(false);
   protected readonly generado = signal<Paquete | null>(null);
   protected readonly paquete = computed(() => this.generado() ?? this.r.value()?.ultimo_paquete ?? null);

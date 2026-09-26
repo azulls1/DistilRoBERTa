@@ -1,10 +1,11 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { Estado } from '../componentes/estado';
 import { Encabezado } from '../componentes/encabezado';
 
 import { Barras } from '../componentes/barras';
 import { Kpi } from '../componentes/kpi';
+import { Paginador, pagina } from '../componentes/paginador';
 import { Clase, Eda } from '../core/modelos';
 import { dec, num } from '../core/formato';
 
@@ -16,7 +17,7 @@ const NOMBRE_METRICA: Record<string, string> = {
 
 @Component({
   selector: 'app-eda',
-  imports: [Encabezado, Estado, Barras, Kpi],
+  imports: [Encabezado, Estado, Barras, Kpi, Paginador],
   template: `
     <app-encabezado titulo="Análisis exploratorio" icono="grafica" etiqueta="C1 · 1.5 pts">
       <span entrada>{{ num(total()) }} consultas en inglés ({{ num(n('train')) }} de entrenamiento y {{ num(n('test')) }} de prueba). Las frecuencias se calculan sobre el
@@ -46,18 +47,27 @@ const NOMBRE_METRICA: Record<string, string> = {
           </table>
         </section>
 
-        <section class="mt-6 grid gap-6 lg:grid-cols-3">
-          <div class="panel"><h2 class="mb-3 font-semibold">15 palabras más frecuentes</h2>
-            <app-barras titulo="Palabras más frecuentes" [datos]="barras(d.ngramas.palabra.slice(0, 15))" /></div>
-          <div class="panel"><h2 class="mb-3 font-semibold">10 bigramas</h2>
-            <app-barras titulo="Bigramas más frecuentes" [datos]="barras(d.ngramas.bigrama, 'bien')" /></div>
-          <div class="panel"><h2 class="mb-3 font-semibold">10 trigramas</h2>
-            <app-barras titulo="Trigramas más frecuentes" [datos]="barras(d.ngramas.trigrama, 'mal')" /></div>
+        <section class="panel mt-6">
+          <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 class="font-semibold">N-gramas más frecuentes</h2>
+            <div class="flex gap-1 rounded-lg bg-acento-suave p-1" role="tablist" aria-label="Tipo de n-grama">
+              @for (t of tiposNgrama(d); track t.id) {
+                <button type="button" role="tab" [attr.aria-selected]="ngrama() === t.id" (click)="ngrama.set(t.id)"
+                        class="rounded-md px-3 py-1.5 text-xs font-medium transition"
+                        [class]="ngrama() === t.id ? 'bg-forest text-white shadow-sm' : 'text-pine hover:bg-white'">{{ t.texto }}</button>
+              }
+            </div>
+          </div>
+          @switch (ngrama()) {
+            @case ('palabra') { <app-barras titulo="Palabras más frecuentes" [datos]="barras(d.ngramas.palabra.slice(0, 15))" /> }
+            @case ('bigrama') { <app-barras titulo="Bigramas más frecuentes" [datos]="barras(d.ngramas.bigrama, 'bien')" /> }
+            @case ('trigrama') { <app-barras titulo="Trigramas más frecuentes" [datos]="barras(d.ngramas.trigrama, 'mal')" /> }
+          }
         </section>
 
         <section class="panel mt-6">
           <h2 class="mb-1 font-semibold">Nube de palabras</h2>
-          <p class="subtitulo mb-4">Las 100 palabras más frecuentes; el tamaño es proporcional a la frecuencia.</p>
+          <p class="subtitulo mb-4">Las {{ nube().length }} palabras más frecuentes; el tamaño es proporcional a la frecuencia.</p>
           <p class="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 leading-tight">
             @for (p of nube(); track p.ngrama) {
               <span [style.font-size.rem]="p.tam" [style.opacity]="p.op" [class]="p.color" [title]="p.ngrama + ': ' + p.frecuencia">{{ p.ngrama }}</span>
@@ -72,11 +82,12 @@ const NOMBRE_METRICA: Record<string, string> = {
           <app-kpi etiqueta="Entropía normalizada" [valor]="'' + d.balance['entropía normalizada']" [detalle]="'CV = ' + d.balance['coeficiente de variación']" />
         </section>
 
-        <section class="panel mt-6">
+        <section id="balance-clases" class="panel mt-6 scroll-mt-24">
           <h2 class="mb-1 font-semibold">Consultas por clase (entrenamiento)</h2>
           <p class="subtitulo mb-4">{{ textoPrueba() }}</p>
           <app-estado [cargando]="c.isLoading()" [error]="c.error()" (reintentar)="c.reload()">
-            <app-barras titulo="Consultas por clase" [datos]="balanceClases()" />
+            <app-barras titulo="Consultas por clase" [datos]="paginaBalance()" [max]="maxBalance()" />
+            <app-paginador [total]="balanceClases().length" [(pagina)]="pagBal" [(tamano)]="tamBal" [opciones]="[15, 30, 77]" etiqueta="clases, de más a menos ejemplos" ancla="balance-clases" />
           </app-estado>
         </section>
       }
@@ -87,6 +98,18 @@ export class EdaPagina {
   protected readonly r = httpResource<Eda>(() => '/api/eda');
   protected readonly c = httpResource<Clase[]>(() => '/api/clases');
   protected readonly dec = dec;
+  protected readonly ngrama = signal<'palabra' | 'bigrama' | 'trigrama'>('palabra');
+  protected tiposNgrama(d: Eda) {
+    return [
+      { id: 'palabra' as const, texto: `${Math.min(15, d.ngramas.palabra.length)} palabras` },
+      { id: 'bigrama' as const, texto: `${d.ngramas.bigrama.length} bigramas` },
+      { id: 'trigrama' as const, texto: `${d.ngramas.trigrama.length} trigramas` },
+    ];
+  }
+  protected readonly pagBal = signal(1);
+  protected readonly tamBal = signal(15);
+  protected readonly paginaBalance = computed(() => pagina(this.balanceClases(), this.pagBal(), this.tamBal()));
+  protected readonly maxBalance = computed(() => Math.max(1, ...this.balanceClases().map((b) => b.valor)));
   protected readonly num = num;
   /** Tamaño de cada partición según las estadísticas del EDA guardadas en la base. */
   protected n(particion: string) {
