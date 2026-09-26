@@ -177,6 +177,7 @@ export interface Requisito {
   seccion_notebook: string;
   ruta_web: string;
   evidencia: string;
+  fuente: 'Enunciado' | 'Rúbrica detallada' | 'Solicitud';
   cumplido: boolean;
 }
 

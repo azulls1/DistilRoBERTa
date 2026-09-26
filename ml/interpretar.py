@@ -43,8 +43,34 @@ consultas (`contactless_not_working`) a **187** (`card_payment_fee_charged`), un
 (1 = uniforme): ninguna clase domina y ninguna es marginal. El conjunto de **prueba está
 perfectamente balanceado (40 consultas por clase)**, así que accuracy y F1 macro miden casi lo
 mismo y no hace falta reponderar clases; basta con vigilar el recall de las clases pequeñas.
+
+**Implicaciones para el modelo de clasificación** (lo que este análisis decide antes de entrenar):
+
+1. **Consultas cortas** (mediana de 13 tokens, máximo 96) → `max_length = 128` no trunca ninguna consulta
+   y un lote de 32 cabe holgado en memoria.
+2. **Vocabulario compartido entre intenciones** (*virtual card*, *exchange rate*, *top up*) → hace falta un
+   modelo contextual, no una bolsa de palabras. Y se anticipa que las familias transferencias, recargas y
+   tarjetas concentrarán las confusiones: se comprueba en la sección 3.6.
+3. **Las stopwords llevan intención** (*not*, *why*, *still*) → el Transformer recibe el texto original; la
+   limpieza es solo para este análisis.
+4. **Desbalance moderado en train (5.3×) y prueba balanceada** → la época se elige por **F1 macro**, que
+   pesa igual las 77 clases, y en la sección 3.6 se mide si el tamaño de la clase explica los errores.
 """,
 "causas": """
+**¿Lo anticipaba el EDA? Dos hipótesis medidas en la celda anterior.**
+
+- **H1 — el desbalance causa los errores: se rechaza.** La correlación entre el número de ejemplos de
+  entrenamiento de una clase y su F1 es **ρ = −0.14 (p = 0.21)**: no hay relación significativa. Las siete
+  clases con más errores tienen de media **143 ejemplos**, *más* que el promedio (130), y las siete más
+  pequeñas —como `contactless_not_working`, con solo 35— logran un F1 entre **0.886 y 1.0**.
+- **H2 — el solapamiento de n-gramas causa los errores: se confirma.** Los pares de clases que se confunden
+  comparten **9 veces más bigramas frecuentes** que los que nunca se confunden (Jaccard 0.042 frente a
+  0.005; ρ = 0.31, p ≈ 10⁻⁶⁴). `verify_my_identity` ↔ `why_verify_identity` comparten *verify identity*,
+  *identity check* y *need verify*; `card_arrival` ↔ `card_delivery_estimate`, *new card* y *card delivered*.
+  **Matiz:** el par más confundido, `top_up_failed` ↔ `top_up_reverted` (10 errores), no comparte bigramas
+  frecuentes: ahí la confusión es semántica («fallida» y «revertida» se cuentan con palabras distintas pero
+  describen lo mismo para el cliente), algo que un n-grama no captura.
+
 **Las clases problemáticas fallan hacia sus vecinas semánticas, no al azar.** Los siete destinos
 principales tienen una similitud léxica TF-IDF con la clase real que está en el **percentil
 94.8–99.9** de los 2 926 pares posibles; en seis de los siete casos, por encima del percentil 99.
@@ -100,6 +126,22 @@ account») se reparten entre `declined_card_payment` y otras de fallo, porque *d
   dudosas de las familias transferencias/recargas; (2) aumentar datos en los pares confundidos con
   paráfrasis que marquen el matiz (pendiente vs. no recibido); (3) un modelo más grande
   (RoBERTa-base) o un ensamble; (4) calibrar las probabilidades (p. ej. *temperature scaling*).
+""",
+"mejoras": """
+Cada mejora sale de un hallazgo medido en este notebook, no de una lista genérica:
+
+| Hallazgo (sección) | Ajuste propuesto | Por qué | Referencia |
+|---|---|---|---|
+| El desbalance de train (5.3×) **no** explica los errores: ρ = −0.14 (3.6, H1) | **No** priorizar *class weights*; si se prueban, pérdida ponderada por el número efectivo de muestras | Reponderar clases pequeñas que ya aciertan (F1 ≥ 0.886) movería la frontera a costa de las grandes sin atacar la causa | Cui et al. (2019) |
+| Los pares confusos comparten 9× más bigramas (3.6, H2) | ***Data augmentation* textual dirigida** a esos pares: paráfrasis que marquen el matiz (pendiente / no recibido / saldo sin actualizar) con *back-translation* y operaciones EDA | Aumentar datos al azar no ayuda; ampliar la frontera entre clases vecinas sí | Wei y Zou (2019); Sennrich et al. (2016) |
+| ≈ 7 de los 20 errores revisados tienen etiqueta dudosa (4.6) | **Detectar etiquetas ruidosas** con *confident learning* y corregirlas antes de reentrenar | Parte del techo del modelo es ruido de anotación, no capacidad | Northcutt et al. (2021) |
+| El 35 % de los errores se comete con confianza > 0.90 (3.7) | **Calibrar las probabilidades** con *temperature scaling* y derivar a una persona las consultas bajo un umbral | Sin calibrar, la confianza no sirve para abstenerse | Guo et al. (2017) |
+| Las stopwords llevan la intención (2.2) | Mantener el **texto original** como entrada del Transformer (ya aplicado) | RoBERTa se preentrenó con texto sin limpiar; quitar *not* o *why* cambia la intención | Liu et al. (2019) |
+| Confusión semántica residual sin solapamiento léxico: `top_up_failed` ↔ `top_up_reverted` (3.6) | Modelo de más capacidad (RoBERTa-base) o **ensamble** | Más capas de atención separan mejor matices que no dependen de palabras compartidas | Liu et al. (2019); Sanh et al. (2019) |
+
+**El vínculo EDA → ajustes, en una línea:** el análisis exploratorio señaló dos sospechosos —el desbalance y el
+vocabulario compartido—; la evaluación descartó el primero y confirmó el segundo, así que la inversión va a
+los datos de los pares confusos y a la calidad de las etiquetas, no a reponderar clases.
 """,
 "calibracion": """
 **Resultado de la calibración (5 consultas × 3 configuraciones):**
@@ -184,10 +226,11 @@ WRONG» y el modelo acepta la premisa y la racionaliza.
    exploratorio explicaba de antemano por qué un modelo contextual era necesario: consultas cortas
    que comparten vocabulario (*card*, *transfer*, *top up*) y cuyo sentido lo deciden palabras que
    un preprocesado clásico eliminaría (*not*, *why*, *still*).
-2. **Los errores tienen estructura.** No se reparten al azar: se concentran en familias de
-   intenciones con alto solapamiento léxico (ρ = 0.28 entre similitud y confusión; 57.7 % de los
-   errores dentro de la misma familia) y en etiquetas discutibles. El techo práctico del modelo lo
-   pone tanto la **calidad de las etiquetas** como la arquitectura.
+2. **Los errores tienen estructura, y el EDA la anticipaba a medias.** No se reparten al azar: se
+   concentran en familias de intenciones con vocabulario compartido (ρ = 0.28 entre similitud TF-IDF y
+   confusión; 9× más bigramas compartidos en los pares confusos; 57.7 % de los errores dentro de la misma
+   familia). En cambio, el desbalance que también mostraba el EDA **no** los explica (ρ = −0.14, p = 0.21).
+   El techo práctico del modelo lo pone tanto la **calidad de las etiquetas** como la arquitectura.
 3. **El LLM ayuda a pensar, no a explicar.** Con un prompt estructurado y temperatura baja,
    Falcon-7b-instruct produce explicaciones breves y en formato, pero solo 3 de 20 fueron
    plenamente fieles y 8 contenían afirmaciones falsas. La calibración reduce la invención
@@ -196,6 +239,18 @@ WRONG» y el modelo acepta la premisa y la racionaliza.
 4. **Lección metodológica.** El resultado más valioso del ejercicio no lo dio ninguno de los dos
    modelos, sino la revisión humana de sus salidas: descubrir que parte de los «errores» del
    clasificador son aciertos frente a etiquetas mal puestas.
+
+**Ejemplos del experimento que lo sostienen:**
+
+- *EDA → Transformer*: `verify_my_identity` y `why_verify_identity` comparten los bigramas *verify
+  identity* e *identity check*, y el modelo las confundió 6 veces entre sí.
+- *Transformer → calidad de las etiquetas*: «How do I top up my card?» está etiquetada como
+  `transfer_into_account`; el modelo predijo `topping_up_by_card` con 98.9 % de confianza, y es lo más
+  razonable.
+- *LLM*: la explicación n.º 1 afirma que la consulta contiene la palabra *card* y no la contiene
+  (alucinación); la n.º 11 sí señala correctamente *top up my card* como pista.
+- *Limpieza*: «How old do you have to be?» queda reducida a «old» al quitar stopwords; por eso el modelo
+  recibe el texto original.
 
 **Limitaciones.** Una sola corrida con una semilla (sin intervalos de confianza); la validación
 manual la hizo una sola persona; las 20 muestras son las de mayor confianza, no una muestra
@@ -206,6 +261,32 @@ Todos los resultados de esta ejecución se publicaron en <https://distilroberta.
 donde además se puede clasificar una consulta nueva en vivo.
 """,
 }
+
+TABLA_PROMPT = """
+
+**El prompt, en inglés (tal como se envía) y en español.** Se escribe en inglés porque las consultas y las
+etiquetas del dataset están en inglés y Falcon-7b-instruct se ajustó sobre todo con instrucciones en inglés;
+mezclar idiomas en el prompt empeora la adherencia al formato.
+
+| Inglés (enviado a Falcon) | Español |
+|---|---|
+| You are a banking customer-support analyst who audits an automatic intent classifier. | Eres un analista de atención a clientes bancarios que audita un clasificador automático de intenciones. |
+| The classifier read the customer query below and predicted an intent that is WRONG. | El clasificador leyó la consulta del cliente de abajo y predijo una intención que es INCORRECTA. |
+| In at most two short sentences, explain why the classifier probably chose the predicted intent instead of the correct one. | En máximo dos oraciones cortas, explica por qué el clasificador probablemente eligió la intención predicha en lugar de la correcta. |
+| Refer only to words that appear in the query. Do not invent facts, do not give advice to the customer. | Refiérete solo a palabras que aparecen en la consulta. No inventes hechos y no des consejos al cliente. |
+| Customer query: "{texto}" | Consulta del cliente: «{texto}» |
+| Predicted intent: {pred} | Intención predicha: {pred} |
+| Correct intent: {real} | Intención correcta: {real} |
+| Explanation: | Explicación: |
+"""
+
+REFERENCIAS_NUEVAS = [
+    ("- Devlin, J., Chang,", "- Cui, Y., Jia, M., Lin, T.-Y., Song, Y., & Belongie, S. (2019). Class-Balanced Loss Based on Effective\n  Number of Samples. *CVPR*.\n"),
+    ("- Holtzman, A.,", "- Guo, C., Pleiss, G., Sun, Y., & Weinberger, K. Q. (2017). On Calibration of Modern Neural Networks.\n  *ICML*.\n"),
+    ("- Sanh, V.,", "- Northcutt, C., Jiang, L., & Chuang, I. (2021). Confident Learning: Estimating Uncertainty in Dataset\n  Labels. *Journal of Artificial Intelligence Research*, 70, 1373–1411.\n"),
+    ("- Vaswani, A.,", "- Sennrich, R., Haddow, B., & Birch, A. (2016). Improving Neural Machine Translation Models with\n  Monolingual Data. *ACL*. (Back-translation.)\n"),
+    ("- Wolf, T.,", "- Wei, J., & Zou, K. (2019). EDA: Easy Data Augmentation Techniques for Boosting Performance on Text\n  Classification Tasks. *EMNLP-IJCNLP*.\n"),
+]
 
 CORRECCIONES = {
     "| Tamaño de lote | 32 | cabe holgado en memoria con `max_length` 64 |":
@@ -232,6 +313,21 @@ def tabla_revision():
 TEXTOS["tabla_revision"] = tabla_revision()
 
 nb = nbf.read(NB, as_version=4)
+# 4.2: tabla bilingüe del prompt (una sola vez)
+for c in nb.cells:
+    if c.cell_type == "markdown" and c.source.startswith("### 4.2 Diseño del prompt") and "en español" not in c.source:
+        c.source += TABLA_PROMPT.rstrip("\n")
+    if c.cell_type == "markdown" and c.source.startswith("## 6. Referencias"):
+        for antes, ref in REFERENCIAS_NUEVAS:
+            if ref.split("(")[0] not in c.source:
+                c.source = c.source.replace(antes, ref + antes, 1)
+# 3.8: mejoras técnicas, justo antes de la sección 4 (una sola vez)
+if not any(c.metadata.get("interpretacion") == "mejoras" for c in nb.cells):
+    i = next(k for k, c in enumerate(nb.cells) if c.cell_type == "markdown" and c.source.startswith("## 4."))
+    titulo = nbf.v4.new_markdown_cell("### 3.8 Mejoras técnicas propuestas: del diagnóstico al ajuste")
+    cuerpo = nbf.v4.new_markdown_cell("")
+    cuerpo.metadata["interpretacion"] = "mejoras"
+    nb.cells[i:i] = [titulo, cuerpo]
 # Insertar la celda de la tabla tras la celda de revisión (una sola vez)
 if not any(c.metadata.get("interpretacion") == "tabla_revision" for c in nb.cells):
     i = next(k for k, c in enumerate(nb.cells) if "pausa_revision" in c.metadata.get("tags", []))

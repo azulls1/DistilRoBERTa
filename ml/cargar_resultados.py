@@ -102,9 +102,9 @@ def main(dsn: str) -> None:
             cur.execute(f"delete from {T('cumplimiento')}")
             cur.executemany(
                 f"""insert into {T('cumplimiento')} (orden, criterio, criterio_nombre, puntos, peso, requisito,
-                        seccion_notebook, ruta_web, evidencia, cumplido)
+                        seccion_notebook, ruta_web, evidencia, fuente, cumplido)
                     values (%(orden)s, %(criterio)s, %(criterio_nombre)s, %(puntos)s, %(peso)s, %(requisito)s,
-                            %(seccion_notebook)s, %(ruta_web)s, %(evidencia)s, %(cumplido)s)""",
+                            %(seccion_notebook)s, %(ruta_web)s, %(evidencia)s, %(fuente)s, %(cumplido)s)""",
                 leer("cumplimiento.json"))
         # Salidas reales de Falcon para la simulación
         if (ART / "simulacion_llm.json").exists():

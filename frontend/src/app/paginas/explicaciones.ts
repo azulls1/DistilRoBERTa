@@ -99,11 +99,30 @@ const RAZON: Record<string, string> = {
         </app-estado>
       </section>
 
-      @if (r.value()?.[0]; as e) {
-        <details class="panel mt-6">
-          <summary class="cursor-pointer font-semibold">Ver el prompt exacto (ejemplo de la consulta 1)</summary>
-          <pre class="mono mt-3 overflow-x-auto whitespace-pre-wrap rounded-lg bg-fondo p-4 text-xs leading-relaxed">{{ e.prompt }}</pre>
-        </details>
+      @if (promptActual(); as e) {
+        <section class="panel mt-6">
+          <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 class="font-semibold">El prompt, en inglés y en español</h2>
+              <p class="subtitulo">Se envía en inglés (el idioma del dataset y de las instrucciones con que se ajustó Falcon); la columna derecha es su traducción.</p>
+            </div>
+            <label class="grid gap-1 text-sm"><span class="text-tenue">Error</span>
+              <select class="campo w-72" [value]="ordenPrompt()" (change)="ordenPrompt.set(+$any($event.target).value)">
+                @for (x of r.value() ?? []; track x.orden) { <option [value]="x.orden">{{ x.orden }}. {{ x.texto }}</option> }
+              </select>
+            </label>
+          </div>
+          <div class="grid gap-4 lg:grid-cols-2">
+            <div>
+              <p class="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-moss">Inglés · exacto, leído de la base</p>
+              <pre class="mono h-full overflow-x-auto whitespace-pre-wrap rounded-lg bg-acento-suave p-4 text-xs leading-relaxed text-forest">{{ e.prompt }}</pre>
+            </div>
+            <div>
+              <p class="mb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-moss">Español · traducción</p>
+              <pre class="mono h-full overflow-x-auto whitespace-pre-wrap rounded-lg border border-fog p-4 text-xs leading-relaxed text-evergreen">{{ traducir(e) }}</pre>
+            </div>
+          </div>
+        </section>
       }
     </app-estado>
   `,
@@ -113,6 +132,23 @@ export class ExplicacionesPagina {
   protected readonly r = httpResource<Explicacion[]>(() => '/api/explicaciones');
   protected readonly c = httpResource<Calibracion[]>(() => '/api/calibracion');
   protected readonly pct = pct;
+  protected readonly ordenPrompt = signal(1);
+  protected readonly promptActual = computed(() => this.r.value()?.find((e) => e.orden === this.ordenPrompt()) ?? null);
+  /** Traducción al español de la plantilla; la consulta queda en inglés porque es el dato original. */
+  protected traducir(e: Explicacion) {
+    const leg = (x: string) => x.replaceAll('_', ' ').replace('?', '').toLowerCase();
+    return [
+      'Eres un analista de atención a clientes bancarios que audita un clasificador automático de intenciones.',
+      'El clasificador leyó la consulta del cliente de abajo y predijo una intención que es INCORRECTA.',
+      'En máximo dos oraciones cortas, explica por qué el clasificador probablemente eligió la intención predicha en lugar de la correcta. Refiérete solo a palabras que aparecen en la consulta. No inventes hechos y no des consejos al cliente.',
+      '',
+      `Consulta del cliente: "${e.texto}"`,
+      `Intención predicha: ${leg(e.pred)}`,
+      `Intención correcta: ${leg(e.real)}`,
+      '',
+      'Explicación:',
+    ].join('\n');
+  }
   protected readonly nConfigs = computed(() => new Set((this.c.value() ?? []).map((k) => k.config)).size);
   protected readonly nConsultasCal = computed(() => new Set((this.c.value() ?? []).map((k) => k.consulta)).size);
   protected parametros(k: Calibracion) {

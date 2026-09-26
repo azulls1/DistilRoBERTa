@@ -32,6 +32,12 @@ n_refs = len(re.findall(r"^- ", refs, re.M))
 n_paginas = len(pypdfium2.PdfDocument(str(NB.with_suffix(".pdf"))))
 sin_ejecutar = sum(1 for c in nb.cells if c.cell_type == "code" and c.execution_count is None)
 con_error = sum(1 for c in nb.cells if c.cell_type == "code" for o in c.outputs if o.get("output_type") == "error")
+h1 = re.search(r"H1 · Spearman\(ejemplos de entrenamiento, F1\) = (-?[\d.]+) \(p = ([\d.]+)\)", salidas)
+h2 = re.search(r"\((\d+)× más\)", salidas)
+md = "\n".join(c.source for c in nb.cells if c.cell_type == "markdown")
+seccion_38 = md.split("### 3.8")[1].split("**El vínculo")[0] if "### 3.8" in md else ""
+filas_38 = [l for l in seccion_38.splitlines() if l.startswith("| ") and not l.startswith("| Hallazgo")]
+n_mejoras = len(filas_38)  # filas de datos de la tabla (sin encabezado ni separador)
 max_tokens = max(e["max"] for e in eda["estadisticas"] if e["metrica"] == "n_tokens")
 
 CRITERIOS = {
@@ -96,8 +102,33 @@ R = [
     ("EN", "Versión exportada en PDF", "—", "/entregables", f"PDF de {n_paginas} páginas generado desde el notebook ejecutado."),
 ]
 
+# Nivel 4 de la rúbrica detallada de Moodle (nota «SCA — Actividad 2 (individual)» en Obsidian) y solicitud del alumno
+R_RUBRICA = [
+    ("C1", "Conclusiones del EDA que vinculan el análisis textual con implicaciones para el modelo", "2.6", "/eda",
+     "Cuatro implicaciones explícitas: max_length, modelo contextual, texto sin limpiar para el Transformer y F1 macro."),
+    ("C2", "Métricas globales y por clase + errores sistemáticos en clases específicas", "3.4 · 3.5", "/clases",
+     f"Accuracy {c['accuracy']*100:.2f} % y F1 macro {c['f1_macro']:.3f}; P/R/F1 de las 77 clases; 15 pares más confundidos."),
+    ("C2", "Discusión de causas con base en el EDA", "3.6", "/confusion",
+     f"H1 (desbalance) rechazada: ρ = {float(h1.group(1)):.2f}, p = {float(h1.group(2)):.2f}. "
+     f"H2 (n-gramas compartidos) confirmada: {h2.group(1)}× más bigramas comunes en los pares que se confunden."),
+    ("C3", "Validación de la coherencia de las respuestas y discusión de las implicancias del uso del LLM", "4.6 · 4.8", "/explicaciones",
+     f"Veredicto manual de las {len(rev)} respuestas y cuatro conclusiones sobre fidelidad, calibración, encuadre del prompt y uso recomendado."),
+    ("C4", "Conclusiones que integran EDA + Transformer + LLM, con limitaciones y ejemplos del experimento", "5", "/resumen",
+     "Cuatro conclusiones integradas, cuatro ejemplos concretos de consultas del dataset y limitaciones explícitas."),
+    ("C5", "Mejoras técnicas razonadas (class weights, data augmentation textual…) con referencias que las sustentan", "3.8", "/entregables",
+     f"{n_mejoras} mejoras, cada una con el hallazgo que la motiva y su referencia (Cui 2019, Wei y Zou 2019, Northcutt 2021, Guo 2017…)."),
+    ("C5", "Vínculo explícito entre los hallazgos del EDA y los ajustes del modelo", "2.6 · 3.6 · 3.8", "/entregables",
+     "El EDA propuso dos causas; la evaluación descartó el desbalance y confirmó el vocabulario compartido; las mejoras se dirigen ahí."),
+]
+R_SOLICITUD = [
+    ("C3", "Prompt presentado en inglés (el que se envía) y en español", "4.2", "/explicaciones",
+     "Tabla bilingüe línea por línea en el notebook, traducción en el código y en el portal."),
+]
+R = [(*r, "Enunciado") for r in R] + [(*r, "Rúbrica detallada") for r in R_RUBRICA] + [(*r, "Solicitud") for r in R_SOLICITUD]
+R.sort(key=lambda r: ["C1", "C2", "C3", "C4", "C5", "EN"].index(r[0]))
+
 salida = [{"orden": i + 1, "criterio": cr, "criterio_nombre": CRITERIOS[cr][0], "puntos": CRITERIOS[cr][1],
            "peso": CRITERIOS[cr][2], "requisito": req, "seccion_notebook": sec, "ruta_web": ruta,
-           "evidencia": ev, "cumplido": True} for i, (cr, req, sec, ruta, ev) in enumerate(R)]
+           "evidencia": ev, "fuente": fuente, "cumplido": True} for i, (cr, req, sec, ruta, ev, fuente) in enumerate(R)]
 json.dump(salida, open(ART / "cumplimiento.json", "w"), indent=1, ensure_ascii=False)
 print(len(salida), "requisitos ·", sum(r["cumplido"] for r in salida), "cumplidos")

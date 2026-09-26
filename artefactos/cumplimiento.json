@@ -9,6 +9,7 @@
   "seccion_notebook": "2.1",
   "ruta_web": "/eda",
   "evidencia": "Columnas n_caracteres y n_palabras para las 13 083 consultas; histogramas train/test.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -21,6 +22,7 @@
   "seccion_notebook": "2.1",
   "ruta_web": "/eda",
   "evidencia": "Media 11.95 palabras (train), mediana 10, máx. 79.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -33,6 +35,7 @@
   "seccion_notebook": "2.2",
   "ruta_web": "/eda",
   "evidencia": "limpiar(): texto.lower()",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -45,6 +48,7 @@
   "seccion_notebook": "2.2",
   "ruta_web": "/eda",
   "evidencia": "Regex [^a-z0-9\\s] + 198 stopwords de NLTK; se justifica por qué el Transformer recibe el texto original.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -57,6 +61,7 @@
   "seccion_notebook": "2.3",
   "ruta_web": "/eda",
   "evidencia": "Top-15 con gráfica (se guardan 100 para la nube).",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -69,6 +74,7 @@
   "seccion_notebook": "2.3",
   "ruta_web": "/eda",
   "evidencia": "10 bigramas y 10 trigramas con gráfica.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -81,6 +87,7 @@
   "seccion_notebook": "2.4",
   "ruta_web": "/eda",
   "evidencia": "WordCloud (150 palabras) en el notebook; nube interactiva en la web.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -93,6 +100,7 @@
   "seccion_notebook": "2.5",
   "ruta_web": "/eda",
   "evidencia": "Razón máx/mín 5.34, CV 0.254, entropía normalizada 0.992; test: 40 por clase.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -105,18 +113,20 @@
   "seccion_notebook": "2.6",
   "ruta_web": "/eda",
   "evidencia": "Cuatro bloques: longitud, vocabulario, limpieza y balance.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
   "orden": 10,
-  "criterio": "C2",
-  "criterio_nombre": "Entrenamiento de transformer",
-  "puntos": 2.5,
-  "peso": 25,
-  "requisito": "Tokenizar los textos usando el tokenizer de DistilRoBERTa",
-  "seccion_notebook": "3.1",
-  "ruta_web": "/simulacion",
-  "evidencia": "Tokens BPE mostrados; max_length = 128 justificado por la distribución (máx. 96 tokens).",
+  "criterio": "C1",
+  "criterio_nombre": "Análisis exploratorio de datos",
+  "puntos": 1.5,
+  "peso": 15,
+  "requisito": "Conclusiones del EDA que vinculan el análisis textual con implicaciones para el modelo",
+  "seccion_notebook": "2.6",
+  "ruta_web": "/eda",
+  "evidencia": "Cuatro implicaciones explícitas: max_length, modelo contextual, texto sin limpiar para el Transformer y F1 macro.",
+  "fuente": "Rúbrica detallada",
   "cumplido": true
  },
  {
@@ -125,10 +135,11 @@
   "criterio_nombre": "Entrenamiento de transformer",
   "puntos": 2.5,
   "peso": 25,
-  "requisito": "Realizar el fine-tuning del modelo preentrenado",
-  "seccion_notebook": "3.3",
-  "ruta_web": "/resumen",
-  "evidencia": "9,002 ej. de entrenamiento + 1,001 de validación; mejor época 6; 8.4 min en mps.",
+  "requisito": "Tokenizar los textos usando el tokenizer de DistilRoBERTa",
+  "seccion_notebook": "3.1",
+  "ruta_web": "/simulacion",
+  "evidencia": "Tokens BPE mostrados; max_length = 128 justificado por la distribución (máx. 96 tokens).",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -137,10 +148,11 @@
   "criterio_nombre": "Entrenamiento de transformer",
   "puntos": 2.5,
   "peso": 25,
-  "requisito": "Calcular accuracy, matriz de confusión y reporte de métricas (precision, recall y F1-score)",
-  "seccion_notebook": "3.4",
-  "ruta_web": "/confusion",
-  "evidencia": "Accuracy 93.25 %, F1 macro 0.932; matriz 77×77 y classification_report.",
+  "requisito": "Realizar el fine-tuning del modelo preentrenado",
+  "seccion_notebook": "3.3",
+  "ruta_web": "/resumen",
+  "evidencia": "9,002 ej. de entrenamiento + 1,001 de validación; mejor época 6; 8.4 min en mps.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -149,10 +161,11 @@
   "criterio_nombre": "Entrenamiento de transformer",
   "puntos": 2.5,
   "peso": 25,
-  "requisito": "Identificar las siete clases mejor clasificadas y las siete con mayor número de errores",
-  "seccion_notebook": "3.5",
-  "ruta_web": "/clases",
-  "evidencia": "Tablas y gráfica de F1 por clase con las 7 + 7 resaltadas.",
+  "requisito": "Calcular accuracy, matriz de confusión y reporte de métricas (precision, recall y F1-score)",
+  "seccion_notebook": "3.4",
+  "ruta_web": "/confusion",
+  "evidencia": "Accuracy 93.25 %, F1 macro 0.932; matriz 77×77 y classification_report.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -161,10 +174,11 @@
   "criterio_nombre": "Entrenamiento de transformer",
   "puntos": 2.5,
   "peso": 25,
-  "requisito": "Analizar posibles causas del bajo desempeño en las clases problemáticas",
-  "seccion_notebook": "3.6",
-  "ruta_web": "/confusion",
-  "evidencia": "Destino de los errores, similitud TF-IDF por percentil, Spearman ρ = 0.28 y ejemplos reales.",
+  "requisito": "Identificar las siete clases mejor clasificadas y las siete con mayor número de errores",
+  "seccion_notebook": "3.5",
+  "ruta_web": "/clases",
+  "evidencia": "Tablas y gráfica de F1 por clase con las 7 + 7 resaltadas.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -173,46 +187,50 @@
   "criterio_nombre": "Entrenamiento de transformer",
   "puntos": 2.5,
   "peso": 25,
-  "requisito": "Redactar conclusiones del uso del modelo Transformer",
-  "seccion_notebook": "3.7",
-  "ruta_web": "/resumen",
-  "evidencia": "Cinco conclusiones con cifras y propuestas de mejora.",
+  "requisito": "Analizar posibles causas del bajo desempeño en las clases problemáticas",
+  "seccion_notebook": "3.6",
+  "ruta_web": "/confusion",
+  "evidencia": "Destino de los errores, similitud TF-IDF por percentil, Spearman ρ = 0.28 y ejemplos reales.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
   "orden": 16,
-  "criterio": "C3",
-  "criterio_nombre": "Diseño de prompt",
-  "puntos": 3.0,
-  "peso": 30,
-  "requisito": "Diseñar un prompt para tiiuae/falcon-7b-instruct con explicación breve (máximo dos oraciones)",
-  "seccion_notebook": "4.2",
-  "ruta_web": "/explicaciones",
-  "evidencia": "Prompt de cinco piezas (rol, tarea, restricciones, datos, ancla de salida) documentado pieza por pieza.",
+  "criterio": "C2",
+  "criterio_nombre": "Entrenamiento de transformer",
+  "puntos": 2.5,
+  "peso": 25,
+  "requisito": "Redactar conclusiones del uso del modelo Transformer",
+  "seccion_notebook": "3.7",
+  "ruta_web": "/resumen",
+  "evidencia": "Cinco conclusiones con cifras y propuestas de mejora.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
   "orden": 17,
-  "criterio": "C3",
-  "criterio_nombre": "Diseño de prompt",
-  "puntos": 3.0,
-  "peso": 30,
-  "requisito": "Calibrar la temperatura",
-  "seccion_notebook": "4.4",
-  "ruta_web": "/simulacion",
-  "evidencia": "Tres configuraciones: codiciosa (T→0), T = 0.3 y T = 1.0 sobre las mismas consultas.",
+  "criterio": "C2",
+  "criterio_nombre": "Entrenamiento de transformer",
+  "puntos": 2.5,
+  "peso": 25,
+  "requisito": "Métricas globales y por clase + errores sistemáticos en clases específicas",
+  "seccion_notebook": "3.4 · 3.5",
+  "ruta_web": "/clases",
+  "evidencia": "Accuracy 93.25 % y F1 macro 0.932; P/R/F1 de las 77 clases; 15 pares más confundidos.",
+  "fuente": "Rúbrica detallada",
   "cumplido": true
  },
  {
   "orden": 18,
-  "criterio": "C3",
-  "criterio_nombre": "Diseño de prompt",
-  "puntos": 3.0,
-  "peso": 30,
-  "requisito": "Calibrar la longitud de respuesta",
-  "seccion_notebook": "4.4",
-  "ruta_web": "/simulacion",
-  "evidencia": "max_new_tokens 60 vs 150 (+ explicación de por qué max_new_tokens y no max_length) y recorte a 2 oraciones.",
+  "criterio": "C2",
+  "criterio_nombre": "Entrenamiento de transformer",
+  "puntos": 2.5,
+  "peso": 25,
+  "requisito": "Discusión de causas con base en el EDA",
+  "seccion_notebook": "3.6",
+  "ruta_web": "/confusion",
+  "evidencia": "H1 (desbalance) rechazada: ρ = -0.14, p = 0.21. H2 (n-gramas compartidos) confirmada: 9× más bigramas comunes en los pares que se confunden.",
+  "fuente": "Rúbrica detallada",
   "cumplido": true
  },
  {
@@ -221,10 +239,11 @@
   "criterio_nombre": "Diseño de prompt",
   "puntos": 3.0,
   "peso": 30,
-  "requisito": "Calibrar la claridad y estructura del prompt",
-  "seccion_notebook": "4.2 · 4.4",
+  "requisito": "Diseñar un prompt para tiiuae/falcon-7b-instruct con explicación breve (máximo dos oraciones)",
+  "seccion_notebook": "4.2",
   "ruta_web": "/explicaciones",
-  "evidencia": "Formato fijo con ancla «Explanation:», parada en línea en blanco y repetition_penalty.",
+  "evidencia": "Prompt de cinco piezas (rol, tarea, restricciones, datos, ancla de salida) documentado pieza por pieza.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -233,10 +252,11 @@
   "criterio_nombre": "Diseño de prompt",
   "puntos": 3.0,
   "peso": 30,
-  "requisito": "Seleccionar 20 muestras mal clasificadas",
-  "seccion_notebook": "4.3",
-  "ruta_web": "/explicaciones",
-  "evidencia": "20 errores de mayor confianza, máximo 2 por clase (criterio reproducible).",
+  "requisito": "Calibrar la temperatura",
+  "seccion_notebook": "4.4",
+  "ruta_web": "/simulacion",
+  "evidencia": "Tres configuraciones: codiciosa (T→0), T = 0.3 y T = 1.0 sobre las mismas consultas.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -245,10 +265,11 @@
   "criterio_nombre": "Diseño de prompt",
   "puntos": 3.0,
   "peso": 30,
-  "requisito": "Solicitar al LLM una justificación de cada clasificación incorrecta",
-  "seccion_notebook": "4.5",
-  "ruta_web": "/explicaciones",
-  "evidencia": "20 explicaciones generadas con la configuración B.",
+  "requisito": "Calibrar la longitud de respuesta",
+  "seccion_notebook": "4.4",
+  "ruta_web": "/simulacion",
+  "evidencia": "max_new_tokens 60 vs 150 (+ explicación de por qué max_new_tokens y no max_length) y recorte a 2 oraciones.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -257,10 +278,11 @@
   "criterio_nombre": "Diseño de prompt",
   "puntos": 3.0,
   "peso": 30,
-  "requisito": "Validar manualmente la veracidad y pertinencia de las respuestas",
-  "seccion_notebook": "4.6",
+  "requisito": "Calibrar la claridad y estructura del prompt",
+  "seccion_notebook": "4.2 · 4.4",
   "ruta_web": "/explicaciones",
-  "evidencia": "Veredicto por explicación: 3 pertinentes, 9 parciales, 8 alucinadas.",
+  "evidencia": "Formato fijo con ancla «Explanation:», parada en línea en blanco y repetition_penalty.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
@@ -269,14 +291,80 @@
   "criterio_nombre": "Diseño de prompt",
   "puntos": 3.0,
   "peso": 30,
-  "requisito": "Analizar y listar las razones proporcionadas por el LLM",
-  "seccion_notebook": "4.6 · 4.7",
+  "requisito": "Seleccionar 20 muestras mal clasificadas",
+  "seccion_notebook": "4.3",
   "ruta_web": "/explicaciones",
-  "evidencia": "Cinco categorías de razón con conteo, tabla y los tres patrones de alucinación.",
+  "evidencia": "20 errores de mayor confianza, máximo 2 por clase (criterio reproducible).",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
   "orden": 24,
+  "criterio": "C3",
+  "criterio_nombre": "Diseño de prompt",
+  "puntos": 3.0,
+  "peso": 30,
+  "requisito": "Solicitar al LLM una justificación de cada clasificación incorrecta",
+  "seccion_notebook": "4.5",
+  "ruta_web": "/explicaciones",
+  "evidencia": "20 explicaciones generadas con la configuración B.",
+  "fuente": "Enunciado",
+  "cumplido": true
+ },
+ {
+  "orden": 25,
+  "criterio": "C3",
+  "criterio_nombre": "Diseño de prompt",
+  "puntos": 3.0,
+  "peso": 30,
+  "requisito": "Validar manualmente la veracidad y pertinencia de las respuestas",
+  "seccion_notebook": "4.6",
+  "ruta_web": "/explicaciones",
+  "evidencia": "Veredicto por explicación: 3 pertinentes, 9 parciales, 8 alucinadas.",
+  "fuente": "Enunciado",
+  "cumplido": true
+ },
+ {
+  "orden": 26,
+  "criterio": "C3",
+  "criterio_nombre": "Diseño de prompt",
+  "puntos": 3.0,
+  "peso": 30,
+  "requisito": "Analizar y listar las razones proporcionadas por el LLM",
+  "seccion_notebook": "4.6 · 4.7",
+  "ruta_web": "/explicaciones",
+  "evidencia": "Cinco categorías de razón con conteo, tabla y los tres patrones de alucinación.",
+  "fuente": "Enunciado",
+  "cumplido": true
+ },
+ {
+  "orden": 27,
+  "criterio": "C3",
+  "criterio_nombre": "Diseño de prompt",
+  "puntos": 3.0,
+  "peso": 30,
+  "requisito": "Validación de la coherencia de las respuestas y discusión de las implicancias del uso del LLM",
+  "seccion_notebook": "4.6 · 4.8",
+  "ruta_web": "/explicaciones",
+  "evidencia": "Veredicto manual de las 20 respuestas y cuatro conclusiones sobre fidelidad, calibración, encuadre del prompt y uso recomendado.",
+  "fuente": "Rúbrica detallada",
+  "cumplido": true
+ },
+ {
+  "orden": 28,
+  "criterio": "C3",
+  "criterio_nombre": "Diseño de prompt",
+  "puntos": 3.0,
+  "peso": 30,
+  "requisito": "Prompt presentado en inglés (el que se envía) y en español",
+  "seccion_notebook": "4.2",
+  "ruta_web": "/explicaciones",
+  "evidencia": "Tabla bilingüe línea por línea en el notebook, traducción en el código y en el portal.",
+  "fuente": "Solicitud",
+  "cumplido": true
+ },
+ {
+  "orden": 29,
   "criterio": "C4",
   "criterio_nombre": "Conclusiones",
   "puntos": 2.0,
@@ -285,10 +373,11 @@
   "seccion_notebook": "4.8",
   "ruta_web": "/explicaciones",
   "evidencia": "Cuatro conclusiones, prompt mejorado propuesto y uso recomendado.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 25,
+  "orden": 30,
   "criterio": "C4",
   "criterio_nombre": "Conclusiones",
   "puntos": 2.0,
@@ -297,10 +386,24 @@
   "seccion_notebook": "5",
   "ruta_web": "/resumen",
   "evidencia": "Cuatro conclusiones + limitaciones explícitas.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 26,
+  "orden": 31,
+  "criterio": "C4",
+  "criterio_nombre": "Conclusiones",
+  "puntos": 2.0,
+  "peso": 20,
+  "requisito": "Conclusiones que integran EDA + Transformer + LLM, con limitaciones y ejemplos del experimento",
+  "seccion_notebook": "5",
+  "ruta_web": "/resumen",
+  "evidencia": "Cuatro conclusiones integradas, cuatro ejemplos concretos de consultas del dataset y limitaciones explícitas.",
+  "fuente": "Rúbrica detallada",
+  "cumplido": true
+ },
+ {
+  "orden": 32,
   "criterio": "C5",
   "criterio_nombre": "Código comentado y referencias",
   "puntos": 1.0,
@@ -309,10 +412,11 @@
   "seccion_notebook": "Todo",
   "ruta_web": "/entregables",
   "evidencia": "Comentarios en cada celda; secciones numeradas 0–7.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 27,
+  "orden": 33,
   "criterio": "C5",
   "criterio_nombre": "Código comentado y referencias",
   "puntos": 1.0,
@@ -321,10 +425,11 @@
   "seccion_notebook": "Todo",
   "ruta_web": "/entregables",
   "evidencia": "8 celdas con figuras y una interpretación escrita por sección.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 28,
+  "orden": 34,
   "criterio": "C5",
   "criterio_nombre": "Código comentado y referencias",
   "puntos": 1.0,
@@ -332,11 +437,38 @@
   "requisito": "Referencias",
   "seccion_notebook": "6",
   "ruta_web": "/entregables",
-  "evidencia": "10 referencias (APA).",
+  "evidencia": "15 referencias (APA).",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 29,
+  "orden": 35,
+  "criterio": "C5",
+  "criterio_nombre": "Código comentado y referencias",
+  "puntos": 1.0,
+  "peso": 10,
+  "requisito": "Mejoras técnicas razonadas (class weights, data augmentation textual…) con referencias que las sustentan",
+  "seccion_notebook": "3.8",
+  "ruta_web": "/entregables",
+  "evidencia": "6 mejoras, cada una con el hallazgo que la motiva y su referencia (Cui 2019, Wei y Zou 2019, Northcutt 2021, Guo 2017…).",
+  "fuente": "Rúbrica detallada",
+  "cumplido": true
+ },
+ {
+  "orden": 36,
+  "criterio": "C5",
+  "criterio_nombre": "Código comentado y referencias",
+  "puntos": 1.0,
+  "peso": 10,
+  "requisito": "Vínculo explícito entre los hallazgos del EDA y los ajustes del modelo",
+  "seccion_notebook": "2.6 · 3.6 · 3.8",
+  "ruta_web": "/entregables",
+  "evidencia": "El EDA propuso dos causas; la evaluación descartó el desbalance y confirmó el vocabulario compartido; las mejoras se dirigen ahí.",
+  "fuente": "Rúbrica detallada",
+  "cumplido": true
+ },
+ {
+  "orden": 37,
   "criterio": "EN",
   "criterio_nombre": "Entrega y notas técnicas",
   "puntos": null,
@@ -345,10 +477,11 @@
   "seccion_notebook": "1",
   "ruta_web": "/eda",
   "evidencia": "CSV oficiales y orden de etiquetas del script de Hugging Face (datasets 4 ya no ejecuta scripts).",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 30,
+  "orden": 38,
   "criterio": "EN",
   "criterio_nombre": "Entrega y notas técnicas",
   "puntos": null,
@@ -357,10 +490,11 @@
   "seccion_notebook": "0",
   "ruta_web": "/entregables",
   "evidencia": "Detección CUDA/MPS/CPU; Falcon en 4 bits en Colab; celda de !nvidia-smi; en MPS, float16 (≈ 14 GB medidos en la prueba de carga).",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 31,
+  "orden": 39,
   "criterio": "EN",
   "criterio_nombre": "Entrega y notas técnicas",
   "puntos": null,
@@ -369,10 +503,11 @@
   "seccion_notebook": "0",
   "ruta_web": "/entregables",
   "evidencia": "Documentado: no se presentó con NumPy 2.4.6; se deja la instrucción para Colab.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 32,
+  "orden": 40,
   "criterio": "EN",
   "criterio_nombre": "Entrega y notas técnicas",
   "puntos": null,
@@ -381,10 +516,11 @@
   "seccion_notebook": "—",
   "ruta_web": "/entregables",
   "evidencia": "Ejecutado de punta a punta: 0 celdas sin ejecutar, 0 errores.",
+  "fuente": "Enunciado",
   "cumplido": true
  },
  {
-  "orden": 33,
+  "orden": 41,
   "criterio": "EN",
   "criterio_nombre": "Entrega y notas técnicas",
   "puntos": null,
@@ -392,7 +528,8 @@
   "requisito": "Versión exportada en PDF",
   "seccion_notebook": "—",
   "ruta_web": "/entregables",
-  "evidencia": "PDF de 39 páginas generado desde el notebook ejecutado.",
+  "evidencia": "PDF de 46 páginas generado desde el notebook ejecutado.",
+  "fuente": "Enunciado",
   "cumplido": true
  }
 ]
