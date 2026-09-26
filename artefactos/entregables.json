@@ -8,7 +8,7 @@
    "detalle": "Notebook, PDF, figuras y resultados, con LEEME que mapea cada criterio de la rúbrica a su evidencia.",
    "ruta": "entregable-actividad-2-adonai-hernandez.zip",
    "bytes": 4774082,
-   "sha256": "3693ed58a13def6e121a6f7f46caae929b7a59a59725765d9e0f37e50bf9634a"
+   "sha256": "b5069e1e45ea8805381e4f255b8cc241f71691d1dd098fa6e8160af7b99364ae"
   },
   {
    "criterio": "Entrega",
@@ -259,8 +259,8 @@
    "nombre": "README del repositorio",
    "detalle": "Cómo reproducir todo.",
    "ruta": "README.md",
-   "bytes": 21045,
-   "sha256": "ee706eeda4f4c773e86bc5418fa69942afbb62a1d3ec189a547d9a08d9b48188"
+   "bytes": 21121,
+   "sha256": "76bbfe6f3c539234e998903d13248207ed241405304432809d9e6681e5367d3f"
   },
   {
    "criterio": "C5",
