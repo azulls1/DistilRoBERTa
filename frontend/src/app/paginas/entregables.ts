@@ -112,6 +112,7 @@ const NOMBRE_CRITERIO: Record<string, string> = {
                 <div class="mt-4 rounded-lg border border-white/15 bg-white/5 p-3 font-mono text-[11px] text-white/80">
                   @if (p.estado === 'completada') {
                     <p class="text-emerald-300">✓ {{ p.archivo }}</p>
+                    @if (reutilizado()) { <p class="text-white/60">Ya estaba generado con los archivos vigentes; se reutiliza en lugar de crear uno idéntico.</p> }
                     <p>{{ p.n_archivos }} archivos · {{ mb(p.bytes ?? 0) }} comprimido</p>
                     <p class="break-all">SHA-256 {{ p.sha256 }}</p>
                   } @else if (p.estado === 'error') {
@@ -197,6 +198,8 @@ export class EntregablesPagina {
   protected readonly paginaFiguras = computed(() => pagina(this.figuras(), this.pagFig(), this.tamFig()));
   protected readonly paginaCatalogo = computed(() => pagina(this.filtrados(), this.pagCat(), this.tamCat()));
   protected readonly generando = signal(false);
+  /** El servidor devolvió el ZIP vigente en vez de construir uno idéntico. */
+  protected readonly reutilizado = signal(false);
   protected readonly generado = signal<Paquete | null>(null);
   protected readonly paquete = computed(() => this.generado() ?? this.r.value()?.ultimo_paquete ?? null);
 
@@ -231,9 +234,14 @@ export class EntregablesPagina {
 
   protected generar() {
     this.generando.set(true);
-    this.http.post<{ paquete_id: string }>('/api/entregables/generar', {}).subscribe({
-      next: ({ paquete_id }) => this.sondear(paquete_id, Date.now()),
-      error: () => { this.generando.set(false); this.generado.set({ estado: 'error', error: 'No se pudo encolar la generación.' } as Paquete); },
+    this.reutilizado.set(false);
+    this.http.post<{ paquete_id: string; reutilizado?: boolean }>('/api/entregables/generar', {}).subscribe({
+      next: ({ paquete_id, reutilizado }) => { this.reutilizado.set(!!reutilizado); this.sondear(paquete_id, Date.now()); },
+      error: (e) => {
+        this.generando.set(false);
+        const msg = e?.status === 429 ? 'Demasiadas solicitudes seguidas: espera un minuto e inténtalo de nuevo.' : 'No se pudo encolar la generación.';
+        this.generado.set({ estado: 'error', error: msg } as Paquete);
+      },
     });
   }
 
