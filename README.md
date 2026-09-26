@@ -283,7 +283,7 @@ Detalle con evidencia en **[/cumplimiento](https://distilroberta.iagentek.com.mx
 
 ## 🌐 El portal
 
-
+<img src="docs/readme/demo.gif" alt="Demostración del portal" width="100%">
 
 |  | Página | Qué muestra |
 |---|---|---|
